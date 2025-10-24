@@ -1,0 +1,60 @@
+export default {
+  "label": {
+    "back": "Back",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "signUpTitle": "Sign Up",
+    "verificationTitle": "Verification Code",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "example@email.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "passwordDescription": "At least 8 characters with uppercase, lowercase, numbers, and symbols",
+    "verificationCodeLabel": "Verification Code",
+    "verificationCodeDescription": "Enter the 6-digit verification code sent to",
+    "register": "Register",
+    "registering": "Registering...",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "resendCode": "Resend Code",
+    "resendingCode": "Resending...",
+    "accountCreation": "Account Creation",
+    "companyInfo": "Company Information",
+    "adminSetup": "Admin Setup",
+    "paymentSetup": "Payment Setup"
+  },
+  "alert": {
+    "emailRequired": "Please enter your email address",
+    "passwordRequired": "Please enter your password",
+    "emailAndPasswordRequired": "Please enter your email address and password",
+    "invalidEmailFormat": "Please enter a valid email address format",
+    "invalidPasswordFormat": "Password must be at least 8 characters with uppercase, lowercase, numbers, and symbols",
+    "verificationCodeRequired": "Please enter the verification code",
+    "verificationCodeLength": "Please enter a 6-digit verification code",
+    "codeResent": "Verification code has been resent",
+    "resendSuccess": "Verification code resend successful",
+    "emailAlreadyExists": "This email address is already registered",
+    "verificationFailed": "Verification failed",
+    "signInFailed": "Sign in failed. Please try again.",
+    "networkError": "Network error occurred",
+    "resendFailed": "Failed to resend code",
+    "resendNetworkError": "Network error occurred while resending",
+    "generalError": "An error occurred",
+    "verificationCodeNotFound": "Verification code not found or expired",
+    "remainingAttempts": "Remaining attempts",
+    "verificationCodeExpired": "Verification code has expired",
+    "maxAttemptsReached": "Maximum attempts reached"
+  },
+  "modal": {
+    "emailVerificationTitle": "Email Verification",
+    "emailVerificationDescription": "Please enter the 6-digit verification code sent to",
+    "expirationTime": "Expiration Time:",
+    "expirationNote": "The verification code is valid for 5 minutes. Please resend if it expires.",
+    "cancel": "Cancel",
+    "resend": "Resend",
+    "confirm": "Confirm",
+    "verifying": "Verifying..."
+  }
+} as const;
+
+

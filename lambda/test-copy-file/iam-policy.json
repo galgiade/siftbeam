@@ -1,0 +1,43 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3ReadInputFiles",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:HeadObject"
+      ],
+      "Resource": "arn:aws:s3:::siftbeam/service/input/*"
+    },
+    {
+      "Sid": "S3WriteOutputFiles",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": "arn:aws:s3:::siftbeam/service/output/*"
+    },
+    {
+      "Sid": "S3CopyOperation",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CopyObject"
+      ],
+      "Resource": "arn:aws:s3:::siftbeam/service/output/*"
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    }
+  ]
+}
+

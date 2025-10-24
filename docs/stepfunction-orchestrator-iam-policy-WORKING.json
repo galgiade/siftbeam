@@ -1,0 +1,76 @@
+{
+  "Comment": "ServiceProcessingOrchestrator用のIAM権限（動作確認済みバージョン）",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EventBridgeConnectionAccess",
+      "Effect": "Allow",
+      "Action": [
+        "events:RetrieveConnectionCredentials",
+        "events:DescribeConnection"
+      ],
+      "Resource": "arn:aws:events:ap-northeast-1:002689294103:connection/Stripe-subscriptions-Connection/2118a290-a701-4dd3-a15e-9dacbe6dc899"
+    },
+    {
+      "Sid": "SecretsManagerAccess",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "InvokeStripeHTTPEndpoint",
+      "Effect": "Allow",
+      "Action": "states:InvokeHTTPEndpoint",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "states:HTTPMethod": [
+            "POST",
+            "DELETE"
+          ]
+        },
+        "StringLike": {
+          "states:HTTPEndpoint": "https://api.stripe.com/*"
+        }
+      }
+    },
+    {
+      "Sid": "DynamoDBAccess",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-processing-history",
+        "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-policy-stepfunction-mapping"
+      ]
+    },
+    {
+      "Sid": "StepFunctionsStartExecution",
+      "Effect": "Allow",
+      "Action": [
+        "states:StartExecution"
+      ],
+      "Resource": [
+        "arn:aws:states:ap-northeast-1:002689294103:stateMachine:*"
+      ]
+    },
+    {
+      "Sid": "XRayAccess",
+      "Effect": "Allow",
+      "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords",
+        "xray:GetSamplingRules",
+        "xray:GetSamplingTargets"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+

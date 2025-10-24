@@ -1,0 +1,60 @@
+export default {
+  label: {
+    back: "Kembali",
+    submit: "Kirim",
+    loading: "Memuat...",
+    signUpTitle: "Daftar",
+    verificationTitle: "Kode Verifikasi",
+    emailLabel: "Alamat Email",
+    emailPlaceholder: "contoh@email.com",
+    passwordLabel: "Kata Sandi",
+    passwordPlaceholder: "Masukkan kata sandi",
+    passwordDescription: "Minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan simbol",
+    verificationCodeLabel: "Kode Verifikasi",
+    verificationCodeDescription: "Masukkan kode 6 digit yang dikirim ke",
+    register: "Daftar",
+    registering: "Mendaftar...",
+    verify: "Verifikasi",
+    verifying: "Memverifikasi...",
+    resendCode: "Kirim Ulang Kode",
+    resendingCode: "Mengirim ulang...",
+    accountCreation: "Pembuatan Akun",
+    companyInfo: "Informasi Perusahaan",
+    adminSetup: "Pengaturan Admin",
+    paymentSetup: "Pengaturan Pembayaran"
+  },
+  alert: {
+    emailRequired: "Masukkan alamat email",
+    passwordRequired: "Masukkan kata sandi",
+    emailAndPasswordRequired: "Masukkan email dan kata sandi",
+    invalidEmailFormat: "Masukkan format email yang valid",
+    invalidPasswordFormat: "Kata sandi minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan simbol",
+    verificationCodeRequired: "Masukkan kode verifikasi",
+    verificationCodeLength: "Masukkan kode 6 digit",
+    codeResent: "Kode verifikasi telah dikirim ulang",
+    resendSuccess: "Pengiriman ulang kode verifikasi berhasil",
+    emailAlreadyExists: "Alamat email ini sudah terdaftar",
+    verificationFailed: "Verifikasi gagal",
+    signInFailed: "Gagal masuk. Coba lagi.",
+    networkError: "Terjadi kesalahan jaringan",
+    resendFailed: "Gagal mengirim ulang kode",
+    resendNetworkError: "Terjadi kesalahan jaringan saat mengirim ulang",
+    generalError: "Terjadi kesalahan",
+    verificationCodeNotFound: "Kode verifikasi tidak ditemukan atau kedaluwarsa",
+    remainingAttempts: "Percobaan tersisa",
+    verificationCodeExpired: "Kode verifikasi telah kedaluwarsa",
+    maxAttemptsReached: "Jumlah percobaan maksimum tercapai"
+  },
+  modal: {
+    emailVerificationTitle: "Verifikasi Email",
+    emailVerificationDescription: "Silakan masukkan kode verifikasi 6 digit yang dikirim ke",
+    expirationTime: "Waktu Kedaluwarsa:",
+    expirationNote: "Kode verifikasi berlaku selama 5 menit. Silakan kirim ulang jika kedaluwarsa.",
+    cancel: "Batal",
+    resend: "Kirim Ulang",
+    confirm: "Konfirmasi",
+    verifying: "Memverifikasi..."
+  }
+} as const;
+
+

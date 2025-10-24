@@ -1,0 +1,60 @@
+export default {
+  label: {
+    back: "Zurück",
+    submit: "Senden",
+    loading: "Laden...",
+    signUpTitle: "Registrieren",
+    verificationTitle: "Bestätigungscode",
+    emailLabel: "E-Mail-Adresse",
+    emailPlaceholder: "beispiel@email.com",
+    passwordLabel: "Passwort",
+    passwordPlaceholder: "Passwort eingeben",
+    passwordDescription: "Mindestens 8 Zeichen mit Groß-/Kleinbuchstaben, Zahlen und Symbolen",
+    verificationCodeLabel: "Bestätigungscode",
+    verificationCodeDescription: "6-stelligen Code eingeben, gesendet an",
+    register: "Registrieren",
+    registering: "Registrierung...",
+    verify: "Bestätigen",
+    verifying: "Bestätigung...",
+    resendCode: "Code erneut senden",
+    resendingCode: "Sende erneut...",
+    accountCreation: "Kontoerstellung",
+    companyInfo: "Unternehmensdaten",
+    adminSetup: "Admin-Einrichtung",
+    paymentSetup: "Zahlungsmethode"
+  },
+  alert: {
+    emailRequired: "Bitte E-Mail-Adresse eingeben",
+    passwordRequired: "Bitte Passwort eingeben",
+    emailAndPasswordRequired: "Bitte E-Mail-Adresse und Passwort eingeben",
+    invalidEmailFormat: "Bitte eine gültige E-Mail-Adresse eingeben",
+    invalidPasswordFormat: "Passwort: mind. 8 Zeichen, Groß-/Kleinbuchstaben, Zahl, Symbol",
+    verificationCodeRequired: "Bitte Bestätigungscode eingeben",
+    verificationCodeLength: "Bitte 6-stelligen Code eingeben",
+    codeResent: "Bestätigungscode erneut gesendet",
+    resendSuccess: "Bestätigungscode erfolgreich erneut gesendet",
+    emailAlreadyExists: "Diese E-Mail-Adresse ist bereits registriert",
+    verificationFailed: "Bestätigung fehlgeschlagen",
+    signInFailed: "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
+    networkError: "Netzwerkfehler ist aufgetreten",
+    resendFailed: "Code konnte nicht erneut gesendet werden",
+    resendNetworkError: "Netzwerkfehler beim erneuten Senden",
+    generalError: "Ein Fehler ist aufgetreten",
+    verificationCodeNotFound: "Bestätigungscode nicht gefunden oder abgelaufen",
+    remainingAttempts: "Verbleibende Versuche",
+    verificationCodeExpired: "Bestätigungscode ist abgelaufen",
+    maxAttemptsReached: "Maximale Anzahl der Versuche erreicht"
+  },
+  modal: {
+    emailVerificationTitle: "E-Mail-Bestätigung",
+    emailVerificationDescription: "Bitte geben Sie den 6-stelligen Bestätigungscode ein, der gesendet wurde an",
+    expirationTime: "Ablaufzeit:",
+    expirationNote: "Der Bestätigungscode ist 5 Minuten gültig. Bitte erneut senden, wenn er abläuft.",
+    cancel: "Abbrechen",
+    resend: "Erneut senden",
+    confirm: "Bestätigen",
+    verifying: "Bestätigung..."
+  }
+} as const;
+
+

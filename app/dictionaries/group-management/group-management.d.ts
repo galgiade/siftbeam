@@ -1,0 +1,40 @@
+export type GroupManagementLocale = {
+  label: {
+    groupList: string;
+    groupNotRegistered: string;
+    groupName: string;
+    description: string;
+    user: string;
+    policy: string;
+    createGroup: string;
+    create: string;
+    creating: string;
+    groupDescription: string;
+    cancel: string;
+    deleteGroup: string;
+    delete: string;
+    deleting: string;
+  };
+  alert: {
+    requiredGroupName: string;
+    requiredUsers: string;
+    requiredPolicies: string;
+    createFail: string;
+    userAttachFail: string;
+    policyAttachFail: string;
+    createSuccess: string;
+    fieldRequired: string;
+    dataFetchFail: string;
+    deleteConfirm: string;
+    deleteFail: string;
+    deleteSuccess: string;
+    adminOnlyCreateMessage: string;
+    adminOnlyEditMessage: string;
+    adminOnlyDeleteMessage: string;
+    updateSuccess: string;
+    updateFail: string;
+    userUpdateSuccess: string;
+    policyUpdateSuccess: string;
+    noChanges: string;
+  };
+};

@@ -1,0 +1,60 @@
+export default {
+  "label": {
+    "back": "戻る",
+    "submit": "送信",
+    "loading": "読み込み中...",
+    "signUpTitle": "新規登録",
+    "verificationTitle": "認証コード入力",
+    "emailLabel": "メールアドレス",
+    "emailPlaceholder": "example@email.com",
+    "passwordLabel": "パスワード",
+    "passwordPlaceholder": "パスワードを入力してください",
+    "passwordDescription": "8文字以上で、英大文字・小文字・数字・記号を含めてください",
+    "verificationCodeLabel": "認証コード",
+    "verificationCodeDescription": "に送信された6桁の認証コードを入力してください",
+    "register": "登録",
+    "registering": "登録中...",
+    "verify": "認証",
+    "verifying": "認証中...",
+    "resendCode": "認証コードを再送信",
+    "resendingCode": "再送信中...",
+    "accountCreation": "アカウント作成",
+    "companyInfo": "会社情報入力",
+    "adminSetup": "管理者設定",
+    "paymentSetup": "支払い方法設定"
+  },
+  "alert": {
+    "emailRequired": "メールアドレスを入力してください",
+    "passwordRequired": "パスワードを入力してください",
+    "emailAndPasswordRequired": "メールアドレスとパスワードを入力してください",
+    "invalidEmailFormat": "正しいメールアドレス形式で入力してください",
+    "invalidPasswordFormat": "パスワードは8文字以上で、英大文字・小文字・数字・記号を含めてください",
+    "verificationCodeRequired": "認証コードを入力してください",
+    "verificationCodeLength": "6桁の認証コードを入力してください",
+    "codeResent": "認証コードを再送信しました",
+    "resendSuccess": "認証コード再送信成功",
+    "emailAlreadyExists": "このメールアドレスは既に登録されています",
+    "verificationFailed": "認証エラーが発生しました",
+    "signInFailed": "サインインに失敗しました。再度お試しください。",
+    "networkError": "ネットワークエラーが発生しました",
+    "resendFailed": "再送信に失敗しました",
+    "resendNetworkError": "再送信でエラーが発生しました",
+    "generalError": "エラーが発生しました",
+    "verificationCodeNotFound": "認証コードが見つからないか期限切れです",
+    "remainingAttempts": "残り試行回数",
+    "verificationCodeExpired": "認証コードの有効期限が切れています",
+    "maxAttemptsReached": "試行回数が上限に達しました"
+  },
+  "modal": {
+    "emailVerificationTitle": "メールアドレス確認",
+    "emailVerificationDescription": "に送信された6桁の認証コードを入力してください。",
+    "expirationTime": "有効期限:",
+    "expirationNote": "認証コードは5分間有効です。期限切れの場合は再送信してください。",
+    "cancel": "キャンセル",
+    "resend": "再送信",
+    "confirm": "確認",
+    "verifying": "検証中..."
+  }
+} as const;
+
+

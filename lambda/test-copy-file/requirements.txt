@@ -1,0 +1,3 @@
+# TestCopyFile Lambda Dependencies
+boto3>=1.34.0
+

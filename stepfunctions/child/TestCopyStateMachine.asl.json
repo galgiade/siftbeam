@@ -1,0 +1,100 @@
+{
+  "Comment": "TestCopyStateMachine - ファイルをコピーしてdownloadS3Keysを親に返す",
+  "StartAt": "PrepareFileList",
+  "States": {
+    "PrepareFileList": {
+      "Type": "Pass",
+      "Comment": "入力変数を準備し、outputS3Keys配列を初期化",
+      "Assign": {
+        "processingHistoryId": "{% $states.input.processingHistoryId %}",
+        "customerId": "{% $states.input.customerId %}",
+        "userId": "{% $states.input.userId %}",
+        "userName": "{% $states.input.userName %}",
+        "policyId": "{% $states.input.policyId %}",
+        "policyName": "{% $states.input.policyName %}",
+        "inputS3Bucket": "{% $states.input.inputS3Bucket %}",
+        "uploadedFileKeys": "{% $states.input.uploadedFileKeys %}",
+        "aiTrainingUsage": "{% $states.input.aiTrainingUsage %}",
+        "fileSizeBytes": "{% $states.input.fileSizeBytes %}",
+        "usageAmountBytes": "{% $states.input.usageAmountBytes %}",
+        "createdAt": "{% $states.input.createdAt %}",
+        "fileIndex": 0,
+        "outputS3Keys": []
+      },
+      "Next": "CheckMoreFiles"
+    },
+
+    "CheckMoreFiles": {
+      "Type": "Choice",
+      "Comment": "まだ処理するファイルがあるか確認",
+      "Choices": [
+        {
+          "Condition": "{% $fileIndex < $count($uploadedFileKeys) %}",
+          "Next": "CopyFileToOutput"
+        }
+      ],
+      "Default": "ProcessingComplete"
+    },
+
+    "CopyFileToOutput": {
+      "Type": "Task",
+      "Comment": "S3 SDKを直接呼び出してファイルをコピー",
+      "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
+      "Arguments": {
+        "Bucket": "{% $inputS3Bucket %}",
+        "Key": "{% $replace($uploadedFileKeys[$fileIndex], '/input/', '/output/') %}",
+        "CopySource": "{% $inputS3Bucket & '/' & $uploadedFileKeys[$fileIndex] %}"
+      },
+      "Assign": {
+        "processingHistoryId": "{% $processingHistoryId %}",
+        "customerId": "{% $customerId %}",
+        "userId": "{% $userId %}",
+        "userName": "{% $userName %}",
+        "policyId": "{% $policyId %}",
+        "policyName": "{% $policyName %}",
+        "inputS3Bucket": "{% $inputS3Bucket %}",
+        "uploadedFileKeys": "{% $uploadedFileKeys %}",
+        "aiTrainingUsage": "{% $aiTrainingUsage %}",
+        "fileSizeBytes": "{% $fileSizeBytes %}",
+        "usageAmountBytes": "{% $usageAmountBytes %}",
+        "createdAt": "{% $createdAt %}",
+        "fileIndex": "{% $fileIndex + 1 %}",
+        "outputS3Keys": "{% $append($outputS3Keys, $replace($uploadedFileKeys[$fileIndex], '/input/', '/output/')) %}"
+      },
+      "Next": "CheckMoreFiles",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "ProcessingFailed"
+        }
+      ]
+    },
+
+    "ProcessingComplete": {
+      "Type": "Pass",
+      "Comment": "処理完了 - downloadS3Keysを親に返す",
+      "Output": {
+        "status": "success",
+        "processingHistoryId": "{% $processingHistoryId %}",
+        "downloadS3Keys": "{% $outputS3Keys %}",
+        "processedFileCount": "{% $count($uploadedFileKeys) %}"
+      },
+      "End": true
+    },
+
+    "ProcessingFailed": {
+      "Type": "Fail",
+      "Error": "ProcessingError",
+      "Cause": "ファイルコピー中にエラーが発生しました"
+    }
+  },
+  "QueryLanguage": "JSONata"
+}
