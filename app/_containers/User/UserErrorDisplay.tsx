@@ -1,0 +1,63 @@
+'use client'
+
+/**
+ * ユーザー情報取得エラー表示コンポーネント
+ */
+export default function UserErrorDisplay({ 
+  error, 
+  dictionary 
+}: { 
+  error: string; 
+  dictionary: any; 
+}) {
+  const handleRetry = () => {
+    window.location.reload();
+  };
+
+  return (
+    <div className="min-h-screen mx-auto flex flex-col items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg border border-red-200">
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+            <svg 
+              className="h-6 w-6 text-red-600" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" 
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            ユーザー情報の取得に失敗しました
+          </h3>
+          <div className="text-sm text-gray-500 mb-4 max-h-32 overflow-y-auto">
+            <pre className="whitespace-pre-wrap text-left bg-gray-50 p-2 rounded text-xs">
+              {error}
+            </pre>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+            <p className="text-xs text-red-800">
+              <strong>開発者向け情報:</strong><br />
+              • DynamoDB接続またはCognito設定を確認してください<br />
+              • 環境変数: USER_TABLE_NAME, COGNITO_USER_POOL_ID<br />
+              • IAM権限: dynamodb:GetItem, cognito-idp:AdminGetUser<br />
+              • ネットワーク接続を確認してください
+            </p>
+          </div>
+          <button
+            onClick={handleRetry}
+            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
+          >
+            再試行
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

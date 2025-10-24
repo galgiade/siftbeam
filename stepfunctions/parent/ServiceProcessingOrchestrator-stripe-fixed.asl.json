@@ -1,0 +1,48 @@
+{
+  "Comment": "Stripe Meter Event送信ステート（修正版）",
+  "SendStripeMeterEvent": {
+    "Type": "Task",
+    "Comment": "Stripe Billing Meters API v2にファイルサイズを送信",
+    "Resource": "arn:aws:states:::http:invoke",
+    "Parameters": {
+      "ApiEndpoint": "https://api.stripe.com/v2/billing/meter_events",
+      "Method": "POST",
+      "Authentication": {
+        "ConnectionArn": "arn:aws:events:ap-northeast-1:002689294103:connection/Stripe-subscriptions-Connection/2118a290-a701-4dd3-a15e-9dacbe6dc899"
+      },
+      "RequestBody": {
+        "event_name": "data-usage",
+        "payload": {
+          "stripe_customer_id": "{% $customerId %}",
+          "value": "{% $string($usageAmountBytes) %}"
+        }
+      },
+      "Headers": {
+        "Content-Type": "application/json",
+        "Stripe-Version": "2025-03-31.preview"
+      }
+    },
+    "ResultPath": "$.stripeMeterResult",
+    "Next": "ProcessingSuccess",
+    "Retry": [
+      {
+        "ErrorEquals": [
+          "States.Http.HttpServerError",
+          "States.Http.HttpRequestTimeout"
+        ],
+        "IntervalSeconds": 3,
+        "MaxAttempts": 2,
+        "BackoffRate": 2.0
+      }
+    ],
+    "Catch": [
+      {
+        "ErrorEquals": ["States.ALL"],
+        "ResultPath": "$.stripeError",
+        "Comment": "Stripe送信失敗時も処理は成功扱い",
+        "Next": "LogStripeMeterError"
+      }
+    ]
+  }
+}
+

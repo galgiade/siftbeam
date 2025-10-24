@@ -1,0 +1,360 @@
+{
+  "Comment": "ServiceProcessingOrchestrator - 親Step Function (汎用的な子Step Function起動)",
+  "StartAt": "InitializeVariables",
+  "States": {
+    "InitializeVariables": {
+      "Type": "Pass",
+      "Comment": "入力変数を初期化",
+      "Assign": {
+        "processingHistoryId": "{% $states.input.processingHistoryId %}",
+        "customerId": "{% $states.input.customerId %}",
+        "userId": "{% $states.input.userId %}",
+        "userName": "{% $states.input.userName %}",
+        "policyId": "{% $states.input.policyId %}",
+        "policyName": "{% $states.input.policyName %}",
+        "inputS3Bucket": "{% $states.input.inputS3Bucket %}",
+        "uploadedFileKeys": "{% $states.input.uploadedFileKeys %}",
+        "aiTrainingUsage": "{% $states.input.aiTrainingUsage %}",
+        "fileSizeBytes": "{% $states.input.fileSizeBytes %}",
+        "usageAmountBytes": "{% $states.input.usageAmountBytes %}",
+        "createdAt": "{% $states.input.createdAt %}"
+      },
+      "Next": "UpdateStatusToProcessing"
+    },
+
+    "UpdateStatusToProcessing": {
+      "Type": "Task",
+      "Comment": "DynamoDB: 処理ステータスを 'in_progress' に更新",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName": "siftbeam-processing-history",
+        "Key": {
+          "processing-historyId": {
+            "S": "{% $states.processingHistoryId %}"
+          }
+        },
+        "UpdateExpression": "SET #status = :status, #startedAt = :startedAt",
+        "ExpressionAttributeNames": {
+          "#status": "status",
+          "#startedAt": "startedAt"
+        },
+        "ExpressionAttributeValues": {
+          ":status": {
+            "S": "in_progress"
+          },
+          ":startedAt": {
+            "S": "{% $now() %}"
+          }
+        }
+      },
+      "ResultPath": null,
+      "Next": "GetPolicyMapping",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "UpdateStatusToFailed"
+        }
+      ]
+    },
+
+    "GetPolicyMapping": {
+      "Type": "Task",
+      "Comment": "DynamoDB: policyIdから子Step Function ARNを取得",
+      "Resource": "arn:aws:states:::dynamodb:getItem",
+      "Parameters": {
+        "TableName": "siftbeam-policy-stepfunction-mapping",
+        "Key": {
+          "policyId": {
+            "S": "{% $states.policyId %}"
+          }
+        }
+      },
+      "ResultPath": "$.mappingResult",
+      "Next": "CheckMappingExists",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "UpdateStatusToFailed"
+        }
+      ]
+    },
+
+    "CheckMappingExists": {
+      "Type": "Choice",
+      "Comment": "policyIdに対応するStep Functionが存在するか確認",
+      "Choices": [
+        {
+          "Condition": "{% $exists($states.mappingResult.Item.stateMachineArn.S) %}",
+          "Next": "StartChildStepFunction"
+        }
+      ],
+      "Default": "UpdateStatusToFailedNoMapping"
+    },
+
+    "StartChildStepFunction": {
+      "Type": "Task",
+      "Comment": "子Step Functionを同期実行 (.sync:2 で完了まで待機)",
+      "Resource": "arn:aws:states:::states:startExecution.sync:2",
+      "Parameters": {
+        "StateMachineArn": "{% $states.mappingResult.Item.stateMachineArn.S %}",
+        "Input": {
+          "processingHistoryId": "{% $states.processingHistoryId %}",
+          "customerId": "{% $states.customerId %}",
+          "userId": "{% $states.userId %}",
+          "userName": "{% $states.userName %}",
+          "policyId": "{% $states.policyId %}",
+          "policyName": "{% $states.policyName %}",
+          "inputS3Bucket": "{% $states.inputS3Bucket %}",
+          "uploadedFileKeys": "{% $states.uploadedFileKeys %}",
+          "aiTrainingUsage": "{% $states.aiTrainingUsage %}",
+          "fileSizeBytes": "{% $states.fileSizeBytes %}",
+          "usageAmountBytes": "{% $states.usageAmountBytes %}",
+          "createdAt": "{% $states.createdAt %}"
+        }
+      },
+      "ResultPath": "$.childExecutionResult",
+      "Next": "UpdateStatusToCompleted",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.Timeout"
+          ],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 2,
+          "BackoffRate": 1.5
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "UpdateStatusToFailed"
+        }
+      ]
+    },
+
+    "UpdateStatusToCompleted": {
+      "Type": "Task",
+      "Comment": "DynamoDB: 処理ステータスを 'success' に更新し、downloadS3Keysを保存",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName": "siftbeam-processing-history",
+        "Key": {
+          "processing-historyId": {
+            "S": "{% $states.processingHistoryId %}"
+          }
+        },
+        "UpdateExpression": "SET #status = :status, #completedAt = :completedAt, downloadS3Keys = :downloadKeys",
+        "ExpressionAttributeNames": {
+          "#status": "status",
+          "#completedAt": "completedAt"
+        },
+        "ExpressionAttributeValues": {
+          ":status": {
+            "S": "success"
+          },
+          ":completedAt": {
+            "S": "{% $now() %}"
+          },
+          ":downloadKeys": {
+            "L": "{% $map($states.childExecutionResult.Output.downloadS3Keys, function($v) { {'S': $v} }) %}"
+          }
+        }
+      },
+      "ResultPath": null,
+      "Next": "GetStripeAPIKey",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Comment": "DynamoDB更新失敗時もStripe送信を試みる",
+          "Next": "GetStripeAPIKey"
+        }
+      ]
+    },
+
+    "GetStripeAPIKey": {
+      "Type": "Task",
+      "Comment": "Secrets ManagerからStripe APIキーを取得",
+      "Resource": "arn:aws:states:::aws-sdk:secretsmanager:getSecretValue",
+      "Parameters": {
+        "SecretId": "siftbeam/stripe/api-key"
+      },
+      "ResultPath": "$.stripeSecret",
+      "Next": "SendStripeMeterEvent",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.stripeError",
+          "Comment": "Stripeキー取得失敗時は処理を成功扱い",
+          "Next": "ProcessingSuccess"
+        }
+      ]
+    },
+
+    "SendStripeMeterEvent": {
+      "Type": "Task",
+      "Comment": "Stripe Billing Meters API (v1) にファイルサイズを送信",
+      "Resource": "arn:aws:states:::http:invoke",
+      "Parameters": {
+        "ApiEndpoint": "https://api.stripe.com/v1/billing/meter_events",
+        "Method": "POST",
+        "Headers": {
+          "Authorization": "{% 'Bearer ' & $parseJson($states.stripeSecret.SecretString).STRIPE_SECRET_KEY %}",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Stripe-Version": "2024-10-28.acacia"
+        },
+        "RequestBody": {
+          "event_name": "file_processed",
+          "identifier": "{% $states.processingHistoryId %}",
+          "payload[stripe_customer_id]": "{% $states.customerId %}",
+          "payload[value]": "{% $string($states.usageAmountBytes) %}",
+          "timestamp": "{% $string($round($toMillis($now()) / 1000)) %}"
+        }
+      },
+      "ResultPath": "$.stripeMeterResult",
+      "Next": "ProcessingSuccess",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.Http.HttpServerError",
+            "States.Http.HttpRequestTimeout"
+          ],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.stripeError",
+          "Comment": "Stripe送信失敗時も処理は成功扱い (課金は手動で後から処理可能)",
+          "Next": "LogStripeMeterError"
+        }
+      ]
+    },
+
+    "LogStripeMeterError": {
+      "Type": "Task",
+      "Comment": "Stripe Meter送信エラーをDynamoDBに記録",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName": "siftbeam-processing-history",
+        "Key": {
+          "processing-historyId": {
+            "S": "{% $states.processingHistoryId %}"
+          }
+        },
+        "UpdateExpression": "SET #stripeMeterError = :stripeMeterError",
+        "ExpressionAttributeNames": {
+          "#stripeMeterError": "stripeMeterError"
+        },
+        "ExpressionAttributeValues": {
+          ":stripeMeterError": {
+            "S": "{% $string($states.stripeError) %}"
+          }
+        }
+      },
+      "ResultPath": null,
+      "Next": "ProcessingSuccess",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Comment": "エラーログ記録失敗時も処理は成功扱い",
+          "Next": "ProcessingSuccess"
+        }
+      ]
+    },
+
+    "UpdateStatusToFailed": {
+      "Type": "Task",
+      "Comment": "DynamoDB: 処理ステータスを 'failed' に更新",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName": "siftbeam-processing-history",
+        "Key": {
+          "processing-historyId": {
+            "S": "{% $states.processingHistoryId %}"
+          }
+        },
+        "UpdateExpression": "SET #status = :status, #failedAt = :failedAt, #errorMessage = :errorMsg",
+        "ExpressionAttributeNames": {
+          "#status": "status",
+          "#failedAt": "failedAt",
+          "#errorMessage": "errorMessage"
+        },
+        "ExpressionAttributeValues": {
+          ":status": {
+            "S": "failed"
+          },
+          ":failedAt": {
+            "S": "{% $now() %}"
+          },
+          ":errorMsg": {
+            "S": "{% $string($states.error) %}"
+          }
+        }
+      },
+      "ResultPath": null,
+      "Next": "ProcessingFailure"
+    },
+
+    "UpdateStatusToFailedNoMapping": {
+      "Type": "Task",
+      "Comment": "DynamoDB: マッピングが見つからない場合のエラー更新",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName": "siftbeam-processing-history",
+        "Key": {
+          "processing-historyId": {
+            "S": "{% $states.processingHistoryId %}"
+          }
+        },
+        "UpdateExpression": "SET #status = :status, #failedAt = :failedAt, #errorMessage = :errorMsg",
+        "ExpressionAttributeNames": {
+          "#status": "status",
+          "#failedAt": "failedAt",
+          "#errorMessage": "errorMessage"
+        },
+        "ExpressionAttributeValues": {
+          ":status": {
+            "S": "failed"
+          },
+          ":failedAt": {
+            "S": "{% $now() %}"
+          },
+          ":errorMsg": {
+            "S": "{% 'Policy mapping not found for policyId: ' & $states.policyId %}"
+          }
+        }
+      },
+      "ResultPath": null,
+      "Next": "ProcessingFailure"
+    },
+
+    "ProcessingSuccess": {
+      "Type": "Pass",
+      "Comment": "処理成功 - 親からの視点での結果を返す",
+      "Output": {
+        "status": "success",
+        "processingHistoryId": "{% $states.processingHistoryId %}",
+        "customerId": "{% $states.customerId %}",
+        "policyId": "{% $states.policyId %}",
+        "message": "処理が正常に完了しました"
+      },
+      "End": true
+    },
+
+    "ProcessingFailure": {
+      "Type": "Fail",
+      "Comment": "処理失敗",
+      "Error": "ProcessingFailed",
+      "Cause": "子Step Functionまたはシステムエラーが発生しました"
+    }
+  },
+  "QueryLanguage": "JSONata"
+}
+

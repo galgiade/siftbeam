@@ -1,0 +1,51 @@
+export default {
+  label: {
+    pageTitle: "Pusat Dukungan",
+    supportRequestList: "Permintaan Dukungan",
+    newRequest: "Permintaan Baru",
+    noRequests: "Tidak ada permintaan dukungan",
+    issueType: "Jenis Masalah",
+    issueTypePlaceholder: "Silakan pilih jenis masalah",
+    technical: "Masalah Teknis",
+    account: "Masalah Akun",
+    billing: "Masalah Penagihan",
+    other: "Lainnya",
+    subject: "Subjek",
+    subjectPlaceholder: "Silakan masukkan subjek",
+    description: "Detail Masalah",
+    descriptionPlaceholder: "Silakan jelaskan masalah secara detail",
+    cancel: "Batal",
+    submit: "Kirim",
+    submitting: "Mengirim...",
+    status: "Status",
+    creator: "Pembuat",
+    createdAt: "Dibuat",
+    updatedAt: "Diperbarui",
+    statusOpen: "Terbuka",
+    statusInProgress: "Sedang Berjalan",
+    statusClosed: "Selesai",
+    back: "← Kembali",
+    reply: "Balas",
+    replyContent: "Konten Balasan",
+    inquiryContent: "Konten Pertanyaan",
+    attachedFiles: "Berkas Terlampir",
+    messagePlaceholder: "Silakan masukkan pesan",
+    markResolved: "Tandai Selesai",
+    markUnresolved: "Batalkan Penandaan Selesai",
+    staff: "Staf",
+    problemType: "Jenis Masalah",
+    technicalIssue: "Masalah Teknis",
+    accountRelated: "Terkait Akun",
+    billingRelated: "Terkait Penagihan",
+    deleteFile: "Hapus Berkas",
+    fileRemoved: "Berkas telah dihapus"
+  },
+  alert: {
+    requestReceived: "Pertanyaan Anda telah diterima. Harap tunggu kontak dari staf kami.",
+    submitFailed: "Gagal mengirim permintaan dukungan",
+    messageRequired: "Silakan masukkan pesan",
+    supportRequestError: "Kesalahan pengambilan permintaan dukungan:"
+  }
+} as const;
+
+

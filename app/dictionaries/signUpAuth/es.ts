@@ -1,0 +1,60 @@
+export default {
+  label: {
+    back: "Atrás",
+    submit: "Enviar",
+    loading: "Cargando...",
+    signUpTitle: "Crear cuenta",
+    verificationTitle: "Código de verificación",
+    emailLabel: "Correo electrónico",
+    emailPlaceholder: "ejemplo@email.com",
+    passwordLabel: "Contraseña",
+    passwordPlaceholder: "Introduce tu contraseña",
+    passwordDescription: "Al menos 8 caracteres con mayúsculas, minúsculas, números y símbolos",
+    verificationCodeLabel: "Código de verificación",
+    verificationCodeDescription: "Introduce el código de 6 dígitos enviado a",
+    register: "Registrarse",
+    registering: "Registrando...",
+    verify: "Verificar",
+    verifying: "Verificando...",
+    resendCode: "Reenviar código",
+    resendingCode: "Reenviando...",
+    accountCreation: "Creación de cuenta",
+    companyInfo: "Información de la empresa",
+    adminSetup: "Configuración del administrador",
+    paymentSetup: "Configuración de pago"
+  },
+  alert: {
+    emailRequired: "Introduce tu correo electrónico",
+    passwordRequired: "Introduce tu contraseña",
+    emailAndPasswordRequired: "Introduce correo y contraseña",
+    invalidEmailFormat: "Introduce un formato de correo válido",
+    invalidPasswordFormat: "La contraseña debe tener al menos 8 caracteres con mayúsculas, minúsculas, números y símbolos",
+    verificationCodeRequired: "Introduce el código de verificación",
+    verificationCodeLength: "Introduce un código de 6 dígitos",
+    codeResent: "El código de verificación ha sido reenviado",
+    resendSuccess: "Reenvío del código de verificación exitoso",
+    emailAlreadyExists: "Este correo ya está registrado",
+    verificationFailed: "La verificación ha fallado",
+    signInFailed: "Error al iniciar sesión. Inténtalo de nuevo.",
+    networkError: "Error de red",
+    resendFailed: "Fallo al reenviar el código",
+    resendNetworkError: "Error de red al reenviar",
+    generalError: "Ha ocurrido un error",
+    verificationCodeNotFound: "Código de verificación no encontrado o expirado",
+    remainingAttempts: "Intentos restantes",
+    verificationCodeExpired: "El código de verificación ha expirado",
+    maxAttemptsReached: "Se alcanzó el número máximo de intentos"
+  },
+  modal: {
+    emailVerificationTitle: "Verificación de correo electrónico",
+    emailVerificationDescription: "Por favor ingrese el código de verificación de 6 dígitos enviado a",
+    expirationTime: "Hora de expiración:",
+    expirationNote: "El código de verificación es válido por 5 minutos. Por favor reenvíe si expira.",
+    cancel: "Cancelar",
+    resend: "Reenviar",
+    confirm: "Confirmar",
+    verifying: "Verificando..."
+  }
+} as const;
+
+

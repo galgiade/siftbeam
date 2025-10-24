@@ -1,0 +1,53 @@
+export default {
+  "label": {
+    "pageTitle": "Centre d’assistance",
+    "supportRequestList": "Demandes d’assistance",
+    "newRequest": "Nouvelle demande",
+    "noRequests": "Aucune demande d’assistance",
+    "issueType": "Type de problème",
+    "issueTypePlaceholder": "Veuillez sélectionner un type de problème",
+    "technical": "Problème technique",
+    "account": "Problème de compte",
+    "billing": "Problème de facturation",
+    "other": "Autre",
+    "subject": "Objet",
+    "subjectPlaceholder": "Veuillez saisir un objet",
+    "description": "Détails du problème",
+    "descriptionPlaceholder": "Veuillez décrire le problème en détail",
+    "cancel": "Annuler",
+    "submit": "Envoyer",
+    "submitting": "Envoi…",
+    "status": "Statut",
+    "creator": "Créateur",
+    "createdAt": "Créé le",
+    "updatedAt": "Mis à jour le",
+    "statusOpen": "Ouvert",
+    "statusInProgress": "En cours",
+    "statusClosed": "Résolu",
+    "back": "← Retour",
+    "reply": "Répondre",
+    "replyContent": "Contenu de la réponse",
+    "inquiryContent": "Contenu de la demande",
+    "attachedFiles": "Fichiers joints",
+    "messagePlaceholder": "Veuillez saisir un message",
+    "markResolved": "Marquer comme résolu",
+    "markUnresolved": "Marquer comme non résolu",
+    "staff": "Personnel",
+    "problemType": "Type de problème",
+    "technicalIssue": "Problème technique",
+    "accountRelated": "Lié au compte",
+    "billingRelated": "Lié à la facturation",
+    "deleteFile": "Supprimer le fichier",
+    "fileRemoved": "Le fichier a été supprimé"
+  },
+  "alert": {
+    "requestReceived": "Votre demande a été reçue. Veuillez attendre le contact de notre équipe.",
+    "submitFailed": "Échec de l'envoi de la demande d'assistance",
+    "subjectRequired": "Veuillez saisir un sujet",
+    "descriptionRequired": "Veuillez saisir une description",
+    "messageRequired": "Veuillez saisir un message",
+    "supportRequestError": "Erreur lors de la récupération de la demande :"
+  }
+} as const;
+
+

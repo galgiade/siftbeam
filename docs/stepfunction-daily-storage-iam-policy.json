@@ -1,0 +1,98 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "XRayAccess",
+      "Effect": "Allow",
+      "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords",
+        "xray:GetSamplingRules",
+        "xray:GetSamplingTargets"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchLogsAccess",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogDelivery",
+        "logs:GetLogDelivery",
+        "logs:UpdateLogDelivery",
+        "logs:DeleteLogDelivery",
+        "logs:ListLogDeliveries",
+        "logs:PutResourcePolicy",
+        "logs:DescribeResourcePolicies",
+        "logs:DescribeLogGroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DynamoDBWriteAccess",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-storage-usage-daily"
+      ]
+    },
+    {
+      "Sid": "S3ListAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::siftbeam"
+      ],
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "service/input/*",
+            "service/output/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "InvokeHTTPEndpoint",
+      "Effect": "Allow",
+      "Action": [
+        "states:InvokeHTTPEndpoint"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "states:HTTPMethod": "GET"
+        },
+        "StringLike": {
+          "states:HTTPEndpoint": "https://api.stripe.com/v1/customers*"
+        }
+      }
+    },
+    {
+      "Sid": "EventBridgeConnectionAccess",
+      "Effect": "Allow",
+      "Action": [
+        "events:RetrieveConnectionCredentials",
+        "events:DescribeConnection"
+      ],
+      "Resource": [
+        "arn:aws:events:ap-northeast-1:002689294103:connection/Stripe-Production-Connection/b711004d-52d7-4b35-8b29-9f33e9e3a054"
+      ]
+    },
+    {
+      "Sid": "SecretsManagerForEventBridgeConnection",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:ap-northeast-1:002689294103:secret:events!connection/Stripe-Production-Connection/*"
+      ]
+    }
+  ]
+}
+

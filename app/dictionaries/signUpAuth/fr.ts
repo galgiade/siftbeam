@@ -1,0 +1,60 @@
+export default {
+  "label": {
+    "back": "Retour",
+    "submit": "Envoyer",
+    "loading": "Chargement…",
+    "signUpTitle": "Créer un compte",
+    "verificationTitle": "Code de vérification",
+    "emailLabel": "Adresse e-mail",
+    "emailPlaceholder": "example@email.com",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "Saisissez votre mot de passe",
+    "passwordDescription": "Au moins 8 caractères, avec majuscules, minuscules, chiffres et symboles",
+    "verificationCodeLabel": "Code de vérification",
+    "verificationCodeDescription": "Saisissez le code à 6 chiffres envoyé à",
+    "register": "S’inscrire",
+    "registering": "Inscription…",
+    "verify": "Vérifier",
+    "verifying": "Vérification…",
+    "resendCode": "Renvoyer le code",
+    "resendingCode": "Renvoi…",
+    "accountCreation": "Création de compte",
+    "companyInfo": "Informations de l’entreprise",
+    "adminSetup": "Configuration administrateur",
+    "paymentSetup": "Configuration du paiement"
+  },
+  "alert": {
+    "emailRequired": "Veuillez saisir votre adresse e-mail",
+    "passwordRequired": "Veuillez saisir votre mot de passe",
+    "emailAndPasswordRequired": "Veuillez saisir votre adresse e-mail et votre mot de passe",
+    "invalidEmailFormat": "Veuillez saisir une adresse e-mail valide",
+    "invalidPasswordFormat": "Le mot de passe doit contenir au moins 8 caractères avec majuscules, minuscules, chiffres et symboles",
+    "verificationCodeRequired": "Veuillez saisir le code de vérification",
+    "verificationCodeLength": "Veuillez saisir un code de vérification à 6 chiffres",
+    "codeResent": "Le code de vérification a été renvoyé",
+    "resendSuccess": "Renvoi du code de vérification réussi",
+    "emailAlreadyExists": "Cette adresse e-mail est déjà enregistrée",
+    "verificationFailed": "Échec de la vérification",
+    "signInFailed": "Échec de la connexion. Veuillez réessayer.",
+    "networkError": "Une erreur réseau est survenue",
+    "resendFailed": "Échec du renvoi du code",
+    "resendNetworkError": "Erreur réseau lors du renvoi",
+    "generalError": "Une erreur est survenue",
+    "verificationCodeNotFound": "Code de vérification introuvable ou expiré",
+    "remainingAttempts": "Tentatives restantes",
+    "verificationCodeExpired": "Le code de vérification a expiré",
+    "maxAttemptsReached": "Nombre maximum de tentatives atteint"
+  },
+  "modal": {
+    "emailVerificationTitle": "Vérification de l'e-mail",
+    "emailVerificationDescription": "Veuillez saisir le code de vérification à 6 chiffres envoyé à",
+    "expirationTime": "Heure d'expiration:",
+    "expirationNote": "Le code de vérification est valide pendant 5 minutes. Veuillez le renvoyer s'il expire.",
+    "cancel": "Annuler",
+    "resend": "Renvoyer",
+    "confirm": "Confirmer",
+    "verifying": "Vérification..."
+  }
+} as const;
+
+

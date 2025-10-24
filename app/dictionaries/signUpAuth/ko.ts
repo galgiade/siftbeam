@@ -1,0 +1,60 @@
+export default {
+  label: {
+    back: "뒤로",
+    submit: "제출",
+    loading: "로딩 중...",
+    signUpTitle: "회원가입",
+    verificationTitle: "인증 코드",
+    emailLabel: "이메일 주소",
+    emailPlaceholder: "example@email.com",
+    passwordLabel: "비밀번호",
+    passwordPlaceholder: "비밀번호를 입력하세요",
+    passwordDescription: "대문자/소문자/숫자/기호를 포함하여 최소 8자",
+    verificationCodeLabel: "인증 코드",
+    verificationCodeDescription: "전송된 6자리 인증 코드를 입력하세요",
+    register: "등록",
+    registering: "등록 중...",
+    verify: "인증",
+    verifying: "인증 중...",
+    resendCode: "코드 재전송",
+    resendingCode: "재전송 중...",
+    accountCreation: "계정 생성",
+    companyInfo: "회사 정보",
+    adminSetup: "관리자 설정",
+    paymentSetup: "결제 설정"
+  },
+  alert: {
+    emailRequired: "이메일 주소를 입력하세요",
+    passwordRequired: "비밀번호를 입력하세요",
+    emailAndPasswordRequired: "이메일과 비밀번호를 입력하세요",
+    invalidEmailFormat: "유효한 이메일 주소 형식을 입력하세요",
+    invalidPasswordFormat: "비밀번호는 대문자/소문자/숫자/기호를 포함하여 최소 8자여야 합니다",
+    verificationCodeRequired: "인증 코드를 입력하세요",
+    verificationCodeLength: "6자리 인증 코드를 입력하세요",
+    codeResent: "인증 코드가 재전송되었습니다",
+    resendSuccess: "인증 코드 재전송 성공",
+    emailAlreadyExists: "이미 등록된 이메일 주소입니다",
+    verificationFailed: "인증에 실패했습니다",
+    signInFailed: "로그인에 실패했습니다. 다시 시도해주세요.",
+    networkError: "네트워크 오류가 발생했습니다",
+    resendFailed: "코드 재전송에 실패했습니다",
+    resendNetworkError: "재전송 중 네트워크 오류가 발생했습니다",
+    generalError: "오류가 발생했습니다",
+    verificationCodeNotFound: "인증 코드를 찾을 수 없거나 만료되었습니다",
+    remainingAttempts: "남은 시도 횟수",
+    verificationCodeExpired: "인증 코드가 만료되었습니다",
+    maxAttemptsReached: "최대 시도 횟수에 도달했습니다"
+  },
+  modal: {
+    emailVerificationTitle: "이메일 확인",
+    emailVerificationDescription: "에 전송된 6자리 인증 코드를 입력하세요.",
+    expirationTime: "만료 시간:",
+    expirationNote: "인증 코드는 5분간 유효합니다. 만료된 경우 재전송해주세요.",
+    cancel: "취소",
+    resend: "재전송",
+    confirm: "확인",
+    verifying: "확인 중..."
+  }
+} as const;
+
+

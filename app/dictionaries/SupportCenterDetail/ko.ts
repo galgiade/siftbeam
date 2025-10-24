@@ -1,0 +1,51 @@
+export default {
+  label: {
+    pageTitle: "지원 센터",
+    supportRequestList: "지원 요청",
+    newRequest: "새 요청",
+    noRequests: "지원 요청이 없습니다",
+    issueType: "문제 유형",
+    issueTypePlaceholder: "문제 유형을 선택하세요",
+    technical: "기술 문제",
+    account: "계정 문제",
+    billing: "결제 문제",
+    other: "기타",
+    subject: "제목",
+    subjectPlaceholder: "제목을 입력하세요",
+    description: "문제 상세",
+    descriptionPlaceholder: "문제를 자세히 설명하세요",
+    cancel: "취소",
+    submit: "제출",
+    submitting: "제출 중...",
+    status: "상태",
+    creator: "작성자",
+    createdAt: "생성일",
+    updatedAt: "업데이트일",
+    statusOpen: "오픈",
+    statusInProgress: "처리 중",
+    statusClosed: "해결됨",
+    back: "← 뒤로",
+    reply: "답변",
+    replyContent: "답변 내용",
+    inquiryContent: "문의 내용",
+    attachedFiles: "첨부 파일",
+    messagePlaceholder: "메시지를 입력하세요",
+    markResolved: "해결로 표시",
+    markUnresolved: "미해결로 표시",
+    staff: "스태프",
+    problemType: "문제 종류",
+    technicalIssue: "기술 문제",
+    accountRelated: "계정 관련",
+    billingRelated: "결제 관련",
+    deleteFile: "파일 삭제",
+    fileRemoved: "파일이 삭제되었습니다"
+  },
+  alert: {
+    requestReceived: "문의가 접수되었습니다. 담당자의 연락을 기다려주세요.",
+    submitFailed: "지원 요청 제출에 실패했습니다",
+    messageRequired: "메시지를 입력하세요",
+    supportRequestError: "지원 요청 가져오기 오류:"
+  }
+} as const;
+
+

@@ -1,0 +1,565 @@
+{
+  "Comment": "アカウント削除自動化 - Lambda不要版（AWS SDK直接呼び出し）",
+  "StartAt": "PrepareCurrentDate",
+  "States": {
+    "PrepareCurrentDate": {
+      "Type": "Pass",
+      "Comment": "現在日時と90日前の日時を計算",
+      "Assign": {
+        "currentTimestamp": "{% $now() %}",
+        "deletionThresholdTimestamp": "{% $toMillis($now()) - (90 * 24 * 60 * 60 * 1000) %}",
+        "executionId": "{% $states.context.Execution.Id %}"
+      },
+      "Next": "GetStripeCustomersWithDeletionFlag"
+    },
+
+    "GetStripeCustomersWithDeletionFlag": {
+      "Type": "Task",
+      "Comment": "Stripe APIから削除フラグ付きの顧客リストを取得",
+      "Resource": "arn:aws:states:::http:invoke",
+      "Arguments": {
+        "ApiEndpoint": "https://api.stripe.com/v1/customers",
+        "Method": "GET",
+        "Authentication": {
+          "ConnectionArn": "arn:aws:events:ap-northeast-1:002689294103:connection/Stripe-Production-Connection/b711004d-52d7-4b35-8b29-9f33e9e3a054"
+        },
+        "QueryParameters": {
+          "limit": "100"
+        }
+      },
+      "Assign": {
+        "stripeCustomers": "{% $states.result %}",
+        "currentTimestamp": "{% $states.input.currentTimestamp %}",
+        "deletionThresholdTimestamp": "{% $states.input.deletionThresholdTimestamp %}",
+        "executionId": "{% $states.input.executionId %}"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.Http.StatusCode.429",
+            "States.Http.StatusCode.503"
+          ],
+          "BackoffRate": 2,
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Next": "FilterExpiredAccounts"
+    },
+
+    "FilterExpiredAccounts": {
+      "Type": "Pass",
+      "Comment": "90日以上経過したアカウントをフィルター",
+      "Assign": {
+        "expiredCustomers": "{% $states.input.stripeCustomers.ResponseBody.data[\n          metadata.deletionRequestedAt and \n          $toMillis(metadata.deletionRequestedAt) < $states.input.deletionThresholdTimestamp\n        ].{\"customerId\": id, \"deletionRequestedAt\": metadata.deletionRequestedAt} %}",
+        "currentTimestamp": "{% $states.input.currentTimestamp %}",
+        "executionId": "{% $states.input.executionId %}"
+      },
+      "Next": "CheckExpiredAccountsExist"
+    },
+
+    "CheckExpiredAccountsExist": {
+      "Type": "Choice",
+      "Comment": "削除対象のアカウントが存在するか確認",
+      "Choices": [
+        {
+          "Condition": "{% $count($states.input.expiredCustomers) > 0 %}",
+          "Next": "ProcessEachExpiredAccount"
+        }
+      ],
+      "Default": "NoAccountsToDelete"
+    },
+
+    "NoAccountsToDelete": {
+      "Type": "Succeed",
+      "Comment": "削除対象のアカウントなし"
+    },
+
+    "ProcessEachExpiredAccount": {
+      "Type": "Map",
+      "Comment": "各削除対象アカウントを処理",
+      "Items": "{% $states.input.expiredCustomers %}",
+      "MaxConcurrency": 5,
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "INLINE"
+        },
+        "StartAt": "SetAccountContext",
+        "States": {
+          "SetAccountContext": {
+            "Type": "Pass",
+            "Comment": "アカウントコンテキストを設定",
+            "Assign": {
+              "cognitoUserPoolId": "ap-northeast-1_PbGgXnV6q",
+              "s3Bucket": "siftbeam"
+            },
+            "Next": "ListCognitoUsers"
+          },
+
+          "ListCognitoUsers": {
+            "Type": "Task",
+            "Comment": "Cognitoユーザーをリスト",
+            "Resource": "arn:aws:states:::aws-sdk:cognitoidentityprovider:listUsers",
+            "Arguments": {
+              "UserPoolId": "{% $states.input.cognitoUserPoolId %}",
+              "Filter": "{% 'custom:customerId = \"' & $states.input.customerId & '\"' %}",
+              "Limit": 60
+            },
+            "Assign": {
+              "cognitoUsers": "{% $states.result %}"
+            },
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DeleteDynamoDBRecords"
+              }
+            ],
+            "Next": "CheckCognitoUsersExist"
+          },
+
+          "CheckCognitoUsersExist": {
+            "Type": "Choice",
+            "Comment": "Cognitoユーザーが存在するか確認",
+            "Choices": [
+              {
+                "Condition": "{% $count($states.input.cognitoUsers.Users) > 0 %}",
+                "Next": "DeleteCognitoUsersLoop"
+              }
+            ],
+            "Default": "DeleteDynamoDBRecords"
+          },
+
+          "DeleteCognitoUsersLoop": {
+            "Type": "Map",
+            "Comment": "各Cognitoユーザーを削除",
+            "Items": "{% $states.input.cognitoUsers.Users %}",
+            "MaxConcurrency": 10,
+            "ItemProcessor": {
+              "ProcessorConfig": {
+                "Mode": "INLINE"
+              },
+              "StartAt": "DeleteCognitoUser",
+              "States": {
+                "DeleteCognitoUser": {
+                  "Type": "Task",
+                  "Resource": "arn:aws:states:::aws-sdk:cognitoidentityprovider:adminDeleteUser",
+                  "Arguments": {
+                    "UserPoolId": "{% $states.context.Execution.Input.cognitoUserPoolId %}",
+                    "Username": "{% $states.input.Username %}"
+                  },
+                  "Retry": [
+                    {
+                      "ErrorEquals": ["States.TaskFailed"],
+                      "IntervalSeconds": 2,
+                      "MaxAttempts": 3,
+                      "BackoffRate": 2.0
+                    }
+                  ],
+                  "Catch": [
+                    {
+                      "ErrorEquals": ["States.ALL"],
+                      "Next": "UserDeletionFailed"
+                    }
+                  ],
+                  "End": true
+                },
+                "UserDeletionFailed": {
+                  "Type": "Pass",
+                  "Assign": {
+                    "username": "{% $states.input.Username %}",
+                    "status": "failed"
+                  },
+                  "End": true
+                }
+              }
+            },
+            "Assign": {
+              "deletedCognitoUsers": "{% $states.result %}"
+            },
+            "Next": "DeleteDynamoDBRecords"
+          },
+
+          "DeleteDynamoDBRecords": {
+            "Type": "Parallel",
+            "Comment": "DynamoDBテーブルから並列削除",
+            "Branches": [
+              {
+                "StartAt": "DeleteFromUsersTable",
+                "States": {
+                  "DeleteFromUsersTable": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::aws-sdk:dynamodb:query",
+                    "Arguments": {
+                      "TableName": "siftbeam-users",
+                      "IndexName": "customerId-createdAt-index",
+                      "KeyConditionExpression": "customerId = :customerId",
+                      "ExpressionAttributeValues": {
+                        ":customerId": {
+                          "S": "{% $states.input.customerId %}"
+                        }
+                      }
+                    },
+                    "Assign": {
+                      "queryResult": "{% $states.result %}",
+                      "customerId": "{% $states.input.customerId %}"
+                    },
+                    "Catch": [
+                      {
+                        "ErrorEquals": ["States.ALL"],
+                        "Next": "UsersTableDone"
+                      }
+                    ],
+                    "Next": "DeleteUsersItems"
+                  },
+                  "DeleteUsersItems": {
+                    "Type": "Map",
+                    "Items": "{% $states.input.queryResult.Items %}",
+                    "MaxConcurrency": 25,
+                    "ItemProcessor": {
+                      "ProcessorConfig": {
+                        "Mode": "INLINE"
+                      },
+                      "StartAt": "DeleteUserItem",
+                      "States": {
+                        "DeleteUserItem": {
+                          "Type": "Task",
+                          "Resource": "arn:aws:states:::aws-sdk:dynamodb:deleteItem",
+                          "Arguments": {
+                            "TableName": "siftbeam-users",
+                            "Key": {
+                              "userId": {
+                                "S": "{% $states.input.userId.S %}"
+                              }
+                            }
+                          },
+                          "Retry": [
+                            {
+                              "ErrorEquals": ["States.TaskFailed"],
+                              "IntervalSeconds": 1,
+                              "MaxAttempts": 3,
+                              "BackoffRate": 2.0
+                            }
+                          ],
+                          "Catch": [
+                            {
+                              "ErrorEquals": ["States.ALL"],
+                              "Next": "UserItemDeletionFailed"
+                            }
+                          ],
+                          "End": true
+                        },
+                        "UserItemDeletionFailed": {
+                          "Type": "Pass",
+                          "End": true
+                        }
+                      }
+                    },
+                    "End": true
+                  },
+                  "UsersTableDone": {
+                    "Type": "Pass",
+                    "End": true
+                  }
+                }
+              },
+              {
+                "StartAt": "DeleteFromProcessingHistoryTable",
+                "States": {
+                  "DeleteFromProcessingHistoryTable": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::aws-sdk:dynamodb:query",
+                    "Arguments": {
+                      "TableName": "siftbeam-processing-history",
+                      "IndexName": "customerId-createdAt-index",
+                      "KeyConditionExpression": "customerId = :customerId",
+                      "ExpressionAttributeValues": {
+                        ":customerId": {
+                          "S": "{% $states.input.customerId %}"
+                        }
+                      }
+                    },
+                    "Assign": {
+                      "queryResult": "{% $states.result %}",
+                      "customerId": "{% $states.input.customerId %}"
+                    },
+                    "Catch": [
+                      {
+                        "ErrorEquals": ["States.ALL"],
+                        "Next": "ProcessingHistoryTableDone"
+                      }
+                    ],
+                    "Next": "DeleteProcessingHistoryItems"
+                  },
+                  "DeleteProcessingHistoryItems": {
+                    "Type": "Map",
+                    "Items": "{% $states.input.queryResult.Items %}",
+                    "MaxConcurrency": 25,
+                    "ItemProcessor": {
+                      "ProcessorConfig": {
+                        "Mode": "INLINE"
+                      },
+                      "StartAt": "DeleteProcessingHistoryItem",
+                      "States": {
+                        "DeleteProcessingHistoryItem": {
+                          "Type": "Task",
+                          "Resource": "arn:aws:states:::aws-sdk:dynamodb:deleteItem",
+                          "Arguments": {
+                            "TableName": "siftbeam-processing-history",
+                            "Key": {
+                              "processingHistoryId": {
+                                "S": "{% $states.input.processingHistoryId.S %}"
+                              }
+                            }
+                          },
+                          "Retry": [
+                            {
+                              "ErrorEquals": ["States.TaskFailed"],
+                              "IntervalSeconds": 1,
+                              "MaxAttempts": 3,
+                              "BackoffRate": 2.0
+                            }
+                          ],
+                          "Catch": [
+                            {
+                              "ErrorEquals": ["States.ALL"],
+                              "Next": "HistoryItemDeletionFailed"
+                            }
+                          ],
+                          "End": true
+                        },
+                        "HistoryItemDeletionFailed": {
+                          "Type": "Pass",
+                          "End": true
+                        }
+                      }
+                    },
+                    "End": true
+                  },
+                  "ProcessingHistoryTableDone": {
+                    "Type": "Pass",
+                    "End": true
+                  }
+                }
+              }
+            ],
+            "Assign": {
+              "dynamoResults": "{% $states.result %}"
+            },
+            "Next": "DeleteS3Objects"
+          },
+
+          "DeleteS3Objects": {
+            "Type": "Task",
+            "Comment": "S3オブジェクトをリスト（input）",
+            "Resource": "arn:aws:states:::aws-sdk:s3:listObjectsV2",
+            "Arguments": {
+              "Bucket": "{% $states.input.s3Bucket %}",
+              "Prefix": "{% 'service/input/' & $states.input.customerId & '/' %}"
+            },
+            "Assign": {
+              "s3InputObjects": "{% $states.result %}"
+            },
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DeleteStripeCustomer"
+              }
+            ],
+            "Next": "CheckInputObjectsExist"
+          },
+
+          "CheckInputObjectsExist": {
+            "Type": "Choice",
+            "Choices": [
+              {
+                "Condition": "{% $count($states.input.s3InputObjects.Contents) > 0 %}",
+                "Next": "DeleteInputObjects"
+              }
+            ],
+            "Default": "ListOutputObjects"
+          },
+
+          "DeleteInputObjects": {
+            "Type": "Map",
+            "Items": "{% $states.input.s3InputObjects.Contents %}",
+            "MaxConcurrency": 100,
+            "ItemProcessor": {
+              "ProcessorConfig": {
+                "Mode": "INLINE"
+              },
+              "StartAt": "DeleteInputObject",
+              "States": {
+                "DeleteInputObject": {
+                  "Type": "Task",
+                  "Resource": "arn:aws:states:::aws-sdk:s3:deleteObject",
+                  "Arguments": {
+                    "Bucket": "{% $states.context.Execution.Input.s3Bucket %}",
+                    "Key": "{% $states.input.Key %}"
+                  },
+                  "Retry": [
+                    {
+                      "ErrorEquals": ["States.TaskFailed"],
+                      "IntervalSeconds": 1,
+                      "MaxAttempts": 3,
+                      "BackoffRate": 2.0
+                    }
+                  ],
+                  "Catch": [
+                    {
+                      "ErrorEquals": ["States.ALL"],
+                      "Next": "InputObjectDeletionFailed"
+                    }
+                  ],
+                  "End": true
+                },
+                "InputObjectDeletionFailed": {
+                  "Type": "Pass",
+                  "End": true
+                }
+              }
+            },
+            "Assign": {
+              "deletedInputObjects": "{% $states.result %}"
+            },
+            "Next": "ListOutputObjects"
+          },
+
+          "ListOutputObjects": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::aws-sdk:s3:listObjectsV2",
+            "Arguments": {
+              "Bucket": "{% $states.input.s3Bucket %}",
+              "Prefix": "{% 'service/output/' & $states.input.customerId & '/' %}"
+            },
+            "Assign": {
+              "s3OutputObjects": "{% $states.result %}"
+            },
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "DeleteStripeCustomer"
+              }
+            ],
+            "Next": "CheckOutputObjectsExist"
+          },
+
+          "CheckOutputObjectsExist": {
+            "Type": "Choice",
+            "Choices": [
+              {
+                "Condition": "{% $count($states.input.s3OutputObjects.Contents) > 0 %}",
+                "Next": "DeleteOutputObjects"
+              }
+            ],
+            "Default": "DeleteStripeCustomer"
+          },
+
+          "DeleteOutputObjects": {
+            "Type": "Map",
+            "Items": "{% $states.input.s3OutputObjects.Contents %}",
+            "MaxConcurrency": 100,
+            "ItemProcessor": {
+              "ProcessorConfig": {
+                "Mode": "INLINE"
+              },
+              "StartAt": "DeleteOutputObject",
+              "States": {
+                "DeleteOutputObject": {
+                  "Type": "Task",
+                  "Resource": "arn:aws:states:::aws-sdk:s3:deleteObject",
+                  "Arguments": {
+                    "Bucket": "{% $states.context.Execution.Input.s3Bucket %}",
+                    "Key": "{% $states.input.Key %}"
+                  },
+                  "Retry": [
+                    {
+                      "ErrorEquals": ["States.TaskFailed"],
+                      "IntervalSeconds": 1,
+                      "MaxAttempts": 3,
+                      "BackoffRate": 2.0
+                    }
+                  ],
+                  "Catch": [
+                    {
+                      "ErrorEquals": ["States.ALL"],
+                      "Next": "OutputObjectDeletionFailed"
+                    }
+                  ],
+                  "End": true
+                },
+                "OutputObjectDeletionFailed": {
+                  "Type": "Pass",
+                  "End": true
+                }
+              }
+            },
+            "Assign": {
+              "deletedOutputObjects": "{% $states.result %}"
+            },
+            "Next": "DeleteStripeCustomer"
+          },
+
+          "DeleteStripeCustomer": {
+            "Type": "Task",
+            "Comment": "Stripeカスタマーを削除",
+            "Resource": "arn:aws:states:::http:invoke",
+            "Arguments": {
+              "ApiEndpoint": "{% 'https://api.stripe.com/v1/customers/' & $states.input.customerId %}",
+              "Method": "DELETE",
+              "Authentication": {
+                "ConnectionArn": "arn:aws:events:ap-northeast-1:002689294103:connection/Stripe-Production-Connection/b711004d-52d7-4b35-8b29-9f33e9e3a054"
+              }
+            },
+            "Assign": {
+              "stripeResult": "{% $states.result %}"
+            },
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "States.Http.StatusCode.429",
+                  "States.Http.StatusCode.503"
+                ],
+                "BackoffRate": 2,
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "JitterStrategy": "FULL"
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "AccountDeletionComplete"
+              }
+            ],
+            "Next": "AccountDeletionComplete"
+          },
+
+          "AccountDeletionComplete": {
+            "Type": "Pass",
+            "Comment": "アカウント削除完了",
+            "Output": {
+              "status": "completed",
+              "customerId": "{% $states.input.customerId %}",
+              "deletionRequestedAt": "{% $states.input.deletionRequestedAt %}",
+              "deletedAt": "{% $states.input.currentTimestamp %}"
+            },
+            "End": true
+          }
+        }
+      },
+      "Assign": {
+        "deletionResults": "{% $states.result %}",
+        "currentTimestamp": "{% $states.input.currentTimestamp %}",
+        "executionId": "{% $states.input.executionId %}"
+      },
+      "Next": "DeletionProcessComplete"
+    },
+
+    "DeletionProcessComplete": {
+      "Type": "Succeed",
+      "Comment": "全アカウント削除処理完了"
+    }
+  },
+  "QueryLanguage": "JSONata"
+}

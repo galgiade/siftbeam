@@ -1,0 +1,127 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Sid": "DynamoDBAccess",
+          "Effect": "Allow",
+          "Action": [
+              "dynamodb:PutItem",
+              "dynamodb:DeleteItem",
+              "dynamodb:GetItem",
+              "dynamodb:Scan",
+              "dynamodb:Query",
+              "dynamodb:UpdateItem",
+              "dynamodb:BatchWriteItem"
+          ],
+          "Resource": [
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/User",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/User/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-announcements",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-verification-codes",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-users",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-policy",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-group",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-user-group",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-policy-group",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-support-request",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-support-reply",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-neworder-request",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-neworder-reply",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-processing-history",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-usage-limits",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-audit-logs",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-api-keys",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-policy-analysis",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-data-usage",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-announcements/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-verification-codes/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-users/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-policy/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-group/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-user-group/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-policy-group/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-support-request/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-support-reply/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-neworder-request/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-neworder-reply/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-processing-history/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-usage-limits/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-audit-logs/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-api-keys/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-policy-analysis/index/*",
+              "arn:aws:dynamodb:ap-northeast-1:002689294103:table/siftbeam-data-usage/index/*"
+          ]
+      },
+      {
+          "Sid": "CognitoAdminAccess",
+          "Effect": "Allow",
+          "Action": [
+              "cognito-idp:AdminGetUser",
+              "cognito-idp:AdminCreateUser",
+              "cognito-idp:AdminDeleteUser",
+              "cognito-idp:AdminUpdateUserAttributes",
+              "cognito-idp:AdminConfirmSignUp",
+              "cognito-idp:AdminSetUserPassword"
+          ],
+          "Resource": "arn:aws:cognito-idp:ap-northeast-1:002689294103:userpool/*"
+      },
+      {
+          "Sid": "CognitoUserAccess",
+          "Effect": "Allow",
+          "Action": [
+              "cognito-idp:ForgotPassword",
+              "cognito-idp:GlobalSignOut",
+              "cognito-idp:ConfirmForgotPassword",
+              "cognito-idp:RespondToAuthChallenge",
+              "cognito-idp:GetUser",
+              "cognito-idp:ConfirmSignUp",
+              "cognito-idp:SignUp",
+              "cognito-idp:InitiateAuth",
+              "cognito-idp:ResendConfirmationCode"
+          ],
+          "Resource": "arn:aws:cognito-idp:ap-northeast-1:002689294103:userpool/*"
+      },
+      {
+          "Sid": "SESAccess",
+          "Effect": "Allow",
+          "Action": [
+              "ses:SendEmail",
+              "ses:SendTemplatedEmail",
+              "ses:SendRawEmail"
+          ],
+          "Resource": "*"
+      },
+      {
+          "Sid": "S3Access",
+          "Effect": "Allow",
+          "Action": [
+              "s3:PutObject",
+              "s3:GetObject",
+              "s3:DeleteObject",
+              "s3:ListBucket"
+          ],
+          "Resource": [
+              "arn:aws:s3:::siftbeam",
+              "arn:aws:s3:::siftbeam/*"
+          ]
+      },
+      {
+          "Sid": "APIGatewayAccess",
+          "Effect": "Allow",
+          "Action": [
+              "apigateway:POST",
+              "apigateway:DELETE",
+              "apigateway:GET",
+              "apigateway:PUT"
+          ],
+          "Resource": [
+              "arn:aws:apigateway:ap-northeast-1::/apikeys",
+              "arn:aws:apigateway:ap-northeast-1::/apikeys/*",
+              "arn:aws:apigateway:ap-northeast-1::/usageplans",
+              "arn:aws:apigateway:ap-northeast-1::/usageplans/*",
+              "arn:aws:apigateway:ap-northeast-1::/usageplans/*/keys",
+              "arn:aws:apigateway:ap-northeast-1::/usageplans/*/keys/*"
+          ]
+      }
+  ]
+}
