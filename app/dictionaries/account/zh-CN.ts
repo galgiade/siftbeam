@@ -8,6 +8,7 @@ export default {
   deleteAccount: "删除账户",
   auditLog: "审计日志",
   payment: "支付",
+  support: "支持",
   supportCenter: "支持中心",
   stripeUsage: "Stripe 用量",
   apiManagement: "API 管理",

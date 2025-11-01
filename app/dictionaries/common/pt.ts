@@ -3,15 +3,19 @@ import type { CommonLocale } from './common.d.ts';
 const pt: CommonLocale = {
   common: {
     navigation: {
-      services: 'Serviços',
-      flow: 'Fluxo',
+      home: 'Início',
+      about: 'Sobre',
       pricing: 'Preços',
-      supportCenter: 'Suporte',
-      myPage: 'Minha página',
-      announcement: 'Anúncios',
-      languageSelector: 'Idioma',
+      contact: 'Contato',
       signIn: 'Entrar',
+      signUp: 'Cadastrar',
       signOut: 'Sair',
+      dashboard: 'Painel',
+      flow: 'Fluxo',
+      announcement: 'Anúncios',
+      services: 'Serviços',
+      myPage: 'Minha página',
+      supportCenter: 'Suporte',
     },
     footer: {
       title: 'siftbeam',

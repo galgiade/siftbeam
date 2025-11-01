@@ -8,6 +8,7 @@ export interface AccountLocale {
   deleteAccount: string;
   auditLog: string;
   payment: string;
+  support: string;
   supportCenter: string;
   stripeUsage: string;
   apiManagement: string;

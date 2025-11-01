@@ -8,6 +8,7 @@ export default {
   deleteAccount: "Hapus Akun",
   auditLog: "Log Audit",
   payment: "Pembayaran",
+  support: "Dukungan",
   supportCenter: "Pusat Dukungan",
   stripeUsage: "Penggunaan Stripe",
   apiManagement: "Manajemen API",

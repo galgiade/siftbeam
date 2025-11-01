@@ -15,6 +15,7 @@ const enUS: CommonLocale = {
       announcement: 'Announcements',
       services: 'Services',
       myPage: 'My Page',
+      supportCenter: 'Support Center',
     },
     footer: {
       title: 'siftbeam',

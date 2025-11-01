@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import DeleteAccountContainer from '@/app/_containers/DeleteAccount/DeleteAccountContainer'
+import AccountDeletionContainer from '@/app/_containers/AccountDeletion/AccountDeletionContainer'
 import { deleteAccountDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 
 export async function generateMetadata(
@@ -17,8 +17,8 @@ export async function generateMetadata(
   }
 }
 
-export default function AccountDeletionPage() {
-  return <DeleteAccountContainer />
+export default function AccountDeletionPage({ locale }: { locale: string }) {
+  return <AccountDeletionContainer locale={locale} />
 }
 
 
