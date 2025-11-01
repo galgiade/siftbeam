@@ -187,31 +187,57 @@ export async function sendUsageLimitNotificationEmailAction(
   try {
     console.log('Sending usage limit notification emails to:', emails);
     
-    const templateName = `SiftbeamUsageLimitNotification_${locale}`;
+    const templateName = `SiftbeamUsageNotice_${locale}`;
     
-    // 使用量をMB/GB/TBに変換
-    let usageDisplay = '';
-    if (currentUsageBytes >= 1024 * 1024 * 1024 * 1024) {
-      usageDisplay = `${(currentUsageBytes / (1024 * 1024 * 1024 * 1024)).toFixed(2)} TB`;
-    } else if (currentUsageBytes >= 1024 * 1024 * 1024) {
-      usageDisplay = `${(currentUsageBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-    } else if (currentUsageBytes >= 1024 * 1024) {
-      usageDisplay = `${(currentUsageBytes / (1024 * 1024)).toFixed(2)} MB`;
-    } else {
-      usageDisplay = `${(currentUsageBytes / 1024).toFixed(2)} KB`;
-    }
+    // 使用量をMB/GB/TBに変換（Lambda形式に合わせる）
+    const formatBytes = (bytes: number): string => {
+      if (bytes >= 1024 * 1024 * 1024 * 1024) {
+        return `${(bytes / (1024 * 1024 * 1024 * 1024)).toFixed(2).replace(/\.?0+$/, '')} TB`;
+      } else if (bytes >= 1024 * 1024 * 1024) {
+        return `${(bytes / (1024 * 1024 * 1024)).toFixed(2).replace(/\.?0+$/, '')} GB`;
+      } else if (bytes >= 1024 * 1024) {
+        return `${(bytes / (1024 * 1024)).toFixed(2).replace(/\.?0+$/, '')} MB`;
+      } else if (bytes >= 1024) {
+        return `${(bytes / 1024).toFixed(2).replace(/\.?0+$/, '')} KB`;
+      } else {
+        return `${bytes} B`;
+      }
+    };
     
+    // 制限値を数値に変換（exceedingLimitDescriptionから抽出）
+    // 例: "10 MB" → 10485760 bytes
+    const parseLimitDescription = (description: string): number => {
+      const match = description.match(/(\d+(?:\.\d+)?)\s*(KB|MB|GB|TB)/i);
+      if (!match) return 0;
+      
+      const value = parseFloat(match[1]);
+      const unit = match[2].toUpperCase();
+      
+      const multipliers: { [key: string]: number } = {
+        'KB': 1024,
+        'MB': 1024 * 1024,
+        'GB': 1024 * 1024 * 1024,
+        'TB': 1024 * 1024 * 1024 * 1024,
+      };
+      
+      return value * (multipliers[unit] || 1);
+    };
+    
+    const limitValueBytes = parseLimitDescription(exceedingLimitDescription);
+    
+    // Lambda形式のテンプレートデータ（使用率と超過量は削除）
     const templateData = {
-      customerId,
-      currentUsage: usageDisplay,
-      exceedingLimit: exceedingLimitDescription,
-      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/${locale}/usage-limits`,
-      companyName: 'SiftBeam',
-      supportEmail: process.env.SES_FROM_EMAIL || 'support@siftbeam.com',
+      currentUsage: formatBytes(currentUsageBytes),
+      limitValue: formatBytes(limitValueBytes),
     };
 
     let sentCount = 0;
     const failedEmails: string[] = [];
+
+    // デバッグログ: テンプレートデータを出力
+    console.log('Template data:', JSON.stringify(templateData, null, 2));
+    console.log('Template name:', templateName);
+    console.log('Recipients:', emails);
 
     // 各メールアドレスに送信
     for (const email of emails) {

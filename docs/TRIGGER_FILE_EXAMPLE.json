@@ -1,0 +1,20 @@
+{
+  "processing-historyId": "f5b182ac-6150-4006-a3ea-d75128bd057c",
+  "userId": "user_abc123",
+  "userName": "田中太郎",
+  "customerId": "cus_TB7TNGpqOEFcst",
+  "policyId": "policy_xyz789",
+  "policyName": "標準処理ポリシー",
+  "uploadedFileKeys": [
+    "service/input/cus_TB7TNGpqOEFcst/f5b182ac-6150-4006-a3ea-d75128bd057c/icon.png",
+    "service/input/cus_TB7TNGpqOEFcst/f5b182ac-6150-4006-a3ea-d75128bd057c/icon2.png"
+  ],
+  "aiTrainingUsage": "allow",
+  "fileCount": 2,
+  "usageAmountBytes": 2048000,
+  "createdAt": "2025-01-27T10:30:05.123Z",
+  "metadata": {
+    "source": "browser",
+    "apiVersion": "2025-10-28"
+  }
+}

@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { Card, CardBody, CardHeader, Button, Divider, Alert, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from '@heroui/react';
 import { ExclamationTriangleIcon, TrashIcon, ArrowPathIcon, ClockIcon, UserGroupIcon } from '@heroicons/react/24/outline';
-import { requestAccountDeletionAction, restoreAccountAction, calculateDaysUntilDeletion, calculateDeletionDate } from '@/app/lib/actions/account-deletion-actions';
+import { requestAccountDeletionAction, restoreAccountAction } from '@/app/lib/actions/account-deletion-actions';
 import type { DeletionStatusResponse } from '@/app/lib/actions/account-deletion-actions';
+import { calculateDaysUntilDeletion, calculateDeletionDate } from '@/app/lib/utils/account-deletion-utils';
 import { UserAttributesDTO } from '@/app/lib/types/TypeAPIs';
 
 interface AccountDeletionPresentationProps {

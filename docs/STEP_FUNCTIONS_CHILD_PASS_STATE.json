@@ -1,0 +1,20 @@
+{
+  "processingHistoryId": "{% $states.input.processingHistoryId %}",
+  "customerId": "{% $states.input.customerId %}",
+  "userId": "{% $states.input.userId %}",
+  "userName": "{% $states.input.userName %}",
+  "policyId": "{% $states.input.policyId %}",
+  "policyName": "{% $states.input.policyName %}",
+  "inputS3Bucket": "{% $states.input.inputS3Bucket %}",
+  "uploadedFileKeys": "{% $states.input.uploadedFileKeys %}",
+  "downloadS3Keys": "{% $states.input.downloadS3Keys %}",
+  "aiTrainingUsage": "{% $states.input.aiTrainingUsage %}",
+  "fileCount": "{% $states.input.fileCount %}",
+  "usageAmountBytes": "{% $states.input.usageAmountBytes %}",
+  "createdAt": "{% $states.input.createdAt %}",
+  "source": "{% $states.input.source %}",
+  "apiVersion": "{% $states.input.apiVersion %}",
+  "fileIndex": 0,
+  "outputS3Keys": []
+}
+

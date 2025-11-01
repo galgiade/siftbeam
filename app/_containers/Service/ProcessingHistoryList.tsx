@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Card, CardBody, CardHeader, Button, Chip, Tooltip } from '@heroui/react';
-import { FaDownload, FaClock, FaCheckCircle, FaExclamationTriangle, FaSync, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaDownload, FaClock, FaExclamationTriangle, FaSync, FaCheck, FaTimes } from 'react-icons/fa';
 import { ProcessingHistory, updateProcessingHistory } from '@/app/lib/actions/processing-history-api';
-import { getProcessingStatusMessage, getDownloadableFiles, calculateProcessingDuration, formatFileSize } from '@/app/lib/utils/s3-utils';
+import { getProcessingStatusMessage, getDownloadableFiles, formatFileSize } from '@/app/lib/utils/s3-utils';
+import { downloadFiles } from '@/app/lib/actions/download-api';
 
 interface ProcessingHistoryListProps {
   processingHistory: ProcessingHistory[];
@@ -20,6 +22,7 @@ export default function ProcessingHistoryList({
   dictionary, 
   refreshKey 
 }: ProcessingHistoryListProps) {
+  const router = useRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -32,35 +35,78 @@ export default function ProcessingHistoryList({
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // 実際のリフレッシュ処理（親コンポーネントで処理）
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsRefreshing(false);
+    try {
+      // サーバーサイドのデータを再取得
+      router.refresh();
+      // UIフィードバックのために少し待つ
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error('Refresh error:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
-  const handleDownload = async (s3Key: string, fileName: string) => {
+  const handleDownload = async (history: ProcessingHistory) => {
     try {
-      // TODO: 実際のダウンロード処理を実装
-      console.log('Downloading:', { s3Key, fileName });
+      const downloadableFiles = getDownloadableFiles(history);
       
-      // 実際のダウンロードAPI呼び出し（実装時）
-      // const response = await fetch(`/api/download?key=${encodeURIComponent(s3Key)}`);
-      // if (!response.ok) {
-      //   if (response.status === 404) {
-      //     throw new Error('FILE_NOT_FOUND');
-      //   }
-      //   throw new Error('Download failed');
-      // }
+      if (downloadableFiles.length === 0) {
+        alert('ダウンロード可能なファイルがありません。');
+        return;
+      }
+
+      // 出力ファイルのみを取得
+      const outputFiles = downloadableFiles.filter(f => f.fileType === 'output');
       
-      alert(`${fileName} のダウンロードを開始します。`);
+      if (outputFiles.length === 0) {
+        alert('ダウンロード可能な出力ファイルがありません。');
+        return;
+      }
+
+      // S3キーの配列を取得
+      const s3Keys = outputFiles.map(f => f.s3Key);
+      
+      // Server Actionを呼び出してファイルをダウンロード
+      const result = await downloadFiles(s3Keys);
+      
+      if (!result.success || !result.data) {
+        alert(result.error || 'ダウンロードに失敗しました。');
+        return;
+      }
+
+      // Base64データをBlobに変換
+      const binaryString = atob(result.data.content);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: result.data.contentType });
+      
+      // ダウンロード用のURLを作成
+      const url = URL.createObjectURL(blob);
+      
+      // ファイル名を決定
+      let fileName = result.data.fileName;
+      if (s3Keys.length > 1) {
+        // 複数ファイルの場合はカスタムZIPファイル名
+        fileName = `${history.policyName}_${history['processing-historyId'].substring(0, 8)}.zip`;
+      }
+      
+      // ダウンロードを開始
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // URLを解放
+      URL.revokeObjectURL(url);
+      
     } catch (error) {
       console.error('Download error:', error);
-      
-      // ファイルが見つからない場合（S3で削除済み）
-      if (error instanceof Error && error.message === 'FILE_NOT_FOUND') {
-        alert('ファイルは保存期間（1年）を過ぎたため削除されました。');
-      } else {
-        alert('ダウンロードに失敗しました。');
-      }
+      alert('ダウンロードに失敗しました。');
     }
   };
 
@@ -73,12 +119,6 @@ export default function ProcessingHistoryList({
       minute: '2-digit'
     });
   };
-
-  const formatFileSizeWithFallback = (bytes?: number): string => {
-    if (!bytes) return '不明';
-    return formatFileSize(bytes);
-  };
-
   /**
    * ファイルが1年経過して削除されているかを判定
    */
@@ -100,14 +140,15 @@ export default function ProcessingHistoryList({
 
       if (!result.success) {
         alert('AI学習使用の更新に失敗しました: ' + result.message);
+      } else {
+        // 更新成功時にデータを再取得
+        await handleRefresh();
       }
     } catch (error) {
       console.error('Toggle AI training error:', error);
       alert('AI学習使用の更新に失敗しました');
     } finally {
       setUpdatingId(null);
-      // リフレッシュ
-      handleRefresh();
     }
   };
 
@@ -143,7 +184,6 @@ export default function ProcessingHistoryList({
                 <TableColumn>ユーザー</TableColumn>
                 <TableColumn>ステータス</TableColumn>
                 <TableColumn>開始時刻</TableColumn>
-                <TableColumn>処理時間</TableColumn>
                 <TableColumn>ファイルサイズ</TableColumn>
                 <TableColumn>AI学習使用</TableColumn>
                 <TableColumn>エラー詳細</TableColumn>
@@ -152,7 +192,6 @@ export default function ProcessingHistoryList({
               <TableBody>
                 {processingHistory.map((history) => {
                   const statusInfo = getProcessingStatusMessage(history.status);
-                  const duration = calculateProcessingDuration(history.createdAt, history.completedAt);
                   
                   return (
                     <TableRow key={history['processing-historyId']}>
@@ -186,23 +225,16 @@ export default function ProcessingHistoryList({
                         </div>
                       </TableCell>
 
-                      {/* 処理時間 */}
-                      <TableCell>
-                        <div className="text-sm">
-                          {duration ? `${duration}秒` : '-'}
-                        </div>
-                      </TableCell>
-
                       {/* ファイルサイズ */}
                       <TableCell>
                         <div className="text-sm">
-                          {history.fileSizeBytes ? formatFileSize(history.fileSizeBytes) : '-'}
+                          {history.usageAmountBytes ? formatFileSize(history.usageAmountBytes) : '-'}
                         </div>
                       </TableCell>
 
                       {/* AI学習トグル */}
                       <TableCell>
-                        <div className="flex justify-center">
+                        <div className="flex justify-center rounded-md bg-gray-200">
                           {history.aiTrainingUsage === 'allow' ? (
                             <Button
                               size="sm"
@@ -277,12 +309,7 @@ export default function ProcessingHistoryList({
                                 size="sm"
                                 variant="flat"
                                 color="success"
-                                onPress={() => {
-                                  const downloadableFiles = getDownloadableFiles(history);
-                                  if (downloadableFiles.length > 0) {
-                                    handleDownload(downloadableFiles[0].s3Key, downloadableFiles[0].fileName);
-                                  }
-                                }}
+                                onPress={() => handleDownload(history)}
                               >
                                 <FaDownload />
                               </Button>

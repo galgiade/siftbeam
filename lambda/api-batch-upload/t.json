@@ -1,0 +1,17 @@
+{
+    "processing-historyId": "f5b182ac-6150-4006-a3ea-d75128bd057c",
+    "userId": "user-123",
+    "userName": "田中太郎",
+    "customerId": "cus_TB7TNGpqOEFcst",
+    "policyId": "policy-456",
+    "policyName": "画像処理ポリシー",
+    "uploadedFileKeys": [
+      "service/input/cus_TB7TNGpqOEFcst/f5b182ac-6150-4006-a3ea-d75128bd057c/icon.png",
+      "service/input/cus_TB7TNGpqOEFcst/f5b182ac-6150-4006-a3ea-d75128bd057c/icon2.png"
+    ],
+    "fileCount": 2,
+    "totalSize": 2048000,
+    "aiTrainingUsage": "allow",
+    "createdAt": "2025-01-27T10:30:00.000Z",
+    "triggerType": "batch_upload_complete"
+}

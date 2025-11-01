@@ -277,24 +277,33 @@ export async function setDefaultPaymentMethodAction(paymentMethodId: string) {
   }
 }
 
-// 請求書一覧を取得
-export async function getInvoicesAction(customerId: string) {
+// 請求書一覧を取得（ページネーション対応）
+export async function getInvoicesAction(customerId: string, limit: number = 20, startingAfter?: string) {
   try {
-    const invoices = await stripe.invoices.list({
+    const params: Stripe.InvoiceListParams = {
       customer: customerId,
       status: 'paid',
-      limit: 100,
-    });
+      limit: limit,
+    };
+
+    // ページネーション用のパラメータ
+    if (startingAfter) {
+      params.starting_after = startingAfter;
+    }
+
+    const invoices = await stripe.invoices.list(params);
 
     return {
       success: true,
-      invoices: invoices.data
+      invoices: invoices.data,
+      hasMore: invoices.has_more
     };
   } catch (error) {
     console.error('Error fetching invoices:', error);
     return {
       success: false,
-      message: 'Failed to fetch invoices'
+      message: 'Failed to fetch invoices',
+      hasMore: false
     };
   }
 }

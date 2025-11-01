@@ -2,6 +2,7 @@ import CreateApiKeyManagementPresentation from './CreateApiKeyManagementPresenta
 import ApiKeyErrorDisplay from '../ApiKeyErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
 import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { getPoliciesByCustomerIdAction } from '@/app/lib/actions/policy-api';
 
 interface CreateApiKeyManagementContainerProps {
   locale: string;
@@ -40,10 +41,15 @@ export default async function CreateApiKeyManagementContainer({ locale }: Create
       paymentMethodId: userProfile.paymentMethodId
     };
     
+    // ポリシー一覧を取得
+    const policiesResult = await getPoliciesByCustomerIdAction(userProfile.customerId);
+    const policies = policiesResult.success && policiesResult.data ? policiesResult.data : [];
+    
     return (
       <CreateApiKeyManagementPresentation
         userAttributes={userAttributesDTO} 
-        dictionary={dictionary} 
+        dictionary={dictionary}
+        policies={policies}
       />
     );
   } catch (error: any) {

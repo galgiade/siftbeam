@@ -1,9 +1,8 @@
 'use server'
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand, QueryCommand, GetCommand, UpdateCommand, DeleteCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { APIGatewayClient, CreateApiKeyCommand, DeleteApiKeyCommand, CreateUsagePlanKeyCommand, DeleteUsagePlanKeyCommand } from "@aws-sdk/client-api-gateway";
-import { v4 as uuidv4 } from 'uuid';
+import { DynamoDBDocumentClient, PutCommand, QueryCommand, GetCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { APIGatewayClient, CreateApiKeyCommand, DeleteApiKeyCommand, CreateUsagePlanKeyCommand, DeleteUsagePlanKeyCommand, UpdateApiKeyCommand, GetApiKeyCommand } from "@aws-sdk/client-api-gateway";
 import { getUserCustomAttributes } from '@/app/utils/cognito-utils';
 import { logSuccessAction, logFailureAction } from './audit-log-actions';
 
@@ -38,10 +37,10 @@ export interface APIKeyEntry {
   'api-keysId': string;
   apiName: string;
   description?: string;
-  gatewayApiKeyId: string;
   policyId: string;
   customerId: string;
   status: APIKeyStatus;
+  tags?: Record<string, string>; // タグ情報
   createdAt: string;
   updatedAt: string;
 }
@@ -49,6 +48,7 @@ export interface APIKeyEntry {
 export interface APIKeyResponse {
   success: boolean;
   message?: string;
+  warning?: string;
   apiKey?: APIKeyEntry;
   apiKeys?: APIKeyEntry[];
   lastEvaluatedKey?: Record<string, any>;
@@ -57,8 +57,8 @@ export interface APIKeyResponse {
 export interface CreateAPIKeyRequest {
   apiName: string;
   description?: string;
-  gatewayApiKeyId?: string; // オプションに変更（自動生成する場合）
   policyId: string;
+  tags?: Record<string, string>; // カスタムタグ（Project, environmentなど）
 }
 
 export interface UpdateAPIKeyRequest {
@@ -66,6 +66,7 @@ export interface UpdateAPIKeyRequest {
   apiName?: string;
   description?: string;
   status?: APIKeyStatus;
+  tags?: Record<string, string>; // タグの更新
 }
 
 export interface APIKeyFilter {
@@ -75,14 +76,51 @@ export interface APIKeyFilter {
 }
 
 /**
+ * API Gateway でAPIキーのタグを取得
+ * 注意: API Gatewayでは、GetApiKeyCommandのレスポンスにタグが含まれます
+ */
+async function getAPIGatewayKeyTags(apiKeyId: string): Promise<Record<string, string>> {
+  try {
+    const getKeyCommand = new GetApiKeyCommand({
+      apiKey: apiKeyId,
+      includeValue: false
+    });
+    
+    const response = await apiGatewayClient.send(getKeyCommand);
+    
+    console.log('API Gateway key tags retrieved:', {
+      apiKeyId,
+      tags: response.tags
+    });
+    
+    return response.tags || {};
+  } catch (error: any) {
+    console.error('Error getting API Gateway key tags:', error);
+    // タグ取得に失敗しても処理は続行（空のオブジェクトを返す）
+    return {};
+  }
+}
+
+/**
  * API Gateway でAPIキーを作成し、Usage Planに紐付ける
  */
-async function createAPIGatewayKey(apiName: string): Promise<{ gatewayApiKeyId: string; gatewayApiKeyValue: string }> {
+async function createAPIGatewayKey(apiName: string, customerId: string, tags?: Record<string, string>): Promise<{ gatewayApiKeyId: string; gatewayApiKeyValue: string }> {
   try {
     // Usage Plan IDの確認
     if (!USAGE_PLAN_ID) {
       throw new Error('USAGE_PLAN_ID is not configured');
     }
+
+    // デフォルトタグを準備（全てのAPIキーに自動適用）
+    const defaultTags: Record<string, string> = {
+      Project: 'siftbeam',
+      customerId: customerId,
+      environment: 'Production', // デフォルト環境
+      version: 'v1.0'            // デフォルトバージョン
+    };
+    
+    // カスタムタグとマージ（カスタムタグが優先）
+    const allTags = { ...defaultTags, ...tags };
 
     // API Gateway でAPIキーを作成
     const createKeyCommand = new CreateApiKeyCommand({
@@ -90,6 +128,7 @@ async function createAPIGatewayKey(apiName: string): Promise<{ gatewayApiKeyId: 
       description: `API key for ${apiName}`,
       enabled: true,
       generateDistinctId: true,
+      tags: allTags // タグを含めて作成
     });
 
     const createKeyResponse = await apiGatewayClient.send(createKeyCommand);
@@ -100,6 +139,15 @@ async function createAPIGatewayKey(apiName: string): Promise<{ gatewayApiKeyId: 
 
     const gatewayApiKeyId = createKeyResponse.id;
     const gatewayApiKeyValue = createKeyResponse.value;
+
+    console.log('API Gateway key created:', {
+      id: gatewayApiKeyId,
+      idLength: gatewayApiKeyId.length,
+      value: gatewayApiKeyValue,
+      valueLength: gatewayApiKeyValue.length,
+      name: createKeyResponse.name,
+      tags: allTags
+    });
 
     // Usage Plan に紐付け
     const createUsagePlanKeyCommand = new CreateUsagePlanKeyCommand({
@@ -154,13 +202,110 @@ async function deleteAPIGatewayKey(gatewayApiKeyId: string): Promise<void> {
 }
 
 /**
+ * API Gateway からAPIキーの値を取得
+ */
+async function getAPIGatewayKeyValue(apiKeyId: string): Promise<string> {
+  try {
+    const getKeyCommand = new GetApiKeyCommand({
+      apiKey: apiKeyId,
+      includeValue: true  // 値を含める
+    });
+    
+    const response = await apiGatewayClient.send(getKeyCommand);
+    
+    if (!response.value) {
+      throw new Error('API key value not found');
+    }
+    
+    console.log('API Gateway key value retrieved:', {
+      id: response.id,
+      name: response.name,
+      valueLength: response.value.length
+    });
+    
+    return response.value;
+  } catch (error: any) {
+    console.error('Error getting API Gateway key value:', error);
+    throw new Error(`Failed to get API key value: ${error.message}`);
+  }
+}
+
+/**
+ * API Gateway でAPIキーの有効/無効を切り替える
+ */
+async function updateAPIGatewayKeyStatus(gatewayApiKeyId: string, enabled: boolean): Promise<void> {
+  try {
+    console.log('updateAPIGatewayKeyStatus called with:', {
+      gatewayApiKeyId,
+      enabled,
+      gatewayApiKeyIdType: typeof gatewayApiKeyId,
+      gatewayApiKeyIdLength: gatewayApiKeyId?.length
+    });
+
+    if (!gatewayApiKeyId || gatewayApiKeyId.trim() === '') {
+      throw new Error('Gateway API Key ID is empty or undefined');
+    }
+
+    // まずAPIキーが存在するか確認
+    try {
+      const getKeyCommand = new GetApiKeyCommand({
+        apiKey: gatewayApiKeyId,
+        includeValue: false
+      });
+      const existingKey = await apiGatewayClient.send(getKeyCommand);
+      console.log('API Gateway key found:', {
+        id: existingKey.id,
+        name: existingKey.name,
+        enabled: existingKey.enabled,
+        createdDate: existingKey.createdDate
+      });
+    } catch (getError: any) {
+      if (getError.name === 'NotFoundException') {
+        console.warn('API Gateway key not found:', gatewayApiKeyId);
+        throw new Error(`API Gateway key does not exist: ${gatewayApiKeyId}. The key may have been deleted or never created.`);
+      }
+      throw getError;
+    }
+
+    const updateKeyCommand = new UpdateApiKeyCommand({
+      apiKey: gatewayApiKeyId,
+      patchOperations: [
+        {
+          op: 'replace',
+          path: '/enabled',
+          value: String(enabled),
+        },
+      ],
+    });
+
+    console.log('Sending UpdateApiKeyCommand:', {
+      apiKey: gatewayApiKeyId,
+      enabled: String(enabled)
+    });
+
+    await apiGatewayClient.send(updateKeyCommand);
+    
+    console.log('API Gateway key status updated successfully');
+  } catch (error: any) {
+    console.error('Error updating API Gateway key status:', {
+      gatewayApiKeyId,
+      enabled,
+      errorName: error.name,
+      errorMessage: error.message,
+      error
+    });
+    throw new Error(`Failed to update API Gateway key status: ${error.message}`);
+  }
+}
+
+/**
  * APIキーを作成
  */
 export async function createAPIKeyAction(request: CreateAPIKeyRequest): Promise<APIKeyResponse & { gatewayApiKeyValue?: string }> {
   try {
     const userAttributes = await getUserCustomAttributes();
     if (!userAttributes || !userAttributes['custom:customerId']) {
-      await logFailureAction('CREATE', 'APIKey', 'User not authenticated or customer ID not found');
+      await logFailureAction('CREATE', 'APIKey', 'User not authenticated or customer ID not found', 'apiName');
       return {
         success: false,
         message: 'User not authenticated or customer ID not found'
@@ -169,47 +314,31 @@ export async function createAPIKeyAction(request: CreateAPIKeyRequest): Promise<
 
     const customerId = userAttributes['custom:customerId'];
     const timestamp = new Date().toISOString();
-    const apiKeyId = uuidv4();
 
-    let gatewayApiKeyId: string;
+    let apiKeyId: string;
     let gatewayApiKeyValue: string;
 
-    // API Gateway でキーを作成するか、既存のキーIDを使用するかを判定
-    if (request.gatewayApiKeyId) {
-      // 既存のgatewayApiKeyIdが提供された場合、重複チェック
-      const existingKey = await getAPIKeyByGatewayIdAction(request.gatewayApiKeyId);
-      if (existingKey.success && existingKey.apiKey) {
-        await logFailureAction('CREATE', 'APIKey', 'Gateway API Key ID already exists');
-        return {
-          success: false,
-          message: 'Gateway API Key ID already exists'
-        };
-      }
-      gatewayApiKeyId = request.gatewayApiKeyId;
-      gatewayApiKeyValue = ''; // 既存キーの場合、値は返さない
-    } else {
-      // 新しいAPI Gateway キーを作成
-      try {
-        const gatewayKeyResult = await createAPIGatewayKey(request.apiName);
-        gatewayApiKeyId = gatewayKeyResult.gatewayApiKeyId;
-        gatewayApiKeyValue = gatewayKeyResult.gatewayApiKeyValue;
-      } catch (gatewayError: any) {
-        await logFailureAction('CREATE', 'APIKey', gatewayError.message || 'Failed to create API Gateway key');
-        return {
-          success: false,
-          message: gatewayError.message || 'Failed to create API Gateway key'
-        };
-      }
+    // 新しいAPI Gateway キーを作成（タグ付き）
+    try {
+      const gatewayKeyResult = await createAPIGatewayKey(request.apiName, customerId, request.tags);
+      apiKeyId = gatewayKeyResult.gatewayApiKeyId; // API GatewayのIDをDynamoDBのPKとして使用
+      gatewayApiKeyValue = gatewayKeyResult.gatewayApiKeyValue;
+    } catch (gatewayError: any) {
+      await logFailureAction('CREATE', 'APIKey', gatewayError.message || 'Failed to create API Gateway key', 'apiName', '', request.apiName);
+      return {
+        success: false,
+        message: gatewayError.message || 'Failed to create API Gateway key'
+      };
     }
 
     const apiKeyEntry: APIKeyEntry = {
-      'api-keysId': apiKeyId,
+      'api-keysId': apiKeyId, // API GatewayのIDを使用
       apiName: request.apiName,
       description: request.description,
-      gatewayApiKeyId,
       policyId: request.policyId,
       customerId,
       status: 'active',
+      tags: request.tags, // タグをDynamoDBにも保存
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -227,12 +356,10 @@ export async function createAPIKeyAction(request: CreateAPIKeyRequest): Promise<
       await docClient.send(command);
     } catch (dbError: any) {
       // DynamoDB保存に失敗した場合、作成したAPI Gateway キーを削除
-      if (!request.gatewayApiKeyId && gatewayApiKeyId) {
-        try {
-          await deleteAPIGatewayKey(gatewayApiKeyId);
-        } catch (cleanupError) {
-          console.error('Failed to cleanup API Gateway key:', cleanupError);
-        }
+      try {
+        await deleteAPIGatewayKey(apiKeyId);
+      } catch (cleanupError) {
+        console.error('Failed to cleanup API Gateway key:', cleanupError);
       }
       throw dbError;
     }
@@ -247,7 +374,7 @@ export async function createAPIKeyAction(request: CreateAPIKeyRequest): Promise<
     };
   } catch (error: any) {
     console.error('Error creating API key:', error);
-    await logFailureAction('CREATE', 'APIKey', error.message || 'Failed to create API key');
+    await logFailureAction('CREATE', 'APIKey', error.message || 'Failed to create API key', 'apiName', '', request.apiName || '');
     return {
       success: false,
       message: error.message || 'Failed to create API key'
@@ -323,66 +450,8 @@ export async function getAPIKeysByCustomerIdAction(
       ExpressionAttributeValues: command.input.ExpressionAttributeValues
     }, null, 2));
 
-    let response;
-    try {
-      response = await docClient.send(command);
-      console.log('Query successful, items count:', response.Items?.length || 0);
-    } catch (queryError: any) {
-      console.error('Query failed:', {
-        name: queryError.name,
-        code: queryError.code,
-        message: queryError.message,
-        statusCode: queryError.$metadata?.httpStatusCode
-      });
-
-      // インデックスが存在しない場合、またはアクセス権限がない場合、Scanでフォールバック
-      if (
-        queryError.name === 'ResourceNotFoundException' || 
-        queryError.code === 'ResourceNotFoundException' ||
-        queryError.name === 'AccessDeniedException' ||
-        queryError.code === 'AccessDeniedException'
-      ) {
-        console.log('Attempting fallback with Scan...');
-        try {
-          const scanCommand = new ScanCommand({
-            TableName: API_KEY_TABLE_NAME,
-            FilterExpression: 'customerId = :customerId',
-            ExpressionAttributeValues: { ':customerId': customerId },
-            Limit: limit,
-            ExclusiveStartKey: lastEvaluatedKey,
-          });
-          
-          response = await docClient.send(scanCommand);
-          console.log('Scan successful, items count:', response.Items?.length || 0);
-        } catch (scanError: any) {
-          console.error('Scan also failed:', {
-            name: scanError.name,
-            code: scanError.code,
-            message: scanError.message
-          });
-          
-          // テーブルが存在しない場合、空の結果を返す
-          if (
-            scanError.name === 'ResourceNotFoundException' || 
-            scanError.code === 'ResourceNotFoundException'
-          ) {
-            console.log('Table does not exist, returning empty result');
-            await logSuccessAction('READ', 'APIKey', 'count', '', '0');
-            return {
-              success: true,
-              apiKeys: [],
-              lastEvaluatedKey: undefined,
-            };
-          }
-          
-          throw scanError;
-        }
-      } else {
-        throw queryError;
-      }
-    }
-
-    await logSuccessAction('READ', 'APIKey', 'count', '', String(response.Items?.length || 0));
+    const response = await docClient.send(command);
+    console.log('Query successful, items count:', response.Items?.length || 0);
 
     return {
       success: true,
@@ -391,7 +460,7 @@ export async function getAPIKeysByCustomerIdAction(
     };
   } catch (error: any) {
     console.error('Error fetching API keys by customer ID:', error);
-    await logFailureAction('READ', 'APIKey', error.message || 'Failed to fetch API keys');
+    await logFailureAction('READ', 'APIKey', error.message || 'Failed to fetch API keys', 'customerId');
     return { success: false, message: error.message || 'Failed to fetch API keys' };
   }
 }
@@ -428,8 +497,6 @@ export async function getAPIKeysByPolicyIdAction(
 
     const response = await docClient.send(command);
 
-    await logSuccessAction('READ', 'APIKey', 'count', '', String(response.Items?.length || 0));
-
     return {
       success: true,
       apiKeys: response.Items as APIKeyEntry[],
@@ -437,7 +504,7 @@ export async function getAPIKeysByPolicyIdAction(
     };
   } catch (error: any) {
     console.error('Error fetching API keys by policy ID:', error);
-    await logFailureAction('READ', 'APIKey', error.message || 'Failed to fetch API keys');
+    await logFailureAction('READ', 'APIKey', error.message || 'Failed to fetch API keys', 'policyId', policyId);
     return { success: false, message: error.message || 'Failed to fetch API keys' };
   }
 }
@@ -474,12 +541,10 @@ export async function getAPIKeyByIdAction(apiKeyId: string): Promise<APIKeyRespo
       return { success: false, message: 'Unauthorized access to this API key' };
     }
 
-    await logSuccessAction('READ', 'APIKey', 'id', '', apiKeyId);
-
     return { success: true, apiKey };
   } catch (error: any) {
     console.error('Error fetching API key by ID:', error);
-    await logFailureAction('READ', 'APIKey', error.message || 'Failed to fetch API key');
+    await logFailureAction('READ', 'APIKey', error.message || 'Failed to fetch API key', 'api-keysId', apiKeyId);
     return { success: false, message: error.message || 'Failed to fetch API key' };
   }
 }
@@ -517,26 +582,21 @@ export async function getAPIKeyByGatewayIdAction(gatewayApiKeyId: string): Promi
  */
 export async function updateAPIKeyAction(request: UpdateAPIKeyRequest): Promise<APIKeyResponse> {
   try {
-    const userAttributes = await getUserCustomAttributes();
-    if (!userAttributes || !userAttributes['custom:customerId']) {
-      await logFailureAction('UPDATE', 'APIKey', request['api-keysId'], 'User not authenticated or customer ID not found');
-      return {
-        success: false,
-        message: 'User not authenticated or customer ID not found'
-      };
-    }
-
-    const customerId = userAttributes['custom:customerId'];
-
     // 既存のAPIキーを取得して権限確認
     const existingApiKey = await getAPIKeyByIdAction(request['api-keysId']);
     if (!existingApiKey.success || !existingApiKey.apiKey) {
       return existingApiKey;
     }
 
+    console.log('Existing API Key data from DynamoDB:', {
+      apiKeyId: existingApiKey.apiKey['api-keysId'],
+      apiName: existingApiKey.apiKey.apiName
+    });
+
     const updateExpressions: string[] = [];
     const expressionAttributeNames: Record<string, string> = {};
     const expressionAttributeValues: Record<string, any> = {};
+    let warningMessage: string | undefined = undefined;
 
     if (request.apiName !== undefined) {
       updateExpressions.push('#apiName = :apiName');
@@ -553,6 +613,58 @@ export async function updateAPIKeyAction(request: UpdateAPIKeyRequest): Promise<
       updateExpressions.push('#status = :status');
       expressionAttributeNames['#status'] = 'status';
       expressionAttributeValues[':status'] = request.status;
+      
+      // API Gatewayのステータスも更新
+      try {
+        const enabled = request.status === 'active';
+        console.log('Attempting to update API Gateway key status:', {
+          apiKeyId: request['api-keysId'],
+          newStatus: request.status,
+          enabled
+        });
+        await updateAPIGatewayKeyStatus(request['api-keysId'], enabled);
+      } catch (gatewayError: any) {
+        console.warn('Failed to update API Gateway key status:', gatewayError.message);
+        // API Gateway更新に失敗してもDynamoDB更新は続行（警告のみ）
+        // ユーザーには警告メッセージを返す
+        if (gatewayError.message && gatewayError.message.includes('does not exist')) {
+          // API Gatewayキーが存在しない場合は、後でユーザーに通知
+          console.warn('⚠️ API Gateway key does not exist. Only DynamoDB status will be updated.');
+          warningMessage = 'API Gatewayのキーが見つかりません。DynamoDBのステータスのみ更新されました。新しいAPIキーを作成することをお勧めします。';
+        }
+      }
+    }
+    
+    // タグの更新
+    if (request.tags !== undefined) {
+      updateExpressions.push('tags = :tags');
+      expressionAttributeValues[':tags'] = request.tags;
+      
+      // API Gatewayのタグも更新
+      // 注意: API Gatewayでは、UpdateApiKeyCommandでタグを完全に置き換えることはできません
+      // タグはAPIキー作成時に設定され、個別の更新はpatchOperationsで行います
+      try {
+        // タグの更新をpatchOperationsで実行
+        const patchOperations = Object.entries(request.tags).map(([key, value]) => ({
+          op: 'replace' as const,
+          path: `/tags/${key}`,
+          value: value
+        }));
+        
+        if (patchOperations.length > 0) {
+          const updateTagCommand = new UpdateApiKeyCommand({
+            apiKey: request['api-keysId'],
+            patchOperations
+          });
+          
+          await apiGatewayClient.send(updateTagCommand);
+          console.log('API Gateway key tags updated successfully');
+        }
+      } catch (gatewayError: any) {
+        console.warn('Failed to update API Gateway key tags:', gatewayError.message);
+        // タグ更新に失敗してもDynamoDB更新は続行（警告のみ）
+        // API Gatewayのタグ更新は制限があるため、DynamoDBのタグを信頼できるソースとして使用
+      }
     }
 
     if (updateExpressions.length === 0) {
@@ -568,25 +680,61 @@ export async function updateAPIKeyAction(request: UpdateAPIKeyRequest): Promise<
       UpdateExpression: `SET ${updateExpressions.join(', ')}`,
       ExpressionAttributeNames: Object.keys(expressionAttributeNames).length > 0 ? expressionAttributeNames : undefined,
       ExpressionAttributeValues: expressionAttributeValues,
-      ConditionExpression: 'customerId = :customerId',
       ReturnValues: 'ALL_NEW',
     });
 
-    expressionAttributeValues[':customerId'] = customerId;
-
     const response = await docClient.send(command);
 
-    await logSuccessAction('UPDATE', 'APIKey', 'multiple', 
-      JSON.stringify(existingApiKey.apiKey), JSON.stringify(response.Attributes));
+    // 監査ログ記録（成功） - 各フィールドごとに記録
+    if (request.apiName !== undefined) {
+      await logSuccessAction(
+        'UPDATE', 
+        'APIKey', 
+        'apiName', 
+        existingApiKey.apiKey.apiName, 
+        request.apiName
+      );
+    }
+    
+    if (request.description !== undefined) {
+      await logSuccessAction(
+        'UPDATE', 
+        'APIKey', 
+        'description', 
+        existingApiKey.apiKey.description || '', 
+        request.description
+      );
+    }
+    
+    if (request.status !== undefined) {
+      await logSuccessAction(
+        'UPDATE', 
+        'APIKey', 
+        'status', 
+        existingApiKey.apiKey.status, 
+        request.status
+      );
+    }
+    
+    if (request.tags !== undefined) {
+      await logSuccessAction(
+        'UPDATE', 
+        'APIKey', 
+        'tags', 
+        JSON.stringify(existingApiKey.apiKey.tags || {}), 
+        JSON.stringify(request.tags)
+      );
+    }
 
     return {
       success: true,
       message: 'API key updated successfully',
+      warning: warningMessage,
       apiKey: response.Attributes as APIKeyEntry
     };
   } catch (error: any) {
     console.error('Error updating API key:', error);
-    await logFailureAction('UPDATE', 'APIKey', request['api-keysId'], error.message || 'Failed to update API key');
+    await logFailureAction('UPDATE', 'APIKey', error.message || 'Failed to update API key', 'api-keysId', '', request['api-keysId']);
     return {
       success: false,
       message: error.message || 'Failed to update API key'
@@ -598,47 +746,33 @@ export async function updateAPIKeyAction(request: UpdateAPIKeyRequest): Promise<
  * APIキーを削除
  */
 export async function deleteAPIKeyAction(apiKeyId: string): Promise<APIKeyResponse> {
+  let existingApiKeyName = '';
   try {
-    const userAttributes = await getUserCustomAttributes();
-    if (!userAttributes || !userAttributes['custom:customerId']) {
-      await logFailureAction('DELETE', 'APIKey', apiKeyId, 'User not authenticated or customer ID not found');
-      return {
-        success: false,
-        message: 'User not authenticated or customer ID not found'
-      };
-    }
-
-    const customerId = userAttributes['custom:customerId'];
-
     // 既存のAPIキーを取得して権限確認
     const existingApiKey = await getAPIKeyByIdAction(apiKeyId);
     if (!existingApiKey.success || !existingApiKey.apiKey) {
       return existingApiKey;
     }
-
-    const gatewayApiKeyId = existingApiKey.apiKey.gatewayApiKeyId;
+    
+    existingApiKeyName = existingApiKey.apiKey.apiName;
 
     // DynamoDBからAPIキーを削除
     const command = new DeleteCommand({
       TableName: API_KEY_TABLE_NAME,
-      Key: { 'api-keysId': apiKeyId },
-      ConditionExpression: 'customerId = :customerId',
-      ExpressionAttributeValues: {
-        ':customerId': customerId,
-      },
+      Key: { 'api-keysId': apiKeyId }
     });
 
     await docClient.send(command);
 
     // API Gateway からもAPIキーを削除
     try {
-      await deleteAPIGatewayKey(gatewayApiKeyId);
+      await deleteAPIGatewayKey(apiKeyId);
     } catch (gatewayError: any) {
       console.warn('Failed to delete API Gateway key, but DynamoDB deletion succeeded:', gatewayError);
       // API Gateway削除に失敗してもDynamoDB削除は成功しているので、警告のみ
     }
 
-    await logSuccessAction('DELETE', 'APIKey', 'id', apiKeyId, '');
+    await logSuccessAction('DELETE', 'APIKey', 'apiName', existingApiKeyName, '');
 
     return {
       success: true,
@@ -646,7 +780,7 @@ export async function deleteAPIKeyAction(apiKeyId: string): Promise<APIKeyRespon
     };
   } catch (error: any) {
     console.error('Error deleting API key:', error);
-    await logFailureAction('DELETE', 'APIKey', apiKeyId, error.message || 'Failed to delete API key');
+    await logFailureAction('DELETE', 'APIKey', error.message || 'Failed to delete API key', 'apiName', existingApiKeyName, '');
     return {
       success: false,
       message: error.message || 'Failed to delete API key'
@@ -658,12 +792,14 @@ export async function deleteAPIKeyAction(apiKeyId: string): Promise<APIKeyRespon
  * APIキーのステータスを変更（有効/無効切り替え）
  */
 export async function toggleAPIKeyStatusAction(apiKeyId: string): Promise<APIKeyResponse> {
+  let existingStatus = '';
   try {
     const existingApiKey = await getAPIKeyByIdAction(apiKeyId);
     if (!existingApiKey.success || !existingApiKey.apiKey) {
       return existingApiKey;
     }
-
+    
+    existingStatus = existingApiKey.apiKey.status;
     const newStatus: APIKeyStatus = existingApiKey.apiKey.status === 'active' ? 'inactive' : 'active';
 
     return await updateAPIKeyAction({
@@ -672,7 +808,7 @@ export async function toggleAPIKeyStatusAction(apiKeyId: string): Promise<APIKey
     });
   } catch (error: any) {
     console.error('Error toggling API key status:', error);
-    await logFailureAction('UPDATE', 'APIKey', apiKeyId, error.message || 'Failed to toggle API key status');
+    await logFailureAction('UPDATE', 'APIKey', error.message || 'Failed to toggle API key status', 'status', existingStatus, '');
     return {
       success: false,
       message: error.message || 'Failed to toggle API key status'
@@ -681,37 +817,63 @@ export async function toggleAPIKeyStatusAction(apiKeyId: string): Promise<APIKey
 }
 
 /**
- * 管理者用：全APIキーを取得（管理者のみ）
+ * APIキーの値を取得（セキュリティ重視：必要な時だけAPI Gatewayから取得）
  */
-export async function getAllAPIKeysAction(
-  limit: number = 50,
-  lastEvaluatedKey?: Record<string, any>
-): Promise<APIKeyResponse> {
+export async function getAPIKeyValueAction(apiKeyId: string): Promise<{
+  success: boolean;
+  value?: string;
+  message?: string;
+}> {
   try {
-    const userAttributes = await getUserCustomAttributes();
-    if (!userAttributes || userAttributes['custom:role'] !== 'admin') {
-      await logFailureAction('READ', 'APIKey', 'AllAPIKeys', 'Admin access required');
-      return { success: false, message: 'Admin access required' };
+    // DynamoDBで権限確認（このAPIキーが自分のcustomerIdに属しているか）
+    const apiKeyResult = await getAPIKeyByIdAction(apiKeyId);
+    if (!apiKeyResult.success || !apiKeyResult.apiKey) {
+      await logFailureAction('READ', 'APIKey', 'API key not found or access denied', 'api-keysId', apiKeyId);
+      return { success: false, message: 'API key not found or access denied' };
     }
 
-    const command = new ScanCommand({
-      TableName: API_KEY_TABLE_NAME,
-      Limit: limit,
-      ExclusiveStartKey: lastEvaluatedKey,
-    });
+    // API Gatewayから値を取得
+    const value = await getAPIGatewayKeyValue(apiKeyId);
 
-    const response = await docClient.send(command);
+    // 監査ログに記録（セキュリティ重要：誰がいつAPIキー値を取得したか）
+    // READアクションでも、APIキー値の取得は重要なセキュリティイベントなので記録する
+    await logSuccessAction('READ', 'APIKey', 'value', '', `${apiKeyResult.apiKey.apiName} (length: ${value.length})`);
 
-    await logSuccessAction('READ', 'APIKey', 'count', '', String(response.Items?.length || 0));
-
-    return {
-      success: true,
-      apiKeys: response.Items as APIKeyEntry[],
-      lastEvaluatedKey: response.LastEvaluatedKey,
-    };
+    return { success: true, value };
   } catch (error: any) {
-    console.error('Error fetching all API keys:', error);
-    await logFailureAction('READ', 'APIKey', 'AllAPIKeys', error.message || 'Failed to fetch all API keys');
-    return { success: false, message: error.message || 'Failed to fetch all API keys' };
+    console.error('Error getting API key value:', error);
+    await logFailureAction('READ', 'APIKey', error.message || 'Failed to get API key value', 'api-keysId', apiKeyId);
+    return { 
+      success: false, 
+      message: error.message || 'Failed to get API key value' 
+    };
+  }
+}
+
+/**
+ * APIキーのタグを取得
+ */
+export async function getAPIKeyTagsAction(apiKeyId: string): Promise<{
+  success: boolean;
+  tags?: Record<string, string>;
+  message?: string;
+}> {
+  try {
+    // DynamoDBで権限確認
+    const apiKeyResult = await getAPIKeyByIdAction(apiKeyId);
+    if (!apiKeyResult.success || !apiKeyResult.apiKey) {
+      return { success: false, message: 'API key not found or access denied' };
+    }
+
+    // API Gatewayからタグを取得
+    const tags = await getAPIGatewayKeyTags(apiKeyId);
+
+    return { success: true, tags };
+  } catch (error: any) {
+    console.error('Error getting API key tags:', error);
+    return { 
+      success: false, 
+      message: error.message || 'Failed to get API key tags' 
+    };
   }
 }

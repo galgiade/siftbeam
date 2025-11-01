@@ -27,7 +27,6 @@ export interface ProcessingHistory {
   status: 'in_progress' | 'success' | 'failed' | 'canceled' | 'deleted' | 'delete_failed';
   downloadS3Keys: string[];
   uploadedFileKeys: string[];
-  fileSizeBytes?: number;
   aiTrainingUsage: 'allow' | 'deny';
   errorDetail?: string;
   createdAt: string;
@@ -47,7 +46,6 @@ export interface CreateProcessingHistoryInput {
   policyName: string;
   usageAmountBytes: number;
   uploadedFileKeys: string[];
-  fileSizeBytes?: number;
   aiTrainingUsage: 'allow' | 'deny';
 }
 
@@ -374,7 +372,6 @@ export async function createProcessingHistory(input: CreateProcessingHistoryInpu
       status: 'in_progress',
       downloadS3Keys: [],
       uploadedFileKeys: input.uploadedFileKeys,
-      fileSizeBytes: input.fileSizeBytes,
       aiTrainingUsage: input.aiTrainingUsage,
       createdAt: now,
       updatedAt: now
