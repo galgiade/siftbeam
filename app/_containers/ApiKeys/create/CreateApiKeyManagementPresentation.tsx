@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import { Button, Card, CardBody, CardHeader, Input, Textarea, Alert, Spinner, Divider } from "@heroui/react"
+import { Button, Card, CardBody, CardHeader, Input, Textarea, Alert, Spinner, Divider, Autocomplete, AutocompleteItem } from "@heroui/react"
 import { createAPIKeyAction } from "@/app/lib/actions/api-key-actions"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
 import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { Policy } from '@/app/lib/actions/policy-api';
 import { KeyIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -12,11 +13,13 @@ import { useRouter } from 'next/navigation'
 interface CreateApiKeyManagementPresentationProps {
   userAttributes: UserAttributesDTO;
   dictionary: UserProfileLocale;
+  policies: Policy[];
 }
 
 export default function CreateApiKeyManagementPresentation({
   userAttributes,
-  dictionary
+  dictionary,
+  policies
 }: CreateApiKeyManagementPresentationProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -27,7 +30,6 @@ export default function CreateApiKeyManagementPresentation({
   const [createForm, setCreateForm] = useState({
     apiName: '',
     description: '',
-    gatewayApiKeyId: '',
     policyId: ''
   });
 
@@ -50,12 +52,8 @@ export default function CreateApiKeyManagementPresentation({
       errors.apiName = 'API名は3文字以上で入力してください';
     }
 
-    if (!createForm.gatewayApiKeyId.trim()) {
-      errors.gatewayApiKeyId = 'Gateway APIキーIDは必須です';
-    }
-
     if (!createForm.policyId.trim()) {
-      errors.policyId = 'ポリシーIDは必須です';
+      errors.policyId = 'ポリシーを選択してください';
     }
 
     if (createForm.description.trim().length > 500) {
@@ -80,7 +78,6 @@ export default function CreateApiKeyManagementPresentation({
       const result = await createAPIKeyAction({
         apiName: createForm.apiName.trim(),
         description: createForm.description.trim() || undefined,
-        gatewayApiKeyId: createForm.gatewayApiKeyId.trim(),
         policyId: createForm.policyId.trim()
       });
 
@@ -107,7 +104,6 @@ export default function CreateApiKeyManagementPresentation({
     setCreateForm({
       apiName: '',
       description: '',
-      gatewayApiKeyId: '',
       policyId: ''
     });
     setValidationErrors({});
@@ -168,58 +164,68 @@ export default function CreateApiKeyManagementPresentation({
           <div className="space-y-6">
             {/* API名 */}
             <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                API名 <span className="text-red-500">*</span>
+              </label>
               <Input
-                label="API名"
                 placeholder="APIキーの名前を入力してください"
                 value={createForm.apiName}
                 onChange={(e) => setCreateForm(prev => ({ ...prev, apiName: e.target.value }))}
-                isRequired
                 isInvalid={!!validationErrors.apiName}
                 errorMessage={validationErrors.apiName}
-                description="APIキーを識別するための名前です（3文字以上）"
+                variant="bordered"
               />
+              <p className="text-xs text-gray-500 mt-1">APIキーを識別するための名前です（3文字以上）</p>
             </div>
 
             {/* 説明 */}
             <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                説明
+              </label>
               <Textarea
-                label="説明"
                 placeholder="APIキーの用途や説明を入力してください（任意）"
                 value={createForm.description}
                 onChange={(e) => setCreateForm(prev => ({ ...prev, description: e.target.value }))}
                 isInvalid={!!validationErrors.description}
                 errorMessage={validationErrors.description}
-                description="APIキーの用途や詳細な説明（500文字以内）"
+                variant="bordered"
                 maxRows={4}
               />
+              <p className="text-xs text-gray-500 mt-1">APIキーの用途や詳細な説明（500文字以内）</p>
             </div>
 
-            {/* Gateway APIキーID */}
+            {/* ポリシー選択 */}
             <div>
-              <Input
-                label="Gateway APIキーID"
-                placeholder="AWS API GatewayのAPIキーIDを入力してください"
-                value={createForm.gatewayApiKeyId}
-                onChange={(e) => setCreateForm(prev => ({ ...prev, gatewayApiKeyId: e.target.value }))}
-                isRequired
-                isInvalid={!!validationErrors.gatewayApiKeyId}
-                errorMessage={validationErrors.gatewayApiKeyId}
-                description="AWS API Gatewayで生成されたAPIキーのIDです"
-              />
-            </div>
-
-            {/* ポリシーID */}
-            <div>
-              <Input
-                label="ポリシーID"
-                placeholder="関連するポリシーのIDを入力してください"
-                value={createForm.policyId}
-                onChange={(e) => setCreateForm(prev => ({ ...prev, policyId: e.target.value }))}
-                isRequired
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                ポリシー <span className="text-red-500">*</span>
+              </label>
+              <Autocomplete
+                placeholder="ポリシーを選択してください"
+                selectedKey={createForm.policyId}
+                onSelectionChange={(key) => setCreateForm(prev => ({ ...prev, policyId: key as string }))}
                 isInvalid={!!validationErrors.policyId}
                 errorMessage={validationErrors.policyId}
-                description="このAPIキーに関連付けるポリシーのIDです"
-              />
+                variant="bordered"
+                defaultItems={policies}
+                classNames={{
+                  base: "bg-white",
+                  listboxWrapper: "bg-white",
+                  popoverContent: "bg-white"
+                }}
+              >
+                {(policy) => (
+                  <AutocompleteItem key={policy.policyId} textValue={policy.policyName} className="bg-white">
+                    <div className="flex flex-col">
+                      <span className="font-medium">{policy.policyName}</span>
+                      {policy.description && (
+                        <span className="text-xs text-gray-500">{policy.description}</span>
+                      )}
+                    </div>
+                  </AutocompleteItem>
+                )}
+              </Autocomplete>
+              <p className="text-xs text-gray-500 mt-1">このAPIキーに関連付けるポリシーを選択してください</p>
             </div>
           </div>
         </CardBody>
@@ -233,9 +239,14 @@ export default function CreateApiKeyManagementPresentation({
             <div>
               <h3 className="font-semibold text-blue-800 mb-2">APIキー作成時の注意事項</h3>
               <ul className="text-sm text-blue-700 space-y-1">
+                <li>• APIキーは作成時にAWS API Gatewayで自動的に生成されます</li>
                 <li>• APIキーは作成後、有効状態で開始されます</li>
-                <li>• Gateway APIキーIDは事前にAWS API Gatewayで作成しておく必要があります</li>
-                <li>• ポリシーIDは既存のポリシーのIDを指定してください</li>
+                <li>• ポリシーは既存のポリシーから選択してください</li>
+                <li>• 以下のタグが自動的に付与されます：</li>
+                <li className="ml-4">- Project: siftbeam</li>
+                <li className="ml-4">- customerId: お客様のID</li>
+                <li className="ml-4">- environment: Production</li>
+                <li className="ml-4">- version: v1.0</li>
                 <li>• 作成後はAPIキー管理ページで編集・削除が可能です</li>
                 <li>• APIキーの使用状況は監査ログで追跡されます</li>
               </ul>

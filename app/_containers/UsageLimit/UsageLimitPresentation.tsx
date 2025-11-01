@@ -25,6 +25,7 @@ interface UsageLimitPresentationProps {
 }
 
 interface UsageLimitFormData {
+  limitType: 'usage' | 'amount';
   usageLimitValue?: number;
   usageUnit?: 'MB' | 'GB' | 'TB';
   amountLimitValue?: number;
@@ -45,6 +46,7 @@ export default function UsageLimitPresentation({
   const [editingLimit, setEditingLimit] = useState<UsageLimit | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<UsageLimitFormData>({
+    limitType: 'usage',
     usageLimitValue: undefined,
     usageUnit: 'MB',
     amountLimitValue: undefined,
@@ -58,6 +60,7 @@ export default function UsageLimitPresentation({
   // フォームデータをリセット
   const resetForm = () => {
     setFormData({
+      limitType: 'usage',
       usageLimitValue: undefined,
       usageUnit: 'MB',
       amountLimitValue: undefined,
@@ -72,7 +75,10 @@ export default function UsageLimitPresentation({
   // 編集開始
   const handleEdit = (limit: UsageLimit) => {
     setEditingLimit(limit);
+    // データ量制限か金額制限かを判定
+    const limitType = limit.usageLimitValue !== undefined ? 'usage' : 'amount';
     setFormData({
+      limitType,
       usageLimitValue: limit.usageLimitValue,
       usageUnit: limit.usageUnit || 'MB',
       amountLimitValue: limit.amountLimitValue,
@@ -91,17 +97,35 @@ export default function UsageLimitPresentation({
 
   // メールアドレス追加
   const handleAddEmail = () => {
-    if (emailInput.trim() && !formData.emails.includes(emailInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        emails: [...prev.emails, emailInput.trim()]
-      }));
-      setEmailInput('');
+    const email = emailInput.trim();
+    if (!email) return;
+
+    // メールアドレス形式チェック
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if (!emailRegex.test(email)) {
+      alert('有効なメールアドレスを入力してください。');
+      return;
     }
+
+    // 重複チェック
+    if (formData.emails.some(existingEmail => existingEmail.toLowerCase() === email.toLowerCase())) {
+      alert('このメールアドレスは既に追加されています。');
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      emails: [...prev.emails, email]
+    }));
+    setEmailInput('');
   };
 
-  // メールアドレス削除
+  // メールアドレス削除（最低1つは必要）
   const handleRemoveEmail = (email: string) => {
+    if (formData.emails.length <= 1) {
+      alert('通知先メールアドレスは最低1つ必要です。');
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       emails: prev.emails.filter(e => e !== email)
@@ -110,9 +134,23 @@ export default function UsageLimitPresentation({
 
   // 保存処理
   const handleSave = async () => {
+    // バリデーション
     if (formData.emails.length === 0) {
       alert('通知先メールアドレスを1つ以上入力してください。');
       return;
+    }
+
+    // 制限値のバリデーション
+    if (formData.limitType === 'usage') {
+      if (!formData.usageLimitValue || formData.usageLimitValue <= 0) {
+        alert('データ量制限値は0より大きい値を入力してください。');
+        return;
+      }
+    } else if (formData.limitType === 'amount') {
+      if (!formData.amountLimitValue || formData.amountLimitValue <= 0) {
+        alert('金額制限値は0より大きい値を入力してください。');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -121,9 +159,9 @@ export default function UsageLimitPresentation({
         // 新規作成
         const result = await createUsageLimit({
           customerId: userAttributes.customerId,
-          usageLimitValue: formData.usageLimitValue,
-          usageUnit: formData.usageUnit,
-          amountLimitValue: formData.amountLimitValue,
+          usageLimitValue: formData.limitType === 'usage' ? formData.usageLimitValue : undefined,
+          usageUnit: formData.limitType === 'usage' ? formData.usageUnit : undefined,
+          amountLimitValue: formData.limitType === 'amount' ? formData.amountLimitValue : undefined,
           exceedAction: formData.exceedAction,
           emails: formData.emails
         });
@@ -138,9 +176,9 @@ export default function UsageLimitPresentation({
         // 更新
         const result = await updateUsageLimit({
           'usage-limitsId': editingLimit['usage-limitsId'],
-          usageLimitValue: formData.usageLimitValue,
-          usageUnit: formData.usageUnit,
-          amountLimitValue: formData.amountLimitValue,
+          usageLimitValue: formData.limitType === 'usage' ? formData.usageLimitValue : undefined,
+          usageUnit: formData.limitType === 'usage' ? formData.usageUnit : undefined,
+          amountLimitValue: formData.limitType === 'amount' ? formData.amountLimitValue : undefined,
           exceedAction: formData.exceedAction,
           emails: formData.emails
         });
@@ -331,79 +369,137 @@ export default function UsageLimitPresentation({
         </Card>
 
         {/* 編集/作成モーダル */}
-        <Modal isOpen={isOpen} onClose={onClose} size="2xl">
-          <ModalContent>
-            <ModalHeader>
+        <Modal 
+          isOpen={isOpen} 
+          onClose={onClose} 
+          size="2xl"
+          classNames={{
+            base: "bg-white",
+            backdrop: "bg-black/50"
+          }}
+        >
+          <ModalContent className="bg-white">
+            <ModalHeader className="bg-white">
               {isCreating ? '新規使用量制限作成' : '使用量制限編集'}
             </ModalHeader>
-            <ModalBody>
+            <ModalBody className="bg-white">
               <div className="space-y-4">
-                {/* データ量制限 */}
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="データ量制限値"
-                    type="number"
-                    placeholder="例: 100"
-                    value={formData.usageLimitValue?.toString() || ''}
-                    onValueChange={(value) => {
-                      const numValue = value ? Number(value) : undefined;
-                      // マイナス値を防ぐ
-                      if (numValue !== undefined && numValue < 0) {
-                        return;
-                      }
-                      setFormData(prev => ({ 
-                        ...prev, 
-                        usageLimitValue: numValue
-                      }));
-                    }}
-                    min="0"
-                  />
+                {/* 制限タイプ選択 */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    制限タイプ
+                  </label>
                   <Select
-                    label="単位"
-                    selectedKeys={formData.usageUnit ? [formData.usageUnit] : []}
+                    placeholder="制限タイプを選択"
+                    selectedKeys={formData.limitType ? [formData.limitType] : []}
                     onSelectionChange={(keys) => {
                       const selectedKey = Array.from(keys)[0] as string;
-                      setFormData(prev => ({ ...prev, usageUnit: selectedKey as 'MB' | 'GB' | 'TB' }));
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        limitType: selectedKey as 'usage' | 'amount',
+                        // 選択が変わったら他の値をクリア
+                        usageLimitValue: selectedKey === 'usage' ? prev.usageLimitValue : undefined,
+                        amountLimitValue: selectedKey === 'amount' ? prev.amountLimitValue : undefined
+                      }));
                     }}
+                    disallowEmptySelection
+                    variant="bordered"
                   >
-                    <SelectItem key="MB">MB</SelectItem>
-                    <SelectItem key="GB">GB</SelectItem>
-                    <SelectItem key="TB">TB</SelectItem>
+                    <SelectItem key="usage" className="bg-white">データ量制限</SelectItem>
+                    <SelectItem key="amount" className="bg-white">金額制限</SelectItem>
                   </Select>
                 </div>
 
-                {/* 金額制限 */}
-                <Input
-                  label="金額制限値 (USD)"
-                  type="number"
-                  placeholder="例: 50"
-                  value={formData.amountLimitValue?.toString() || ''}
-                  onValueChange={(value) => {
-                    const numValue = value ? Number(value) : undefined;
-                    // マイナス値を防ぐ
-                    if (numValue !== undefined && numValue < 0) {
-                      return;
-                    }
-                    setFormData(prev => ({ 
-                      ...prev, 
-                      amountLimitValue: numValue
-                    }));
-                  }}
-                  min="0"
-                />
+                {/* データ量制限（選択されたタイプのみ表示） */}
+                {formData.limitType === 'usage' && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">
+                      データ量制限値
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        type="number"
+                        placeholder="例: 100"
+                        value={formData.usageLimitValue?.toString() || ''}
+                        onValueChange={(value) => {
+                          const numValue = value ? Number(value) : undefined;
+                          // マイナス値を防ぐ
+                          if (numValue !== undefined && numValue < 0) {
+                            return;
+                          }
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            usageLimitValue: numValue
+                          }));
+                        }}
+                        min="0"
+                      />
+                      <Select
+                        selectedKeys={formData.usageUnit ? [formData.usageUnit] : []}
+                        onSelectionChange={(keys) => {
+                          const selectedKey = Array.from(keys)[0] as string;
+                          setFormData(prev => ({ ...prev, usageUnit: selectedKey as 'MB' | 'GB' | 'TB' }));
+                        }}
+                        disallowEmptySelection
+                        variant="bordered"
+                      >
+                        <SelectItem key="MB" className="bg-white">MB</SelectItem>
+                        <SelectItem key="GB" className="bg-white">GB</SelectItem>
+                        <SelectItem key="TB" className="bg-white">TB</SelectItem>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                {/* 金額制限（選択されたタイプのみ表示） */}
+                {formData.limitType === 'amount' && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">
+                      金額制限値 (USD)
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="例: 50"
+                      startContent={
+                        <div className="pointer-events-none flex items-center">
+                          <span className="text-default-400 text-small">$</span>
+                        </div>
+                      }
+                      value={formData.amountLimitValue?.toString() || ''}
+                      onValueChange={(value) => {
+                        const numValue = value ? Number(value) : undefined;
+                        // マイナス値を防ぐ
+                        if (numValue !== undefined && numValue < 0) {
+                          return;
+                        }
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          amountLimitValue: numValue
+                        }));
+                      }}
+                      min="0"
+                    />
+                  </div>
+                )}
 
                 {/* アクション */}
-                <Select
-                  label="超過時のアクション"
-                  selectedKeys={[formData.exceedAction]}
-                  onSelectionChange={(keys) => {
-                    const selectedKey = Array.from(keys)[0] as string;
-                    setFormData(prev => ({ ...prev, exceedAction: selectedKey as 'notify' | 'restrict' }));
-                  }}
-                >
-                  <SelectItem key="notify">通知</SelectItem>
-                  <SelectItem key="restrict">利用停止</SelectItem>
-                </Select>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    超過時のアクション
+                  </label>
+                  <Select
+                    selectedKeys={[formData.exceedAction]}
+                    onSelectionChange={(keys) => {
+                      const selectedKey = Array.from(keys)[0] as string;
+                      setFormData(prev => ({ ...prev, exceedAction: selectedKey as 'notify' | 'restrict' }));
+                    }}
+                    disallowEmptySelection
+                    variant="bordered"
+                  >
+                    <SelectItem key="notify" className="bg-white">通知</SelectItem>
+                    <SelectItem key="restrict" className="bg-white">利用停止</SelectItem>
+                  </Select>
+                </div>
 
                 {/* 通知先メールアドレス */}
                 <div>
@@ -415,7 +511,7 @@ export default function UsageLimitPresentation({
                       placeholder="メールアドレスを入力"
                       value={emailInput}
                       onValueChange={setEmailInput}
-                      onKeyPress={(e) => {
+                      onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           handleAddEmail();
@@ -428,7 +524,7 @@ export default function UsageLimitPresentation({
                     {formData.emails.map((email) => (
                       <Chip
                         key={email}
-                        onClose={() => handleRemoveEmail(email)}
+                        onClose={formData.emails.length > 1 ? () => handleRemoveEmail(email) : undefined}
                         variant="flat"
                         color="primary"
                       >
@@ -436,10 +532,15 @@ export default function UsageLimitPresentation({
                       </Chip>
                     ))}
                   </div>
+                  {formData.emails.length === 1 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      ※ 通知先メールアドレスは最低1つ必要です。
+                    </p>
+                  )}
                 </div>
               </div>
             </ModalBody>
-            <ModalFooter>
+            <ModalFooter className="bg-white">
               <Button variant="light" onPress={onClose}>
                 キャンセル
               </Button>

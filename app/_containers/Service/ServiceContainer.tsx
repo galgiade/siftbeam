@@ -45,11 +45,13 @@ export default async function ServiceContainer({ locale }: ServiceContainerProps
     
     // データを並列取得（処理履歴、ポリシー、利用制限）
     // ポリシーはユーザーが所属するグループに紐づくもののみを取得
+    // 管理者の場合、customerIdでクエリしてAPI経由のデータも含めて取得
     const [processingHistoryResult, policiesResult, usageLimitsResult] = await Promise.all([
-      queryProcessingHistory({
-        userId: userProfile.sub,
-        limit: 20
-      }),
+      queryProcessingHistory(
+        userProfile.role === 'admin'
+          ? { customerId: userProfile.customerId, limit: 20 }  // 管理者: 顧客全体のデータ
+          : { userId: userProfile.sub, limit: 20 }             // 一般ユーザー: 自分のデータのみ
+      ),
       getPoliciesForUser(
         userProfile.sub,
         userProfile.customerId
@@ -105,6 +107,7 @@ export default async function ServiceContainer({ locale }: ServiceContainerProps
     });
     console.log('取得データ:', {
       processingHistoryCount: processingHistory.length,
+      processingHistoryQueryType: userProfile.role === 'admin' ? 'customerId (全データ)' : 'userId (個人データのみ)',
       policiesCount: policies.length,
       notifyLimitsCount: usageLimits.notifyLimits.length,
       restrictLimitsCount: usageLimits.restrictLimits.length

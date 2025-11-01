@@ -1,7 +1,7 @@
-import CreateAPIManagementContainer from "@/app/_containers/APIManagement/create/CreateAPIManagementContainer"
+import CreateApiKeyManagementContainer from "@/app/_containers/ApiKeys/create/CreateApiKeyManagementContainer"
 
 export default function CreateAPIManagementPage() {
     return (
-        <CreateAPIManagementContainer />
+        <CreateApiKeyManagementContainer />
     )
 }

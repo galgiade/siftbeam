@@ -10,8 +10,8 @@ interface ProcessingHistoryStatus {
 interface ProcessingHistoryForUtils {
   'processing-historyId': string;
   status: 'in_progress' | 'success' | 'failed' | 'canceled' | 'deleted' | 'delete_failed';
-  uploadedFileKeys: string[];
-  downloadS3Keys: string[];
+  uploadedFileKeys: string[] | Array<{ S: string }>;
+  downloadS3Keys: string[] | Array<{ S: string }>;
 }
 
 /**
@@ -118,6 +118,22 @@ export function generateTimestamp(): string {
 }
 
 /**
+ * DynamoDB形式の配列を通常の文字列配列に変換するヘルパー関数
+ */
+function normalizeDynamoDBArray(arr: string[] | Array<{ S: string }>): string[] {
+  if (!arr || arr.length === 0) return [];
+  
+  // 最初の要素をチェックして形式を判定
+  if (typeof arr[0] === 'object' && arr[0] !== null && 'S' in arr[0]) {
+    // DynamoDB形式 [{ S: "value" }] の場合
+    return (arr as Array<{ S: string }>).map(item => item.S);
+  }
+  
+  // 通常の文字列配列の場合
+  return arr as string[];
+}
+
+/**
  * 処理履歴からダウンロード可能なファイル情報を取得する関数
  */
 export function getDownloadableFiles(processingHistory: ProcessingHistoryForUtils): Array<{
@@ -131,8 +147,12 @@ export function getDownloadableFiles(processingHistory: ProcessingHistoryForUtil
     fileType: 'input' | 'output';
   }> = [];
   
+  // DynamoDB形式を通常の配列に変換
+  const uploadedFileKeys = normalizeDynamoDBArray(processingHistory.uploadedFileKeys);
+  const downloadS3Keys = normalizeDynamoDBArray(processingHistory.downloadS3Keys);
+  
   // 入力ファイル
-  processingHistory.uploadedFileKeys.forEach(s3Key => {
+  uploadedFileKeys.forEach(s3Key => {
     files.push({
       s3Key,
       fileName: extractFileNameFromS3Key(s3Key),
@@ -142,7 +162,7 @@ export function getDownloadableFiles(processingHistory: ProcessingHistoryForUtil
   
   // 出力ファイル（処理完了時のみ）
   if (processingHistory.status === 'success') {
-    processingHistory.downloadS3Keys.forEach(s3Key => {
+    downloadS3Keys.forEach(s3Key => {
       files.push({
         s3Key,
         fileName: extractFileNameFromS3Key(s3Key),
@@ -210,6 +230,7 @@ export function getProcessingStatusMessage(status: ProcessingHistoryForUtils['st
 
 /**
  * 処理時間を計算する関数（秒単位）
+ * @deprecated Use calculateProcessingDurationByStatus instead
  */
 export function calculateProcessingDuration(createdAt: string, completedAt?: string): number | null {
   if (!completedAt) return null;
@@ -231,4 +252,69 @@ export function calculateProcessingTime(createdAt: string, completedAt?: string)
   const endTime = new Date(completedAt).getTime();
   
   return endTime - startTime; // ミリ秒単位
+}
+
+/**
+ * ステータスに応じた処理時間を計算する関数
+ * 
+ * @param status - 処理履歴のステータス
+ * @param createdAt - 処理開始時刻
+ * @param updatedAt - 処理更新時刻（オプション）
+ * @param completedAt - 処理完了時刻（オプション）
+ * @returns 処理時間（秒）またはnull
+ * 
+ * 仕様:
+ * - success, failed: (completedAt || updatedAt) - createdAt
+ * - in_progress: 現在時刻 - createdAt
+ * - canceled, deleted, delete_failed: null（updatedAtの時刻を表示）
+ */
+export function calculateProcessingDurationByStatus(
+  status: 'in_progress' | 'success' | 'failed' | 'canceled' | 'deleted' | 'delete_failed',
+  createdAt: string,
+  updatedAt?: string,
+  completedAt?: string
+): number | null {
+  switch (status) {
+    case 'success':
+    case 'failed':
+      // (completedAt || updatedAt) - createdAt
+      const endTime = completedAt || updatedAt;
+      if (!endTime) return null;
+      return Math.round((new Date(endTime).getTime() - new Date(createdAt).getTime()) / 1000);
+    
+    case 'in_progress':
+      // 現在時刻 - createdAt
+      return Math.round((Date.now() - new Date(createdAt).getTime()) / 1000);
+    
+    case 'canceled':
+    case 'deleted':
+    case 'delete_failed':
+      // 処理時間は表示せず、updatedAtの時刻を表示
+      return null;
+    
+    default:
+      return null;
+  }
+}
+
+/**
+ * 処理時間を人間が読みやすい形式にフォーマットする関数
+ * 
+ * @param seconds - 処理時間（秒）
+ * @returns フォーマットされた文字列（例: "1時間23分45秒", "45秒", "2分30秒"）
+ */
+export function formatProcessingDuration(seconds: number): string {
+  if (seconds < 60) {
+    return `${seconds}秒`;
+  }
+  
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  
+  if (hours > 0) {
+    return `${hours}時間${minutes}分${secs}秒`;
+  }
+  
+  return `${minutes}分${secs}秒`;
 }

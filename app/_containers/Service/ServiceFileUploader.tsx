@@ -2,8 +2,8 @@
 
 import { useState, useRef } from 'react';
 import { Button, Card, CardBody, Progress, Chip } from '@heroui/react';
-import { FaCloudArrowUp, FaFile, FaImage, FaVideo, FaMusic, FaTrash, FaCheck, FaTriangleExclamation, FaRocket, FaBan } from 'react-icons/fa6';
-import { uploadServiceFileToS3, UploadFileResult } from '@/app/lib/actions/file-upload-api';
+import { FaCloudArrowUp, FaFile, FaImage, FaVideo, FaMusic, FaTrash, FaCheck, FaTriangleExclamation, FaBan } from 'react-icons/fa6';
+import { generatePresignedUrl } from '@/app/lib/actions/generate-presigned-url';
 import { createProcessingHistory } from '@/app/lib/actions/processing-history-api';
 import { checkUsageLimits } from '@/app/lib/actions/usage-limit-check';
 import { sendUsageLimitNotificationEmailAction } from '@/app/lib/actions/email-actions';
@@ -28,7 +28,7 @@ interface UploadingFile {
   id: string;
   status: 'pending' | 'uploading' | 'success' | 'error';
   progress: number;
-  result?: UploadFileResult;
+  s3Key?: string;
   error?: string;
 }
 
@@ -158,56 +158,14 @@ export default function ServiceFileUploader({
       // 処理履歴IDを生成
       const processingHistoryId = crypto.randomUUID();
       
-      // 各ファイルをアップロード
-      const uploadedFileKeys: string[] = [];
-      let actualTotalFileSize = 0;
-
-      for (let i = 0; i < files.length; i++) {
-        const fileItem = files[i];
-        const isLastFile = i === files.length - 1;
-        
-        setFiles(prev => prev.map(f => 
-          f.id === fileItem.id ? { ...f, status: 'uploading', progress: 50 } : f
-        ));
-
-        const uploadResult = await uploadServiceFileToS3({
-          file: fileItem.file,
-          customerId,
-          userId,
-          policyId,
-          processingHistoryId,
-          fileType: 'input',
-          isLastFile  // 最後のファイルかどうかを渡す
-        });
-
-        if (uploadResult.success && uploadResult.data) {
-          uploadedFileKeys.push(uploadResult.data.fileKey);
-          actualTotalFileSize += uploadResult.data.fileSize;
-          
-          setFiles(prev => prev.map(f => 
-            f.id === fileItem.id ? { 
-              ...f, 
-              status: 'success', 
-              progress: 100, 
-              result: uploadResult.data 
-            } : f
-          ));
-        } else {
-          setFiles(prev => prev.map(f => 
-            f.id === fileItem.id ? { 
-              ...f, 
-              status: 'error', 
-              progress: 0, 
-              error: uploadResult.message 
-            } : f
-          ));
-          throw new Error(`${fileItem.file.name}: ${uploadResult.message}`);
-        }
-      }
-
-      // 処理履歴を作成
+      // アップロード予定のファイルキーを事前に生成
+      const uploadedFileKeys: string[] = files.map(fileItem => 
+        `service/input/${customerId}/${processingHistoryId}/${fileItem.file.name}`
+      );
+      
+      // 処理履歴を作成（アップロード前に作成）
       // 注: createdAtは処理開始時刻として自動的に設定されます
-      // 処理が完了したら、サーバーサイドでcompletedAtを設定して処理時間を計算できます
+      // S3イベントLambdaがファイルサイズを更新します
       const historyResult = await createProcessingHistory({
         'processing-historyId': processingHistoryId,
         userId,
@@ -215,9 +173,8 @@ export default function ServiceFileUploader({
         customerId,
         policyId,
         policyName,
-        usageAmountBytes: actualTotalFileSize,
+        usageAmountBytes: 0, // S3イベントLambdaで更新
         uploadedFileKeys,
-        fileSizeBytes: actualTotalFileSize,
         aiTrainingUsage: 'allow' // TODO: ユーザー設定から取得
       });
 
@@ -229,9 +186,146 @@ export default function ServiceFileUploader({
         processingHistoryId,
         policyName,
         fileCount: uploadedFileKeys.length,
-        totalSize: actualTotalFileSize,
         startedAt: historyResult.data?.createdAt
       });
+      
+      // 各ファイルをアップロード（署名付きURL方式）
+      let actualTotalFileSize = 0;
+      const uploadStartTime = Date.now();
+
+      for (let i = 0; i < files.length; i++) {
+        const fileItem = files[i];
+        
+        setFiles(prev => prev.map(f => 
+          f.id === fileItem.id ? { ...f, status: 'uploading', progress: 10 } : f
+        ));
+
+        try {
+          // 1. 署名付きURLを生成
+          const presignedUrlResult = await generatePresignedUrl({
+            fileName: fileItem.file.name,
+            fileType: fileItem.file.type || 'application/octet-stream',
+            customerId,
+            userId,
+            policyId,
+            processingHistoryId,
+            fileType_metadata: 'input',
+            isLastFile: false, // 通常ファイルはfalse
+          });
+
+          if (!presignedUrlResult.success || !presignedUrlResult.data) {
+            throw new Error(presignedUrlResult.message || '署名付きURLの生成に失敗しました');
+          }
+
+          setFiles(prev => prev.map(f => 
+            f.id === fileItem.id ? { ...f, progress: 30 } : f
+          ));
+
+          // 2. S3に直接アップロード
+          const uploadResponse = await fetch(presignedUrlResult.data.presignedUrl, {
+            method: 'PUT',
+            body: fileItem.file,
+            headers: {
+              'Content-Type': fileItem.file.type || 'application/octet-stream',
+            },
+          });
+
+          if (!uploadResponse.ok) {
+            throw new Error(`S3アップロードに失敗しました: ${uploadResponse.status} ${uploadResponse.statusText}`);
+          }
+
+          actualTotalFileSize += fileItem.file.size;
+          
+          setFiles(prev => prev.map(f => 
+            f.id === fileItem.id ? { 
+              ...f, 
+              status: 'success', 
+              progress: 100,
+              s3Key: presignedUrlResult.data!.s3Key,
+            } : f
+          ));
+
+          console.log(`File uploaded successfully: ${fileItem.file.name} (${fileItem.file.size} bytes)`);
+        } catch (error: any) {
+          console.error(`Upload error for ${fileItem.file.name}:`, error);
+          setFiles(prev => prev.map(f => 
+            f.id === fileItem.id ? { 
+              ...f, 
+              status: 'error', 
+              progress: 0, 
+              error: error.message 
+            } : f
+          ));
+          throw new Error(`${fileItem.file.name}: ${error.message}`);
+        }
+      }
+
+      // すべてのファイルアップロード完了後、トリガーファイルを作成
+      const uploadDuration = (Date.now() - uploadStartTime) / 1000; // 秒
+      console.log(`All files uploaded: ${files.length} files, total size: ${actualTotalFileSize} bytes, duration: ${uploadDuration}s`);
+      
+      // トリガーファイルの内容を作成（API版と統一）
+      const triggerContent = {
+        'processing-historyId': processingHistoryId,
+        userId,
+        userName: userName || 'User',
+        customerId,
+        policyId,
+        policyName,
+        uploadedFileKeys,
+        aiTrainingUsage: 'allow' as const,
+        fileCount: files.length,
+        usageAmountBytes: actualTotalFileSize,
+        createdAt: new Date().toISOString(),
+        metadata: {
+          source: 'browser',
+          apiVersion: '2025-10-28'
+        }
+      };
+      
+      // トリガーファイルをBlobとして作成
+      const triggerBlob = new Blob(
+        [JSON.stringify(triggerContent, null, 2)], 
+        { type: 'application/json' }
+      );
+      const triggerFile = new File([triggerBlob], '_trigger.json', { type: 'application/json' });
+      
+      try {
+        // トリガーファイル用の署名付きURLを生成
+        const triggerPresignedUrlResult = await generatePresignedUrl({
+          fileName: '_trigger.json',
+          fileType: 'application/json',
+          customerId,
+          userId,
+          policyId,
+          processingHistoryId,
+          fileType_metadata: 'input',
+          isLastFile: true, // トリガーファイルでStep Functions起動
+        });
+
+        if (!triggerPresignedUrlResult.success || !triggerPresignedUrlResult.data) {
+          throw new Error(triggerPresignedUrlResult.message || 'トリガーファイル用署名付きURLの生成に失敗しました');
+        }
+
+        // S3に直接アップロード
+        const triggerUploadResponse = await fetch(triggerPresignedUrlResult.data.presignedUrl, {
+          method: 'PUT',
+          body: triggerFile,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!triggerUploadResponse.ok) {
+          throw new Error(`トリガーファイルのS3アップロードに失敗しました: ${triggerUploadResponse.status}`);
+        }
+
+        console.log('Trigger file uploaded successfully, Step Functions will be triggered');
+      } catch (error: any) {
+        console.error('Failed to upload trigger file:', error);
+        // トリガーファイルの失敗は警告のみ（メインファイルは成功している）
+        // 手動でStep Functionsを起動することも可能
+      }
 
       // 通知が必要な場合はメールを送信
       if (limitCheckResult.data?.shouldNotify && limitCheckResult.data.notifyEmails.length > 0) {
@@ -480,9 +574,8 @@ export default function ServiceFileUploader({
             onPress={handleStartProcessing}
             isDisabled={!canStartProcessing}
             isLoading={isProcessing}
-            startContent={!isProcessing ? <FaRocket /> : null}
           >
-            {isProcessing ? '処理開始中...' : 'AI処理を開始'}
+            {isProcessing ? '処理開始中...' : '処理を開始'}
           </Button>
         </div>
       )}

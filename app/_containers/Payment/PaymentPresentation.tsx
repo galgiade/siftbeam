@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardBody, CardHeader, Button, Divider, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Alert, Spinner, Input, Select, SelectItem, DatePicker } from '@heroui/react';
 import { CreditCardIcon, PlusIcon, DocumentArrowDownIcon, CheckIcon, FunnelIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { parseDate, type DateValue } from '@internationalized/date';
@@ -165,73 +165,20 @@ export default function PaymentPresentation({
   defaultPaymentMethodId: serverDefaultPaymentMethodId,
   invoices: serverInvoices
 }: PaymentPresentationProps) {
-  // ダミーカードデータを追加
-  const dummyPaymentMethods: PaymentMethod[] = [
-    {
-      id: 'pm_1234567890',
-      card: {
-        brand: 'visa',
-        last4: '4242',
-        exp_month: 12,
-        exp_year: 2025
-      }
-    },
-    {
-      id: 'pm_0987654321',
-      card: {
-        brand: 'mastercard',
-        last4: '5555',
-        exp_month: 8,
-        exp_year: 2026
-      }
-    }
-  ];
-
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(
-    serverPaymentMethods ? serverPaymentMethods as PaymentMethod[] : dummyPaymentMethods
+    serverPaymentMethods ? serverPaymentMethods as PaymentMethod[] : []
   );
-  // ダミーデータを追加
-  const dummyInvoices: Invoice[] = [
-    {
-      id: 'in_1234567890',
-      number: 'INV-2024-001',
-      amount_paid: 15000,
-      currency: 'jpy',
-      status: 'paid',
-      created: Math.floor(new Date('2024-01-15').getTime() / 1000),
-      invoice_pdf: 'https://example.com/invoice1.pdf'
-    },
-    {
-      id: 'in_0987654321',
-      number: 'INV-2024-002',
-      amount_paid: 8500,
-      currency: 'jpy',
-      status: 'paid',
-      created: Math.floor(new Date('2024-02-10').getTime() / 1000),
-      invoice_pdf: 'https://example.com/invoice2.pdf'
-    },
-    {
-      id: 'in_1122334455',
-      number: 'INV-2024-003',
-      amount_paid: 22000,
-      currency: 'jpy',
-      status: 'paid',
-      created: Math.floor(new Date('2024-03-05').getTime() / 1000),
-      invoice_pdf: 'https://example.com/invoice3.pdf'
-    }
-  ];
-
   const [invoices, setInvoices] = useState<Invoice[]>(
-    serverInvoices ? serverInvoices as Invoice[] : dummyInvoices
+    serverInvoices ? serverInvoices as Invoice[] : []
   );
   const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>(
-    serverInvoices ? serverInvoices as Invoice[] : dummyInvoices
+    serverInvoices ? serverInvoices as Invoice[] : []
   );
   const [loading, setLoading] = useState(!serverPaymentMethods);
   const [invoicesLoading, setInvoicesLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [defaultPaymentMethodId, setDefaultPaymentMethodId] = useState<string | null>(
-    serverDefaultPaymentMethodId || 'pm_1234567890' // ダミーデータの最初のカードをデフォルトに
+    serverDefaultPaymentMethodId || null
   );
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   
@@ -241,6 +188,13 @@ export default function PaymentPresentation({
   const [maxAmount, setMaxAmount] = useState('');
   const [startDate, setStartDate] = useState<DateValue | null>(null);
   const [endDate, setEndDate] = useState<DateValue | null>(null);
+  
+  // ページネーション状態
+  const [hasMoreInvoices, setHasMoreInvoices] = useState(false);
+  const [hasPreviousPage, setHasPreviousPage] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageHistory, setPageHistory] = useState<Array<{ firstId: string; lastId: string }>>([]);
+  const itemsPerPage = 20;
 
   // 支払い方法を取得
   const fetchPaymentMethods = async () => {
@@ -345,32 +299,41 @@ export default function PaymentPresentation({
     }
   };
 
-  // 請求書一覧を取得
-  const fetchInvoices = async () => {
+  // 請求書一覧を取得（ページネーション対応）
+  const fetchInvoices = async (startingAfter?: string, isNextPage: boolean = false) => {
     if (!customerId) {
-      // customerIdがない場合はダミーデータを使用
-      setInvoices(dummyInvoices);
-      return;
-    }
-
-    // サーバーから初期データがある場合はスキップ
-    if (serverInvoices) {
+      setError(dictionary.alert.customerInfoNotFound);
       return;
     }
 
     setInvoicesLoading(true);
     try {
-      const result = await getInvoicesAction(customerId);
+      const result = await getInvoicesAction(customerId, itemsPerPage, startingAfter);
       
       if (result.success && result.invoices) {
-        setInvoices(result.invoices as Invoice[]);
+        const newInvoices = result.invoices as Invoice[];
+        
+        // ページ切り替えの場合は置き換え
+        setInvoices(newInvoices);
+        
+        // 次のページがあるかチェック
+        setHasMoreInvoices(result.hasMore || false);
+        
+        // ページ履歴を更新（次ページの場合のみ）
+        if (isNextPage && newInvoices.length > 0) {
+          setPageHistory(prev => [
+            ...prev,
+            {
+              firstId: newInvoices[0].id,
+              lastId: newInvoices[newInvoices.length - 1].id
+            }
+          ]);
+        }
       } else {
-        // エラーの場合もダミーデータを表示（UI確認用）
-        setInvoices(dummyInvoices);
+        setError(result.message || dictionary.alert.errorOccurred);
       }
     } catch (err) {
-      // エラーの場合もダミーデータを表示（UI確認用）
-      setInvoices(dummyInvoices);
+      setError(dictionary.alert.errorOccurred);
     } finally {
       setInvoicesLoading(false);
     }
@@ -378,15 +341,6 @@ export default function PaymentPresentation({
 
   // 領収書ダウンロード
   const handleDownloadReceipt = async (invoiceId: string) => {
-    // ダミーデータの場合は直接PDFを開く（UI確認用）
-    const isDummyData = dummyInvoices.some(invoice => invoice.id === invoiceId);
-    
-    if (isDummyData) {
-      // ダミーデータの場合はサンプルPDFを開く
-      alert('ダミーデータのため、実際のPDFダウンロードは行われません。\n本番環境では実際の領収書PDFがダウンロードされます。');
-      return;
-    }
-
     try {
       const result = await getInvoicePdfAction(invoiceId);
       
@@ -401,8 +355,40 @@ export default function PaymentPresentation({
     }
   };
 
-  // フィルター機能
-  const applyFilters = () => {
+  // 次のページへ
+  const handleNextPage = () => {
+    if (hasMoreInvoices && !invoicesLoading && invoices.length > 0) {
+      const lastInvoiceId = invoices[invoices.length - 1].id;
+      fetchInvoices(lastInvoiceId, true);
+      setCurrentPage(prev => prev + 1);
+      setHasPreviousPage(true);
+    }
+  };
+
+  // 前のページへ
+  const handlePreviousPage = () => {
+    if (hasPreviousPage && !invoicesLoading && currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      
+      if (currentPage === 2) {
+        // 最初のページに戻る
+        fetchInvoices(undefined, false);
+        setHasPreviousPage(false);
+        setPageHistory([]);
+      } else {
+        // 前のページに戻る
+        const previousPageIndex = currentPage - 3; // currentPage - 1 (現在) - 1 (前) - 1 (0-indexed)
+        if (previousPageIndex >= 0 && pageHistory[previousPageIndex]) {
+          const previousPage = pageHistory[previousPageIndex];
+          fetchInvoices(previousPage.lastId, false);
+          setPageHistory(prev => prev.slice(0, previousPageIndex + 1));
+        }
+      }
+    }
+  };
+
+  // フィルター機能（メモ化して不要な再計算を防ぐ）
+  const applyFilters = useCallback(() => {
     let filtered = [...invoices];
 
     // 金額フィルター
@@ -426,7 +412,7 @@ export default function PaymentPresentation({
     }
 
     setFilteredInvoices(filtered);
-  };
+  }, [invoices, minAmount, maxAmount, startDate, endDate]);
 
   // フィルターをクリア
   const clearFilters = () => {
@@ -440,17 +426,22 @@ export default function PaymentPresentation({
   // フィルター値が変更されたときに自動適用
   useEffect(() => {
     applyFilters();
-  }, [minAmount, maxAmount, startDate, endDate, invoices]);
+  }, [applyFilters]);
 
-  // invoicesが更新されたときにfilteredInvoicesも更新
+  // 初回ロード時に請求書を取得（サーバーからデータがない場合のみ）
   useEffect(() => {
-    setFilteredInvoices(invoices);
-  }, [invoices]);
-
-  // 初回ロード時に請求書を取得
-  useEffect(() => {
-    fetchInvoices();
-  }, []);
+    if (serverInvoices && serverInvoices.length > 0) {
+      // サーバーから初期データがある場合、hasMoreをチェック
+      // 20件取得している場合、次ページがある可能性がある
+      if (serverInvoices.length === itemsPerPage) {
+        setHasMoreInvoices(true);
+      }
+    } else if (!serverInvoices && customerId) {
+      // サーバーから初期データがない場合のみクライアント側で取得
+      fetchInvoices();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 空の依存配列で初回のみ実行
 
   if (loading) {
     return (
@@ -677,6 +668,29 @@ export default function PaymentPresentation({
                     </Button>
                   </div>
                 ))}
+                
+                {/* ページネーションボタン */}
+                {!showFilters && (hasPreviousPage || hasMoreInvoices) && (
+                  <div className="flex justify-between items-center pt-6 border-t">
+                    <Button
+                      variant="flat"
+                      onPress={handlePreviousPage}
+                      isDisabled={!hasPreviousPage || invoicesLoading}
+                    >
+                      前へ
+                    </Button>
+                    <span className="text-sm text-gray-600">
+                      ページ {currentPage}
+                    </span>
+                    <Button
+                      variant="flat"
+                      onPress={handleNextPage}
+                      isDisabled={!hasMoreInvoices || invoicesLoading}
+                    >
+                      次へ
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -770,3 +770,33 @@ export async function getAvailableModels(): Promise<{ key: string; label: string
     }
   ];
 }
+
+/**
+ * customerIdでポリシー一覧を取得
+ */
+export async function getPoliciesByCustomerIdAction(customerId: string): Promise<ApiResponse<Policy[]>> {
+  try {
+    // 既存のqueryPolicies関数を使用
+    const result = await queryPolicies({
+      customerId,
+      limit: 1000 // APIキー作成時は全ポリシーを取得
+    });
+
+    if (!result.success || !result.data) {
+      return {
+        success: false,
+        message: result.message || 'ポリシー一覧の取得に失敗しました。',
+        data: []
+      };
+    }
+
+    return {
+      success: true,
+      message: 'ポリシー一覧を取得しました。',
+      data: result.data.policies
+    };
+  } catch (error: any) {
+    await logFailureAction('READ', 'Policy', error?.message || 'ポリシー一覧取得に失敗しました');
+    return handleError(error, 'ポリシー一覧取得');
+  }
+}

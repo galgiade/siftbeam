@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardBody, CardHeader, Select, SelectItem, Chip } from '@heroui/react';
-import { FaRocket, FaCog, FaExclamationTriangle, FaDownload } from 'react-icons/fa';
+import { FaCog, FaExclamationTriangle, FaDownload } from 'react-icons/fa';
 import { ProcessingHistory } from '@/app/lib/actions/processing-history-api';
 import { Policy } from '@/app/lib/actions/policy-api';
 import { UsageLimit } from '@/app/lib/actions/usage-limits-api';
@@ -53,6 +54,7 @@ export default function ServicePresentation({
   dictionary, 
   locale 
 }: ServicePresentationProps) {
+  const router = useRouter();
   // すべてのHooksをコンポーネントの最上部で呼び出す
   const [selectedPolicyId, setSelectedPolicyId] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
@@ -60,10 +62,12 @@ export default function ServicePresentation({
 
   // 処理開始ハンドラー
   const handleProcessingStarted = useCallback(() => {
-    // 処理履歴を再取得するためにトリガーを更新
+    console.log('Processing started, refreshing data...');
+    // サーバーサイドのデータを再取得
+    router.refresh();
+    // 処理履歴リストにも通知
     setRefreshTrigger(prev => prev + 1);
-    console.log('Processing started, refresh trigger updated');
-  }, []);
+  }, [router]);
 
   // クライアントサイドでのみ実行されるようにする
   useEffect(() => {

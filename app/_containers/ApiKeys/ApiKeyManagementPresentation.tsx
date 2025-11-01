@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import { Button, Card, CardBody, CardHeader, Input, Textarea, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Select, SelectItem, Alert, Spinner, Divider } from "@heroui/react"
-import { APIKeyEntry, APIKeyStatus, updateAPIKeyAction, deleteAPIKeyAction, toggleAPIKeyStatusAction } from "@/app/lib/actions/api-key-actions"
+import { Button, Card, CardBody, CardHeader, Input, Textarea, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Select, SelectItem, Alert, Spinner, Divider, SortDescriptor } from "@heroui/react"
+import { APIKeyEntry, APIKeyStatus, updateAPIKeyAction, deleteAPIKeyAction, toggleAPIKeyStatusAction, getAPIKeyValueAction } from "@/app/lib/actions/api-key-actions"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
 import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
-import { KeyIcon, PlusIcon, PencilIcon, TrashIcon, EyeIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '@heroicons/react/24/outline'
+import { KeyIcon, PlusIcon, PencilIcon, TrashIcon, CheckCircleIcon, XCircleIcon, ClockIcon, ClipboardDocumentIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 
 interface ApiKeyManagementPresentationProps {
@@ -35,10 +35,13 @@ export default function ApiKeyManagementPresentation({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // APIキーの表示/非表示管理
+  const [visibleApiKeys, setVisibleApiKeys] = useState<Record<string, string>>({});
+  const [loadingKeys, setLoadingKeys] = useState<Record<string, boolean>>({});
+
   // モーダル管理
   const { isOpen: isEditOpen, onOpen: onEditOpen, onOpenChange: onEditOpenChange } = useDisclosure();
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
-  const { isOpen: isDetailOpen, onOpen: onDetailOpen, onOpenChange: onDetailOpenChange } = useDisclosure();
 
   // フォーム状態
   const [editForm, setEditForm] = useState({
@@ -53,6 +56,12 @@ export default function ApiKeyManagementPresentation({
   // フィルター状態
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<APIKeyStatus | 'all'>('all');
+  
+  // ソート状態
+  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
+    column: 'createdAt',
+    direction: 'descending'
+  });
 
   // フィルタリングされたAPIキー
   const filteredApiKeys = apiKeys.filter(apiKey => {
@@ -65,10 +74,95 @@ export default function ApiKeyManagementPresentation({
     return matchesSearch && matchesStatus;
   });
 
+  // ソートされたAPIキー
+  const sortedApiKeys = [...filteredApiKeys].sort((a, b) => {
+    const { column, direction } = sortDescriptor;
+    let comparison = 0;
+
+    switch (String(column)) {
+      case 'apiName':
+        comparison = a.apiName.localeCompare(b.apiName);
+        break;
+      case 'status':
+        comparison = a.status.localeCompare(b.status);
+        break;
+      case 'createdAt':
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        break;
+      default:
+        comparison = 0;
+    }
+
+    return direction === 'ascending' ? comparison : -comparison;
+  });
+
   // 通知をクリア
   const clearNotifications = () => {
     setError(null);
     setSuccess(null);
+  };
+
+  // APIキーの表示/非表示を切り替え
+  const handleShowApiKey = async (apiKeyId: string) => {
+    if (visibleApiKeys[apiKeyId]) {
+      // 既に表示されている場合は非表示にする
+      setVisibleApiKeys(prev => {
+        const newState = { ...prev };
+        delete newState[apiKeyId];
+        return newState;
+      });
+      return;
+    }
+
+    setLoadingKeys(prev => ({ ...prev, [apiKeyId]: true }));
+    clearNotifications();
+    
+    try {
+      const result = await getAPIKeyValueAction(apiKeyId);
+      
+      if (result.success && result.value) {
+        setVisibleApiKeys(prev => ({ ...prev, [apiKeyId]: result.value! }));
+      } else {
+        setError(result.message || 'APIキーの取得に失敗しました');
+      }
+    } catch (error: any) {
+      setError('APIキーの取得中にエラーが発生しました');
+      console.error('Show API key error:', error);
+    } finally {
+      setLoadingKeys(prev => ({ ...prev, [apiKeyId]: false }));
+    }
+  };
+
+  // APIキーをクリップボードにコピー
+  const handleCopyApiKey = async (apiKeyId: string) => {
+    setLoadingKeys(prev => ({ ...prev, [apiKeyId]: true }));
+    clearNotifications();
+    
+    try {
+      const result = await getAPIKeyValueAction(apiKeyId);
+      
+      if (result.success && result.value) {
+        await navigator.clipboard.writeText(result.value);
+        setSuccess('APIキーをクリップボードにコピーしました');
+      } else {
+        setError(result.message || 'APIキーの取得に失敗しました');
+      }
+    } catch (error: any) {
+      setError('APIキーのコピー中にエラーが発生しました');
+      console.error('Copy API key error:', error);
+    } finally {
+      setLoadingKeys(prev => ({ ...prev, [apiKeyId]: false }));
+    }
+  };
+
+  // クリップボードにコピー（汎用）
+  const handleCopyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setSuccess(`${label}をクリップボードにコピーしました`);
+    } catch (err) {
+      setError('クリップボードへのコピーに失敗しました');
+    }
   };
 
 
@@ -86,8 +180,8 @@ export default function ApiKeyManagementPresentation({
       const result = await updateAPIKeyAction({
         'api-keysId': editForm.id,
         apiName: editForm.apiName.trim(),
-        description: editForm.description.trim() || undefined,
-        status: editForm.status
+        description: editForm.description.trim() || undefined
+        // ステータスは編集モーダルから削除されたため、更新しない
       });
 
       if (result.success && result.apiKey) {
@@ -144,7 +238,15 @@ export default function ApiKeyManagementPresentation({
         setApiKeys(prev => prev.map(key => 
           key['api-keysId'] === apiKey['api-keysId'] ? result.apiKey! : key
         ));
-        setSuccess(`APIキーのステータスが${result.apiKey.status === 'active' ? '有効' : '無効'}に変更されました`);
+        
+        let successMessage = `APIキーのステータスが${result.apiKey.status === 'active' ? '有効' : '無効'}に変更されました`;
+        
+        // 警告メッセージがある場合は追加
+        if (result.warning) {
+          successMessage += `\n\n⚠️ 警告: ${result.warning}`;
+        }
+        
+        setSuccess(successMessage);
       } else {
         setError(result.message || 'ステータスの変更に失敗しました');
       }
@@ -173,12 +275,6 @@ export default function ApiKeyManagementPresentation({
     onDeleteOpen();
   };
 
-  // 詳細モーダルを開く
-  const openDetailModal = (apiKey: APIKeyEntry) => {
-    setSelectedApiKey(apiKey);
-    onDetailOpen();
-  };
-
   // ステータスチップの表示
   const renderStatusChip = (status: APIKeyStatus) => {
     const config = statusConfig[status];
@@ -205,6 +301,17 @@ export default function ApiKeyManagementPresentation({
       return () => clearTimeout(timer);
     }
   }, [error, success]);
+
+  // APIキーの自動非表示（セキュリティ強化：30秒後に自動的に非表示）
+  useEffect(() => {
+    if (Object.keys(visibleApiKeys).length > 0) {
+      const timer = setTimeout(() => {
+        setVisibleApiKeys({});
+        console.log('API keys automatically hidden after 30 seconds');
+      }, 30000); // 30秒
+      return () => clearTimeout(timer);
+    }
+  }, [visibleApiKeys]);
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -265,7 +372,7 @@ export default function ApiKeyManagementPresentation({
       {/* APIキー一覧 */}
       <Card className="shadow-lg">
         <CardHeader>
-          <h2 className="text-lg font-semibold">APIキー一覧 ({filteredApiKeys.length}件)</h2>
+          <h2 className="text-lg font-semibold">APIキー一覧 ({sortedApiKeys.length}件)</h2>
         </CardHeader>
         <Divider />
         <CardBody>
@@ -279,21 +386,68 @@ export default function ApiKeyManagementPresentation({
               <p>表示するAPIキーがありません。</p>
             </div>
           ) : (
-            <Table aria-label="APIキーテーブル" selectionMode="none">
+            <Table 
+              aria-label="APIキーテーブル" 
+              selectionMode="none"
+              sortDescriptor={sortDescriptor}
+              onSortChange={(descriptor) => setSortDescriptor(descriptor)}
+            >
               <TableHeader>
-                <TableColumn>API名</TableColumn>
-                <TableColumn>説明</TableColumn>
-                <TableColumn>ステータス</TableColumn>
-                <TableColumn>作成日</TableColumn>
-                <TableColumn>アクション</TableColumn>
+                <TableColumn key="apiName" allowsSorting>API名</TableColumn>
+                <TableColumn key="apiKey">APIキー</TableColumn>
+                <TableColumn key="description">説明</TableColumn>
+                <TableColumn key="status" allowsSorting>ステータス</TableColumn>
+                <TableColumn key="createdAt" allowsSorting>作成日時</TableColumn>
+                <TableColumn key="actions">アクション</TableColumn>
               </TableHeader>
               <TableBody>
-                {filteredApiKeys.map((apiKey) => (
+                {sortedApiKeys.map((apiKey) => (
                   <TableRow key={apiKey['api-keysId']}>
                     <TableCell>
-                      <div>
-                        <p className="font-medium">{apiKey.apiName}</p>
-                        <p className="text-xs text-gray-500">ID: {apiKey['api-keysId'].substring(0, 8)}...</p>
+                      <p className="font-medium">{apiKey.apiName}</p>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {loadingKeys[apiKey['api-keysId']] ? (
+                          <Spinner size="sm" />
+                        ) : visibleApiKeys[apiKey['api-keysId']] ? (
+                          <p className="text-xs font-mono text-gray-900 max-w-[200px] truncate" 
+                             title={visibleApiKeys[apiKey['api-keysId']]}>
+                            {visibleApiKeys[apiKey['api-keysId']]}
+                          </p>
+                        ) : (
+                          <p className="text-xs font-mono text-gray-400">
+                            ••••••••••••••••••••••••••••••••••••••••
+                          </p>
+                        )}
+                        
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          onPress={() => handleShowApiKey(apiKey['api-keysId'])}
+                          isDisabled={loadingKeys[apiKey['api-keysId']]}
+                          className="min-w-unit-8 w-8 h-8"
+                          title={visibleApiKeys[apiKey['api-keysId']] ? 'APIキーを非表示' : 'APIキーを表示'}
+                        >
+                          {visibleApiKeys[apiKey['api-keysId']] ? (
+                            <EyeSlashIcon className="w-4 h-4 text-gray-500 hover:text-blue-600" />
+                          ) : (
+                            <EyeIcon className="w-4 h-4 text-gray-500 hover:text-blue-600" />
+                          )}
+                        </Button>
+                        
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          onPress={() => handleCopyApiKey(apiKey['api-keysId'])}
+                          isDisabled={loadingKeys[apiKey['api-keysId']]}
+                          className="min-w-unit-8 w-8 h-8"
+                          title="APIキーをクリップボードにコピー"
+                        >
+                          <ClipboardDocumentIcon className="w-4 h-4 text-gray-500 hover:text-blue-600" />
+                        </Button>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -306,19 +460,17 @@ export default function ApiKeyManagementPresentation({
                     </TableCell>
                     <TableCell>
                       <p className="text-sm">
-                        {new Date(apiKey.createdAt).toLocaleDateString('ja-JP')}
+                        {new Date(apiKey.createdAt).toLocaleString('ja-JP', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </p>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="light"
-                          startContent={<EyeIcon className="w-4 h-4" />}
-                          onPress={() => openDetailModal(apiKey)}
-                        >
-                          詳細
-                        </Button>
                         <Button
                           size="sm"
                           variant="light"
@@ -358,40 +510,39 @@ export default function ApiKeyManagementPresentation({
 
       {/* 編集モーダル */}
       <Modal isOpen={isEditOpen} onOpenChange={onEditOpenChange} size="2xl">
-        <ModalContent>
+        <ModalContent className="bg-white">
           {(onClose) => (
             <>
-              <ModalHeader>
+              <ModalHeader className="bg-white">
                 <h2 className="text-xl font-bold">APIキーを編集</h2>
               </ModalHeader>
-              <ModalBody>
+              <ModalBody className="bg-white">
                 <div className="space-y-4">
-                  <Input
-                    label="API名"
-                    placeholder="APIキーの名前を入力"
-                    value={editForm.apiName}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, apiName: e.target.value }))}
-                    isRequired
-                  />
-                  <Textarea
-                    label="説明"
-                    placeholder="APIキーの説明を入力（任意）"
-                    value={editForm.description}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                  />
-                  <Select
-                    label="ステータス"
-                    selectedKeys={[editForm.status]}
-                    onSelectionChange={(keys) => setEditForm(prev => ({ ...prev, status: Array.from(keys)[0] as APIKeyStatus }))}
-                  >
-                    <SelectItem key="active">有効</SelectItem>
-                    <SelectItem key="inactive">無効</SelectItem>
-                    <SelectItem key="expired">期限切れ</SelectItem>
-                    <SelectItem key="revoked">取り消し済み</SelectItem>
-                  </Select>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">
+                      API名 <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="APIキーの名前を入力"
+                      value={editForm.apiName}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, apiName: e.target.value }))}
+                      variant="bordered"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">
+                      説明
+                    </label>
+                    <Textarea
+                      placeholder="APIキーの説明を入力（任意）"
+                      value={editForm.description}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                      variant="bordered"
+                    />
+                  </div>
                 </div>
               </ModalBody>
-              <ModalFooter>
+              <ModalFooter className="bg-white">
                 <Button variant="light" onPress={onClose}>
                   キャンセル
                 </Button>
@@ -410,13 +561,13 @@ export default function ApiKeyManagementPresentation({
 
       {/* 削除確認モーダル */}
       <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange}>
-        <ModalContent>
+        <ModalContent className="bg-white">
           {(onClose) => (
             <>
-              <ModalHeader>
+              <ModalHeader className="bg-white">
                 <h2 className="text-xl font-bold text-red-600">APIキーを削除</h2>
               </ModalHeader>
-              <ModalBody>
+              <ModalBody className="bg-white">
                 <p>以下のAPIキーを削除してもよろしいですか？</p>
                 {selectedApiKey && (
                   <div className="bg-gray-100 p-3 rounded-lg">
@@ -431,7 +582,7 @@ export default function ApiKeyManagementPresentation({
                   description="この操作は取り消すことができません。APIキーを使用しているアプリケーションがある場合、アクセスできなくなります。"
                 />
               </ModalBody>
-              <ModalFooter>
+              <ModalFooter className="bg-white">
                 <Button variant="light" onPress={onClose}>
                   キャンセル
                 </Button>
@@ -448,69 +599,6 @@ export default function ApiKeyManagementPresentation({
         </ModalContent>
       </Modal>
 
-      {/* 詳細モーダル */}
-      <Modal isOpen={isDetailOpen} onOpenChange={onDetailOpenChange} size="3xl">
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>
-                <h2 className="text-xl font-bold">APIキー詳細</h2>
-              </ModalHeader>
-              <ModalBody>
-                {selectedApiKey && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">API名</p>
-                        <p className="text-lg">{selectedApiKey.apiName}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">ステータス</p>
-                        {renderStatusChip(selectedApiKey.status)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">APIキーID</p>
-                        <p className="text-sm font-mono bg-gray-100 p-2 rounded">{selectedApiKey['api-keysId']}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Gateway APIキーID</p>
-                        <p className="text-sm font-mono bg-gray-100 p-2 rounded">{selectedApiKey.gatewayApiKeyId}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">ポリシーID</p>
-                        <p className="text-sm font-mono bg-gray-100 p-2 rounded">{selectedApiKey.policyId}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">顧客ID</p>
-                        <p className="text-sm font-mono bg-gray-100 p-2 rounded">{selectedApiKey.customerId}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">作成日時</p>
-                        <p className="text-sm">{new Date(selectedApiKey.createdAt).toLocaleString('ja-JP')}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">更新日時</p>
-                        <p className="text-sm">{new Date(selectedApiKey.updatedAt).toLocaleString('ja-JP')}</p>
-                      </div>
-                    </div>
-                    {selectedApiKey.description && (
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">説明</p>
-                        <p className="text-sm bg-gray-50 p-3 rounded-lg">{selectedApiKey.description}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="light" onPress={onClose}>
-                  閉じる
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
     </div>
   );
 }

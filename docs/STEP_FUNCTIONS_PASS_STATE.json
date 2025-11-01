@@ -1,0 +1,18 @@
+{
+  "processingHistoryId": "{% $states.input.`processing-historyId` %}",
+  "customerId": "{% $states.input.customerId %}",
+  "userId": "{% $states.input.userId %}",
+  "userName": "{% $states.input.userName %}",
+  "policyId": "{% $states.input.policyId %}",
+  "policyName": "{% $states.input.policyName %}",
+  "uploadedFileKeys": "{% $states.input.uploadedFileKeys %}",
+  "aiTrainingUsage": "{% $states.input.aiTrainingUsage %}",
+  "fileCount": "{% $states.input.fileCount %}",
+  "usageAmountBytes": "{% $states.input.usageAmountBytes %}",
+  "createdAt": "{% $states.input.createdAt %}",
+  "source": "{% $states.input.metadata.source %}",
+  "apiVersion": "{% $states.input.metadata.apiVersion %}",
+  "inputS3Bucket": "siftbeam",
+  "downloadS3Keys": []
+}
+
