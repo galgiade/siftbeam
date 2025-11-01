@@ -13,6 +13,7 @@ export interface CommonLocale {
       announcement: string;
       services: string;
       myPage: string;
+      supportCenter: string;
     };
     footer: {
       title: string;

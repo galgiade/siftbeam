@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import CreateGroupContainer from "@/app/_containers/GroupManagement/CreateGroup/CreateGroupContainer";
+import CreateGroupManagementContainer from "@/app/_containers/GroupManagement/create/CreateGroupManagementContainer";
 import { groupManagementDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 
 export async function generateMetadata(
@@ -17,7 +17,7 @@ export async function generateMetadata(
   }
 }
 
-export default function CreateGroupPage() {
-    return <CreateGroupContainer />
+export default function CreateGroupPage({ locale }: { locale: string }) {
+    return <CreateGroupManagementContainer locale={locale} />
 }
 

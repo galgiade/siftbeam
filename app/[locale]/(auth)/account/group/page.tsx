@@ -17,6 +17,6 @@ export async function generateMetadata(
   }
 }
 
-export default function GroupProfilePage() {
-  return <GroupManagementContainer />
+export default function GroupProfilePage({ locale }: { locale: string }) {
+  return <GroupManagementContainer locale={locale} />
 }

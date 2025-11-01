@@ -15,6 +15,7 @@ const ja: CommonLocale = {
       announcement: 'お知らせ',
       services: 'サービス',
       myPage: 'マイページ',
+      supportCenter: 'サポートセンター',
     },
     footer: {
       title: 'siftbeam',

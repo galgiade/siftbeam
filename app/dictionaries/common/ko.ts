@@ -15,6 +15,7 @@ const ko: CommonLocale = {
       announcement: '공지사항',
       services: '서비스',
       myPage: '마이페이지',
+      supportCenter: '지원 센터',
     },
     footer: {
       title: 'siftbeam',

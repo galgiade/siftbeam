@@ -8,6 +8,7 @@ export default {
   deleteAccount: "Konto löschen",
   auditLog: "Audit-Log",
   payment: "Zahlung",
+  support: "Support",
   supportCenter: "Support-Center",
   stripeUsage: "Stripe-Nutzung",
   apiManagement: "API-Verwaltung",

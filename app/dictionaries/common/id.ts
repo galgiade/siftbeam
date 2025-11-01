@@ -3,15 +3,19 @@ import type { CommonLocale } from './common.d.ts';
 const id: CommonLocale = {
   common: {
     navigation: {
-      services: 'Layanan',
-      flow: 'Alur',
+      home: 'Beranda',
+      about: 'Tentang',
       pricing: 'Harga',
-      supportCenter: 'Dukungan',
-      myPage: 'Halaman Saya',
-      announcement: 'Pengumuman',
-      languageSelector: 'Bahasa',
+      contact: 'Kontak',
       signIn: 'Masuk',
+      signUp: 'Daftar',
       signOut: 'Keluar',
+      dashboard: 'Dasbor',
+      flow: 'Alur',
+      announcement: 'Pengumuman',
+      services: 'Layanan',
+      myPage: 'Halaman Saya',
+      supportCenter: 'Dukungan',
     },
     footer: {
       title: 'siftbeam',
