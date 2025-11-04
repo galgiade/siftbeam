@@ -5,68 +5,77 @@ import { Button, Card, Input, Select, SelectItem, Chip } from "@heroui/react"
 import { NewOrderRequest } from "@/app/lib/types/TypeAPIs"
 import Link from "next/link"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { NewOrderLocale } from '@/app/dictionaries/newOrder/newOrder.d.ts';
 import { FaPlus, FaRocket, FaEye, FaClock, FaCircleCheck, FaCircleExclamation } from "react-icons/fa6"
 
 interface NewOrderManagementPresentationProps {
   newOrderRequests: NewOrderRequest[];
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: NewOrderLocale;
 }
 
-// データタイプのラベル
-const dataTypeLabels = {
-  'structured': '構造化データ',
-  'unstructured': '非構造化データ',
-  'mixed': '混合データ',
-  'other': 'その他'
-} as const;
+// データタイプのラベルを取得する関数
+const getDataTypeLabel = (dataType: string, dictionary: NewOrderLocale): string => {
+  const labels: Record<string, string> = {
+    'structured': dictionary.label.dataTypeStructured,
+    'unstructured': dictionary.label.dataTypeUnstructured,
+    'mixed': dictionary.label.dataTypeMixed,
+    'other': dictionary.label.dataTypeOther
+  };
+  return labels[dataType] || dataType;
+};
 
-// モデルタイプのラベル
-const modelTypeLabels = {
-  'classification': '分類モデル',
-  'regression': '回帰モデル',
-  'clustering': 'クラスタリング',
-  'nlp': '自然言語処理',
-  'computer_vision': 'コンピュータビジョン',
-  'other': 'その他'
-} as const;
+// モデルタイプのラベルを取得する関数
+const getModelTypeLabel = (modelType: string, dictionary: NewOrderLocale): string => {
+  const labels: Record<string, string> = {
+    'classification': dictionary.label.modelTypeClassification,
+    'regression': dictionary.label.modelTypeRegression,
+    'clustering': dictionary.label.modelTypeClustering,
+    'nlp': dictionary.label.modelTypeNLP,
+    'computer_vision': dictionary.label.modelTypeComputerVision,
+    'other': dictionary.label.modelTypeOther
+  };
+  return labels[modelType] || modelType;
+};
 
-// ステータスのラベルとアイコン
-const statusConfig = {
-  'open': { 
-    label: '未着手', 
-    color: 'danger' as const, 
-    icon: FaCircleExclamation,
-    bgColor: 'bg-red-50',
-    textColor: 'text-red-700',
-    borderColor: 'border-red-200'
-  },
-  'in_progress': { 
-    label: '進行中', 
-    color: 'warning' as const, 
-    icon: FaClock,
-    bgColor: 'bg-yellow-50',
-    textColor: 'text-yellow-700',
-    borderColor: 'border-yellow-200'
-  },
-  'resolved': { 
-    label: '完了', 
-    color: 'success' as const, 
-    icon: FaCircleCheck,
-    bgColor: 'bg-green-50',
-    textColor: 'text-green-700',
-    borderColor: 'border-green-200'
-  },
-  'closed': { 
-    label: 'クローズ', 
-    color: 'default' as const, 
-    icon: FaCircleCheck,
-    bgColor: 'bg-gray-50',
-    textColor: 'text-gray-700',
-    borderColor: 'border-gray-200'
-  }
-} as const;
+// ステータスのラベルとアイコンを取得する関数
+const getStatusConfig = (status: string, dictionary: NewOrderLocale) => {
+  const configs: Record<string, any> = {
+    'open': { 
+      label: dictionary.label.statusOpen, 
+      color: 'danger' as const, 
+      icon: FaCircleExclamation,
+      bgColor: 'bg-red-50',
+      textColor: 'text-red-700',
+      borderColor: 'border-red-200'
+    },
+    'in_progress': { 
+      label: dictionary.label.statusInProgress, 
+      color: 'warning' as const, 
+      icon: FaClock,
+      bgColor: 'bg-yellow-50',
+      textColor: 'text-yellow-700',
+      borderColor: 'border-yellow-200'
+    },
+    'resolved': { 
+      label: dictionary.label.statusResolved, 
+      color: 'success' as const, 
+      icon: FaCircleCheck,
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-700',
+      borderColor: 'border-green-200'
+    },
+    'closed': { 
+      label: dictionary.label.statusClosed, 
+      color: 'default' as const, 
+      icon: FaCircleCheck,
+      bgColor: 'bg-gray-50',
+      textColor: 'text-gray-700',
+      borderColor: 'border-gray-200'
+    }
+  };
+  return configs[status] || configs['open'];
+};
 
 export default function NewOrderManagementPresentation({ 
   newOrderRequests: initialNewOrderRequests, 
@@ -114,7 +123,7 @@ export default function NewOrderManagementPresentation({
 
   // ステータスチップコンポーネント
   const StatusChip = ({ status }: { status: NewOrderRequest['status'] }) => {
-    const config = statusConfig[status];
+    const config = getStatusConfig(status, dictionary);
     const Icon = config.icon;
     
     return (
@@ -132,7 +141,7 @@ export default function NewOrderManagementPresentation({
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
             <FaRocket className="text-blue-600" size={32} />
-            <h1 className="text-3xl font-bold">新規オーダー管理</h1>
+            <h1 className="text-3xl font-bold">{dictionary.label.newOrderManagement}</h1>
           </div>
           <Button
             color="primary"
@@ -141,7 +150,7 @@ export default function NewOrderManagementPresentation({
             startContent={<FaPlus size={16} />}
             className="font-medium"
           >
-            新しいオーダーを作成
+            {dictionary.label.createNewOrder}
           </Button>
         </div>
         
@@ -152,7 +161,7 @@ export default function NewOrderManagementPresentation({
             <div>
               {isMounted ? (
                 <Input
-                  placeholder="件名、説明、ユーザー名で検索..."
+                  placeholder={dictionary.label.searchPlaceholder}
                   value={searchTerm}
                   onValueChange={setSearchTerm}
                   variant="bordered"
@@ -172,17 +181,17 @@ export default function NewOrderManagementPresentation({
                     setStatusFilter(selectedKey);
                   }}
                   variant="bordered"
-                  placeholder="ステータスでフィルター"
+                  placeholder={dictionary.label.filterByStatus}
                   classNames={{
                     listbox: "bg-white shadow-lg border border-gray-200",
                     popoverContent: "bg-white shadow-lg border border-gray-200"
                   }}
                 >
-                  <SelectItem key="all" className="bg-white hover:bg-gray-100">すべて</SelectItem>
-                  <SelectItem key="open" className="bg-white hover:bg-gray-100">未着手</SelectItem>
-                  <SelectItem key="in_progress" className="bg-white hover:bg-gray-100">進行中</SelectItem>
-                  <SelectItem key="resolved" className="bg-white hover:bg-gray-100">完了</SelectItem>
-                  <SelectItem key="closed" className="bg-white hover:bg-gray-100">クローズ</SelectItem>
+                  <SelectItem key="all" className="bg-white hover:bg-gray-100">{dictionary.label.filterAll}</SelectItem>
+                  <SelectItem key="open" className="bg-white hover:bg-gray-100">{dictionary.label.statusOpen}</SelectItem>
+                  <SelectItem key="in_progress" className="bg-white hover:bg-gray-100">{dictionary.label.statusInProgress}</SelectItem>
+                  <SelectItem key="resolved" className="bg-white hover:bg-gray-100">{dictionary.label.statusResolved}</SelectItem>
+                  <SelectItem key="closed" className="bg-white hover:bg-gray-100">{dictionary.label.statusClosed}</SelectItem>
                 </Select>
               ) : (
                 <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
@@ -199,17 +208,17 @@ export default function NewOrderManagementPresentation({
                     setDataTypeFilter(selectedKey);
                   }}
                   variant="bordered"
-                  placeholder="データタイプでフィルター"
+                  placeholder={dictionary.label.filterByDataType}
                   classNames={{
                     listbox: "bg-white shadow-lg border border-gray-200",
                     popoverContent: "bg-white shadow-lg border border-gray-200"
                   }}
                 >
-                  <SelectItem key="all" className="bg-white hover:bg-gray-100">すべて</SelectItem>
-                  <SelectItem key="structured" className="bg-white hover:bg-gray-100">構造化データ</SelectItem>
-                  <SelectItem key="unstructured" className="bg-white hover:bg-gray-100">非構造化データ</SelectItem>
-                  <SelectItem key="mixed" className="bg-white hover:bg-gray-100">混合データ</SelectItem>
-                  <SelectItem key="other" className="bg-white hover:bg-gray-100">その他</SelectItem>
+                  <SelectItem key="all" className="bg-white hover:bg-gray-100">{dictionary.label.filterAll}</SelectItem>
+                  <SelectItem key="structured" className="bg-white hover:bg-gray-100">{dictionary.label.dataTypeStructured}</SelectItem>
+                  <SelectItem key="unstructured" className="bg-white hover:bg-gray-100">{dictionary.label.dataTypeUnstructured}</SelectItem>
+                  <SelectItem key="mixed" className="bg-white hover:bg-gray-100">{dictionary.label.dataTypeMixed}</SelectItem>
+                  <SelectItem key="other" className="bg-white hover:bg-gray-100">{dictionary.label.dataTypeOther}</SelectItem>
                 </Select>
               ) : (
                 <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
@@ -226,19 +235,19 @@ export default function NewOrderManagementPresentation({
                     setModelTypeFilter(selectedKey);
                   }}
                   variant="bordered"
-                  placeholder="モデルタイプでフィルター"
+                  placeholder={dictionary.label.filterByModelType}
                   classNames={{
                     listbox: "bg-white shadow-lg border border-gray-200",
                     popoverContent: "bg-white shadow-lg border border-gray-200"
                   }}
                 >
-                  <SelectItem key="all" className="bg-white hover:bg-gray-100">すべて</SelectItem>
-                  <SelectItem key="classification" className="bg-white hover:bg-gray-100">分類モデル</SelectItem>
-                  <SelectItem key="regression" className="bg-white hover:bg-gray-100">回帰モデル</SelectItem>
-                  <SelectItem key="clustering" className="bg-white hover:bg-gray-100">クラスタリング</SelectItem>
-                  <SelectItem key="nlp" className="bg-white hover:bg-gray-100">自然言語処理</SelectItem>
-                  <SelectItem key="computer_vision" className="bg-white hover:bg-gray-100">コンピュータビジョン</SelectItem>
-                  <SelectItem key="other" className="bg-white hover:bg-gray-100">その他</SelectItem>
+                  <SelectItem key="all" className="bg-white hover:bg-gray-100">{dictionary.label.filterAll}</SelectItem>
+                  <SelectItem key="classification" className="bg-white hover:bg-gray-100">{dictionary.label.modelTypeClassification}</SelectItem>
+                  <SelectItem key="regression" className="bg-white hover:bg-gray-100">{dictionary.label.modelTypeRegression}</SelectItem>
+                  <SelectItem key="clustering" className="bg-white hover:bg-gray-100">{dictionary.label.modelTypeClustering}</SelectItem>
+                  <SelectItem key="nlp" className="bg-white hover:bg-gray-100">{dictionary.label.modelTypeNLP}</SelectItem>
+                  <SelectItem key="computer_vision" className="bg-white hover:bg-gray-100">{dictionary.label.modelTypeComputerVision}</SelectItem>
+                  <SelectItem key="other" className="bg-white hover:bg-gray-100">{dictionary.label.modelTypeOther}</SelectItem>
                 </Select>
               ) : (
                 <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
@@ -251,18 +260,18 @@ export default function NewOrderManagementPresentation({
         <Card className="p-6 shadow-lg">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">
-              オーダー一覧 ({filteredNewOrderRequests.length}件)
+              {dictionary.label.orderList} ({filteredNewOrderRequests.length}{dictionary.label.orderListCount})
             </h2>
           </div>
           
           {filteredNewOrderRequests.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <FaRocket size={48} className="mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium mb-2">新規オーダーが見つかりません</p>
+              <p className="text-lg font-medium mb-2">{dictionary.label.noOrdersFound}</p>
               <p className="text-sm">
                 {newOrderRequests.length === 0 
-                  ? '新しい新規オーダーを作成してください'
-                  : '検索条件を変更してください'
+                  ? dictionary.label.createFirstOrder
+                  : dictionary.label.changeSearchCriteria
                 }
               </p>
             </div>
@@ -283,15 +292,15 @@ export default function NewOrderManagementPresentation({
                       </div>
                       
                       <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                        <span>データタイプ: {dataTypeLabels[request.dataType]}</span>
-                        <span>モデルタイプ: {modelTypeLabels[request.modelType]}</span>
-                        <span>作成者: {request.userName}</span>
+                        <span>{dictionary.label.dataType} {getDataTypeLabel(request.dataType, dictionary)}</span>
+                        <span>モデルタイプ: {getModelTypeLabel(request.modelType, dictionary)}</span>
+                        <span>{dictionary.label.creator} {request.userName}</span>
                       </div>
                       
                       <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                        <span>作成日: {formatDate(request.createdAt)}</span>
+                        <span>{dictionary.label.createdAt} {formatDate(request.createdAt)}</span>
                         {request.updatedAt !== request.createdAt && (
-                          <span>更新日: {formatDate(request.updatedAt)}</span>
+                          <span>{dictionary.label.updatedAt} {formatDate(request.updatedAt)}</span>
                         )}
                       </div>
                       
@@ -301,9 +310,9 @@ export default function NewOrderManagementPresentation({
                       
                       {request.fileKeys.length > 0 && (
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="text-xs text-gray-500">添付ファイル:</span>
+                          <span className="text-xs text-gray-500">{dictionary.label.attachedFiles}</span>
                           <Chip size="sm" variant="flat" color="primary">
-                            {request.fileKeys.length}件
+                            {request.fileKeys.length}{dictionary.label.filesCount}
                           </Chip>
                         </div>
                       )}
@@ -318,13 +327,13 @@ export default function NewOrderManagementPresentation({
                         href={`/${userAttributes.locale}/account/new-order/${request['neworder-requestId']}`}
                         startContent={<FaEye size={14} />}
                       >
-                        詳細を見る
+                        {dictionary.label.viewDetails}
                       </Button>
                     </div>
                   </div>
                   
                   <div className="text-xs text-gray-500 border-t pt-2">
-                    オーダーID: {request['neworder-requestId']}
+                    {dictionary.label.orderId} {request['neworder-requestId']}
                   </div>
                 </div>
               ))}

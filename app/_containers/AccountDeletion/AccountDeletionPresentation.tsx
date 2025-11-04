@@ -7,15 +7,20 @@ import { requestAccountDeletionAction, restoreAccountAction } from '@/app/lib/ac
 import type { DeletionStatusResponse } from '@/app/lib/actions/account-deletion-actions';
 import { calculateDaysUntilDeletion, calculateDeletionDate } from '@/app/lib/utils/account-deletion-utils';
 import { UserAttributesDTO } from '@/app/lib/types/TypeAPIs';
+import type { AccountDeletionLocale } from '@/app/dictionaries/account-deletion/account-deletion.d.ts';
 
 interface AccountDeletionPresentationProps {
   userAttributes: UserAttributesDTO;
   deletionStatus: DeletionStatusResponse;
+  dictionary: AccountDeletionLocale;
+  locale?: string;
 }
 
 export default function AccountDeletionPresentation({
   userAttributes,
   deletionStatus,
+  dictionary,
+  locale,
 }: AccountDeletionPresentationProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +31,7 @@ export default function AccountDeletionPresentation({
   const isAdmin = userAttributes.role === 'admin';
   const isDeleted = deletionStatus.isDeleted;
   const deletionRequestedAt = deletionStatus.deletionRequestedAt || userAttributes.deletionRequestedAt;
+  const userLocale = locale || userAttributes.locale || 'ja';
 
   // 削除リクエスト実行
   const handleRequestDeletion = async () => {
@@ -37,15 +43,15 @@ export default function AccountDeletionPresentation({
       const result = await requestAccountDeletionAction();
       
       if (result.success) {
-        setSuccess(result.message || 'アカウント削除リクエストが送信されました');
+        setSuccess(result.message || dictionary.alert.deletionRequestSuccess);
         onOpenChange(); // モーダルを閉じる
         // ページをリロードして最新状態を反映
         window.location.reload();
       } else {
-        setError(result.message || '削除リクエストに失敗しました');
+        setError(result.message || dictionary.alert.deletionRequestFailed);
       }
     } catch (err) {
-      setError('予期しないエラーが発生しました');
+      setError(dictionary.alert.unexpectedError);
     } finally {
       setLoading(false);
     }
@@ -61,15 +67,15 @@ export default function AccountDeletionPresentation({
       const result = await restoreAccountAction();
       
       if (result.success) {
-        setSuccess(result.message || 'アカウントが復旧されました');
+        setSuccess(result.message || dictionary.alert.restoreSuccess);
         onRestoreOpenChange(); // モーダルを閉じる
         // ページをリロードして最新状態を反映
         window.location.reload();
       } else {
-        setError(result.message || 'アカウント復旧に失敗しました');
+        setError(result.message || dictionary.alert.restoreFailed);
       }
     } catch (err) {
-      setError('予期しないエラーが発生しました');
+      setError(dictionary.alert.unexpectedError);
     } finally {
       setLoading(false);
     }
@@ -88,8 +94,8 @@ export default function AccountDeletionPresentation({
             <div className="flex items-center gap-3">
               <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
               <div>
-                <h1 className="text-xl font-bold text-red-700">サービス利用停止中</h1>
-                <p className="text-sm text-red-600">アカウント削除が申請されています</p>
+                <h1 className="text-xl font-bold text-red-700">{dictionary.label.serviceSuspendedTitle}</h1>
+                <p className="text-sm text-red-600">{dictionary.label.serviceSuspendedDescription}</p>
               </div>
             </div>
           </CardHeader>
@@ -99,16 +105,16 @@ export default function AccountDeletionPresentation({
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <ClockIcon className="w-5 h-5 text-gray-500" />
-                  <span className="font-medium">削除申請日時:</span>
-                  <span>{deletionRequestedAt ? new Date(deletionRequestedAt).toLocaleString('ja-JP') : '不明'}</span>
+                  <span className="font-medium">{dictionary.label.deletionRequestDate}</span>
+                  <span>{deletionRequestedAt ? new Date(deletionRequestedAt).toLocaleString(userLocale) : dictionary.label.unknown}</span>
                 </div>
                 
                 {deletionDate && (
                   <div className="flex items-center gap-2">
                     <TrashIcon className="w-5 h-5 text-red-500" />
-                    <span className="font-medium">削除予定日:</span>
+                    <span className="font-medium">{dictionary.label.scheduledDeletionDate}</span>
                     <span className="text-red-600 font-semibold">
-                      {deletionDate.toLocaleDateString('ja-JP')}
+                      {deletionDate.toLocaleDateString(userLocale)}
                     </span>
                   </div>
                 )}
@@ -116,9 +122,9 @@ export default function AccountDeletionPresentation({
                 {daysUntilDeletion !== null && (
                   <div className="flex items-center gap-2">
                     <ClockIcon className="w-5 h-5 text-orange-500" />
-                    <span className="font-medium">削除まで:</span>
+                    <span className="font-medium">{dictionary.label.daysUntilDeletion}</span>
                     <Chip color={daysUntilDeletion <= 7 ? "danger" : "warning"} variant="flat">
-                      あと{daysUntilDeletion}日
+                      {dictionary.label.daysRemaining.replace('{days}', daysUntilDeletion.toString())}
                     </Chip>
                   </div>
                 )}
@@ -126,8 +132,8 @@ export default function AccountDeletionPresentation({
                 {deletionStatus.affectedUsers && (
                   <div className="flex items-center gap-2">
                     <UserGroupIcon className="w-5 h-5 text-blue-500" />
-                    <span className="font-medium">影響ユーザー数:</span>
-                    <span>{deletionStatus.affectedUsers}名</span>
+                    <span className="font-medium">{dictionary.label.affectedUsers}</span>
+                    <span>{dictionary.label.usersCount.replace('{count}', deletionStatus.affectedUsers.toString())}</span>
                   </div>
                 )}
               </div>
@@ -135,13 +141,13 @@ export default function AccountDeletionPresentation({
 
             <Alert 
               color="warning" 
-              title="重要なお知らせ"
-              description="現在、すべてのサービス機能が利用できません。アカウントの復旧をご希望の場合は、管理者にお問い合わせください。"
+              title={dictionary.label.importantNotice}
+              description={dictionary.label.serviceUnavailableMessage}
             />
 
             <div className="text-center pt-4">
               <p className="text-sm text-gray-600">
-                お問い合わせ: <a href="mailto:support@example.com" className="text-blue-600 hover:underline">support@example.com</a>
+                {dictionary.label.contactLabel} <a href="mailto:support@example.com" className="text-blue-600 hover:underline">support@example.com</a>
               </p>
             </div>
           </CardBody>
@@ -154,47 +160,47 @@ export default function AccountDeletionPresentation({
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">アカウント削除管理</h1>
-        <p className="text-gray-600 mt-2">組織のアカウント削除と復旧を管理します</p>
+        <h1 className="text-2xl font-bold text-gray-900">{dictionary.label.pageTitle}</h1>
+        <p className="text-gray-600 mt-2">{dictionary.label.pageDescription}</p>
       </div>
 
       {error && (
-        <Alert color="danger" className="mb-6" title="エラー" description={error} />
+        <Alert color="danger" className="mb-6" title={dictionary.alert.errorTitle} description={error} />
       )}
 
       {success && (
-        <Alert color="success" className="mb-6" title="成功" description={success} />
+        <Alert color="success" className="mb-6" title={dictionary.alert.successTitle} description={success} />
       )}
 
       {/* 現在のステータス */}
       <Card className="mb-6">
         <CardHeader>
-          <h2 className="text-lg font-semibold">現在のステータス</h2>
+          <h2 className="text-lg font-semibold">{dictionary.label.currentStatus}</h2>
         </CardHeader>
         <Divider />
         <CardBody>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="font-medium">アカウント状態:</span>
+                <span className="font-medium">{dictionary.label.accountStatus}</span>
                 <Chip color={isDeleted ? "danger" : "success"} variant="flat">
-                  {isDeleted ? "削除申請中" : "アクティブ"}
+                  {isDeleted ? dictionary.label.statusDeletionRequested : dictionary.label.statusActive}
                 </Chip>
               </div>
 
               {deletionRequestedAt && (
                 <div className="flex items-center gap-2">
                   <ClockIcon className="w-5 h-5 text-gray-500" />
-                  <span className="font-medium">申請日時:</span>
-                  <span>{new Date(deletionRequestedAt).toLocaleString('ja-JP')}</span>
+                  <span className="font-medium">{dictionary.label.requestDate}</span>
+                  <span>{new Date(deletionRequestedAt).toLocaleString(userLocale)}</span>
                 </div>
               )}
 
               {deletionStatus.affectedUsers && (
                 <div className="flex items-center gap-2">
                   <UserGroupIcon className="w-5 h-5 text-blue-500" />
-                  <span className="font-medium">影響ユーザー数:</span>
-                  <span>{deletionStatus.affectedUsers}名</span>
+                  <span className="font-medium">{dictionary.label.affectedUsers}</span>
+                  <span>{dictionary.label.usersCount.replace('{count}', deletionStatus.affectedUsers.toString())}</span>
                 </div>
               )}
             </div>
@@ -203,17 +209,17 @@ export default function AccountDeletionPresentation({
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <TrashIcon className="w-5 h-5 text-red-500" />
-                  <span className="font-medium">削除予定日:</span>
+                  <span className="font-medium">{dictionary.label.scheduledDeletionDate}</span>
                   <span className="text-red-600 font-semibold">
-                    {deletionDate.toLocaleDateString('ja-JP')}
+                    {deletionDate.toLocaleDateString(userLocale)}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <ClockIcon className="w-5 h-5 text-orange-500" />
-                  <span className="font-medium">削除まで:</span>
+                  <span className="font-medium">{dictionary.label.daysUntilDeletion}</span>
                   <Chip color={daysUntilDeletion <= 7 ? "danger" : "warning"} variant="flat">
-                    あと{daysUntilDeletion}日
+                    {dictionary.label.daysRemaining.replace('{days}', daysUntilDeletion.toString())}
                   </Chip>
                 </div>
               </div>
@@ -226,16 +232,16 @@ export default function AccountDeletionPresentation({
       {isAdmin && (
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold">管理者アクション</h2>
+            <h2 className="text-lg font-semibold">{dictionary.label.adminActions}</h2>
           </CardHeader>
           <Divider />
           <CardBody>
             <div className="space-y-4">
               {!isDeleted ? (
                 <div>
-                  <h3 className="font-medium text-red-700 mb-2">アカウント削除</h3>
+                  <h3 className="font-medium text-red-700 mb-2">{dictionary.label.accountDeletionTitle}</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    組織全体のアカウント削除を申請します。この操作により、すべてのユーザーのサービス利用が停止されます。
+                    {dictionary.label.accountDeletionDescription}
                   </p>
                   <Button
                     color="danger"
@@ -244,14 +250,14 @@ export default function AccountDeletionPresentation({
                     onPress={onOpen}
                     isDisabled={!userAttributes.customerId}
                   >
-                    アカウント削除を申請
+                    {dictionary.label.requestDeletionButton}
                   </Button>
                 </div>
               ) : (
                 <div>
-                  <h3 className="font-medium text-green-700 mb-2">アカウント復旧</h3>
+                  <h3 className="font-medium text-green-700 mb-2">{dictionary.label.accountRestoreTitle}</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    削除申請を取り消し、すべてのユーザーのサービス利用を再開します。
+                    {dictionary.label.accountRestoreDescription}
                   </p>
                   <Button
                     color="success"
@@ -259,7 +265,7 @@ export default function AccountDeletionPresentation({
                     startContent={<ArrowPathIcon className="w-4 h-4" />}
                     onPress={onRestoreOpen}
                   >
-                    アカウントを復旧
+                    {dictionary.label.restoreAccountButton}
                   </Button>
                 </div>
               )}
@@ -276,35 +282,35 @@ export default function AccountDeletionPresentation({
               <ModalHeader className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
-                  <span>アカウント削除の確認</span>
+                  <span>{dictionary.label.deletionConfirmModalTitle}</span>
                 </div>
               </ModalHeader>
               <ModalBody>
                 <div className="space-y-4">
                   <Alert 
                     color="danger" 
-                    title="重要な警告"
-                    description="この操作は組織全体に影響します。すべてのユーザーのサービス利用が即座に停止され、90日後にデータが完全に削除されます。"
+                    title={dictionary.label.criticalWarning}
+                    description={dictionary.label.deletionWarningMessage}
                   />
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">削除される内容:</h4>
+                    <h4 className="font-medium mb-2">{dictionary.label.deletedContentTitle}</h4>
                     <ul className="text-sm space-y-1 list-disc list-inside">
-                      <li>すべてのユーザーアカウント</li>
-                      <li>保存されたファイルとデータ</li>
-                      <li>支払い情報と請求履歴</li>
-                      <li>設定とカスタマイズ</li>
+                      <li>{dictionary.label.allUserAccounts}</li>
+                      <li>{dictionary.label.savedFilesAndData}</li>
+                      <li>{dictionary.label.paymentAndBillingHistory}</li>
+                      <li>{dictionary.label.settingsAndCustomization}</li>
                     </ul>
                   </div>
 
                   <p className="text-sm text-gray-600">
-                    この操作は90日以内であれば復旧可能です。本当に削除を申請しますか？
+                    {dictionary.label.restorableMessage}
                   </p>
                 </div>
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
-                  キャンセル
+                  {dictionary.label.cancelButton}
                 </Button>
                 <Button 
                   color="danger" 
@@ -312,7 +318,7 @@ export default function AccountDeletionPresentation({
                   isLoading={loading}
                   startContent={!loading ? <TrashIcon className="w-4 h-4" /> : undefined}
                 >
-                  {loading ? '処理中...' : '削除を申請'}
+                  {loading ? dictionary.label.processingButton : dictionary.label.confirmDeletionButton}
                 </Button>
               </ModalFooter>
             </>
@@ -328,35 +334,35 @@ export default function AccountDeletionPresentation({
               <ModalHeader className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <ArrowPathIcon className="w-6 h-6 text-green-500" />
-                  <span>アカウント復旧の確認</span>
+                  <span>{dictionary.label.restoreConfirmModalTitle}</span>
                 </div>
               </ModalHeader>
               <ModalBody>
                 <div className="space-y-4">
                   <Alert 
                     color="success" 
-                    title="アカウント復旧"
-                    description="削除申請を取り消し、すべてのユーザーのサービス利用を再開します。"
+                    title={dictionary.label.restoreTitle}
+                    description={dictionary.label.restoreDescription}
                   />
                   
                   <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">復旧される内容:</h4>
+                    <h4 className="font-medium mb-2">{dictionary.label.restoredContentTitle}</h4>
                     <ul className="text-sm space-y-1 list-disc list-inside">
-                      <li>すべてのユーザーアカウントへのアクセス</li>
-                      <li>保存されたファイルとデータ</li>
-                      <li>サービス機能の利用</li>
-                      <li>設定とカスタマイズ</li>
+                      <li>{dictionary.label.allUserAccountsAccess}</li>
+                      <li>{dictionary.label.savedFilesAndData}</li>
+                      <li>{dictionary.label.serviceFunctions}</li>
+                      <li>{dictionary.label.settingsAndCustomization}</li>
                     </ul>
                   </div>
 
                   <p className="text-sm text-gray-600">
-                    アカウントを復旧しますか？
+                    {dictionary.label.confirmRestoreQuestion}
                   </p>
                 </div>
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
-                  キャンセル
+                  {dictionary.label.cancelButton}
                 </Button>
                 <Button 
                   color="success" 
@@ -364,7 +370,7 @@ export default function AccountDeletionPresentation({
                   isLoading={loading}
                   startContent={!loading ? <ArrowPathIcon className="w-4 h-4" /> : undefined}
                 >
-                  {loading ? '処理中...' : 'アカウントを復旧'}
+                  {loading ? dictionary.label.processingButton : dictionary.label.confirmRestoreButton}
                 </Button>
               </ModalFooter>
             </>

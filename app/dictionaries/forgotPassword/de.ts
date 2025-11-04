@@ -1,4 +1,6 @@
-export default {
+import type { ForgotPasswordLocale } from './forgotPassword.d.ts';
+
+const de: ForgotPasswordLocale = {
   label: {
     back: "Zurück",
     submit: "Senden",
@@ -48,6 +50,6 @@ export default {
       genericError: "Ein Fehler ist aufgetreten. Bitte erneut versuchen."
     }
   }
-} as const;
+};
 
-
+export default de;

@@ -1,4 +1,6 @@
-export default {
+import type { CreateAdminLocale } from './createAdmin.d.ts';
+
+const de: CreateAdminLocale = {
   label: {
     back: "Zurück",
     submit: "Senden",
@@ -12,6 +14,7 @@ export default {
     positionLabel: "Position",
     positionPlaceholder: "Manager",
     languageLabel: "Sprache",
+    languagePlaceholder: "Wählen Sie eine Sprache",
     japanese: "日本語",
     english: "English",
     spanish: "Spanisch",
@@ -37,7 +40,6 @@ export default {
     adminCreationFailed: "Admin-Konto konnte nicht erstellt werden",
     networkError: "Netzwerkfehler ist aufgetreten"
   }
-} as const;
+};
 
-
-
+export default de;

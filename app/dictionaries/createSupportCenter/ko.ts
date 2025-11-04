@@ -1,4 +1,6 @@
-export default {
+import type { SupportCenterLocale } from './createSupportCenter.d.ts';
+
+const ko: SupportCenterLocale = {
   label: {
     pageTitle: "지원 센터",
     supportRequestList: "지원 요청",
@@ -48,6 +50,6 @@ export default {
     messageRequired: "메시지를 입력하세요",
     supportRequestError: "지원 요청 가져오기 오류:"
   }
-} as const;
+};
 
-
+export default ko;

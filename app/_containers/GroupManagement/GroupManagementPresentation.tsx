@@ -6,7 +6,7 @@ import { Group } from "@/app/lib/types/TypeAPIs"
 import { updateGroup, deleteGroup, getUsersByGroupId, getPoliciesByGroupId, assignUsersToGroup, assignPoliciesToGroup, removeUsersFromGroup, removePoliciesFromGroup } from "@/app/lib/actions/group-api"
 import Link from "next/link"
 import { UserAttributesDTO, User, Policy, UserGroup, PolicyGroup } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { GroupManagementLocale } from '@/app/dictionaries/group-management/group-management.d.ts';
 import { RiEdit2Fill } from "react-icons/ri"
 import { FaCheck, FaXmark, FaPlus, FaTrash, FaUsers, FaFile } from "react-icons/fa6"
 
@@ -15,7 +15,7 @@ interface GroupManagementPresentationProps {
   users: User[];
   policies: Policy[];
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: GroupManagementLocale;
 }
 
 // 編集可能なフィールドの型定義
@@ -25,7 +25,8 @@ type EditableField = 'groupName' | 'description';
 async function updateSingleFieldForGroup(
   fieldName: EditableField,
   value: string,
-  targetGroup: Group
+  targetGroup: Group,
+  dictionary: GroupManagementLocale
 ): Promise<{ success: boolean; message: string; errors?: Record<string, string>; updatedGroup?: Group }> {
   try {
     console.log('updateSingleFieldForGroup called with:', { fieldName, value, groupId: targetGroup.groupId });
@@ -42,13 +43,13 @@ async function updateSingleFieldForGroup(
     if (result.success) {
       return {
         success: true,
-        message: result.message || `${fieldName}が正常に更新されました。`,
+        message: result.message || `${fieldName}${dictionary.label.updatedSuccessfully}`,
         updatedGroup: result.data
       };
     } else {
       return {
         success: false,
-        message: result.message || `${fieldName}の更新に失敗しました。`,
+        message: result.message || dictionary.alert.updateFail,
         errors: result.errors ? Object.fromEntries(
           Object.entries(result.errors).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value])
         ) : {},
@@ -58,8 +59,8 @@ async function updateSingleFieldForGroup(
     console.error('Error in updateSingleFieldForGroup:', error);
     return {
       success: false,
-      message: error?.message || '更新処理でエラーが発生しました。',
-      errors: { [fieldName]: error?.message || '更新処理でエラーが発生しました。' }
+      message: error?.message || dictionary.alert.updateError,
+      errors: { [fieldName]: error?.message || dictionary.alert.updateError }
     };
   }
 }
@@ -183,7 +184,7 @@ export default function GroupManagementPresentation({
   const filteredAvailableUsers = availableUsers
     .filter(user => !groupUsers.some(ug => ug.userId === user.userId))
     .filter(user => {
-      const userName = user.userName || user.email || '名前未設定';
+      const userName = user.userName || user.email || dictionary.label.nameNotSet;
       return userName.toLowerCase().includes(userSearchTerm.toLowerCase());
     });
 
@@ -211,7 +212,7 @@ export default function GroupManagementPresentation({
   const validateField = (field: EditableField, value: string): string | null => {
     // グループ名のみ必須、説明はオプション
     if (field === 'groupName' && (!value || !value.trim())) {
-      return 'グループ名は必須です。';
+      return dictionary.alert.requiredGroupName;
     }
     return null;
   };
@@ -219,7 +220,7 @@ export default function GroupManagementPresentation({
   // 更新実行
   const saveField = async (field: EditableField) => {
     if (!selectedGroup) {
-      setFieldErrors({ ...fieldErrors, [field]: 'グループが選択されていません。' });
+      setFieldErrors({ ...fieldErrors, [field]: dictionary.label.groupNotSelected });
       return;
     }
 
@@ -236,7 +237,7 @@ export default function GroupManagementPresentation({
 
     try {
       console.log('Updating field:', { field, value, groupId: selectedGroup.groupId });
-      const result = await updateSingleFieldForGroup(field, value, selectedGroup);
+      const result = await updateSingleFieldForGroup(field, value, selectedGroup, dictionary);
       console.log('Update result:', result);
       
       if (result.success && result.updatedGroup) {
@@ -256,13 +257,13 @@ export default function GroupManagementPresentation({
         console.log('Field updated successfully:', field);
       } else {
         // エラー時はエラーメッセージを表示
-        const errorMessage = result.message || `${field}の更新に失敗しました。`;
+        const errorMessage = result.message || dictionary.alert.updateFail;
         setFieldErrors({ ...fieldErrors, [field]: errorMessage });
         console.error('Update failed:', result);
       }
     } catch (error: any) {
       console.error('Update error:', error);
-      const errorMessage = error?.message || '更新中にエラーが発生しました。';
+      const errorMessage = error?.message || dictionary.alert.updateError;
       setFieldErrors({ ...fieldErrors, [field]: errorMessage });
     } finally {
       setIsUpdating(false);
@@ -319,7 +320,7 @@ export default function GroupManagementPresentation({
     if (!selectedGroup) return;
     
     if (selectedUserIds.length === 0) {
-      setSelectionErrors(prev => ({ ...prev, users: '最低1つ以上のユーザーを選択してください。' }));
+      setSelectionErrors(prev => ({ ...prev, users: dictionary.alert.selectAtLeastOneUser }));
       return;
     }
 
@@ -347,7 +348,7 @@ export default function GroupManagementPresentation({
     if (!selectedGroup) return;
     
     if (selectedPolicyIds.length === 0) {
-      setSelectionErrors(prev => ({ ...prev, policies: '最低1つ以上のポリシーを選択してください。' }));
+      setSelectionErrors(prev => ({ ...prev, policies: dictionary.alert.selectAtLeastOnePolicy }));
       return;
     }
 
@@ -376,7 +377,7 @@ export default function GroupManagementPresentation({
 
     // 最後の1人を削除しようとした場合はエラーを表示
     if (groupUsers.length <= 1) {
-      setSelectionErrors(prev => ({ ...prev, users: 'グループには最低1人以上のユーザーが必要です。' }));
+      setSelectionErrors(prev => ({ ...prev, users: dictionary.label.minUserRequired }));
       return;
     }
 
@@ -399,7 +400,7 @@ export default function GroupManagementPresentation({
 
     // 最後の1つを削除しようとした場合はエラーを表示
     if (groupPolicies.length <= 1) {
-      setSelectionErrors(prev => ({ ...prev, policies: 'グループには最低1つ以上のポリシーが必要です。' }));
+      setSelectionErrors(prev => ({ ...prev, policies: dictionary.label.minPolicyRequired }));
       return;
     }
 
@@ -518,7 +519,7 @@ export default function GroupManagementPresentation({
         ) : (
           <div className="p-3 bg-gray-50 rounded-md border">
             <span className="text-gray-900">
-              {value || '未設定'}
+              {value || dictionary.label.notSet}
             </span>
           </div>
         )}
@@ -530,7 +531,7 @@ export default function GroupManagementPresentation({
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">グループ管理</h1>
+          <h1 className="text-3xl font-bold">{dictionary.label.groupManagementTitle}</h1>
           <Button
             color="primary"
             as={Link}
@@ -538,27 +539,27 @@ export default function GroupManagementPresentation({
             startContent={<FaPlus size={16} />}
             className="font-medium"
           >
-            新しいグループを作成
+            {dictionary.label.createNewGroup}
           </Button>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* 左側: グループ一覧 */}
           <Card className="lg:col-span-1 p-6 shadow-lg">
-            <h2 className="text-xl font-bold mb-4">グループ一覧 ({filteredGroups.length}件)</h2>
+            <h2 className="text-xl font-bold mb-4">{dictionary.label.groupListTitle.replace('{count}', filteredGroups.length.toString())}</h2>
             
             {/* 検索 */}
             <div className="mb-6">
               {isMounted ? (
                 <Input
-                  placeholder="グループ名、説明で検索..."
+                  placeholder={dictionary.label.searchPlaceholder}
                   value={searchTerm}
                   onValueChange={setSearchTerm}
                   variant="bordered"
                 />
               ) : (
                 <div className="h-10 bg-gray-100 rounded-lg border border-gray-300 flex items-center px-3">
-                  <span className="text-gray-500 text-sm">検索...</span>
+                  <span className="text-gray-500 text-sm">{dictionary.label.search}</span>
                 </div>
               )}
             </div>
@@ -567,7 +568,7 @@ export default function GroupManagementPresentation({
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {filteredGroups.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  グループが見つかりません
+                  {dictionary.label.groupNotFound}
                 </div>
               ) : (
                 filteredGroups.map((group) => (
@@ -596,7 +597,7 @@ export default function GroupManagementPresentation({
           <Card className="lg:col-span-2 p-6 shadow-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
-                {selectedGroup ? `${selectedGroup.groupName} の編集` : 'グループを選択してください'}
+                {selectedGroup ? dictionary.label.editingGroup.replace('{groupName}', selectedGroup.groupName) : dictionary.label.selectGroupPrompt}
               </h2>
               
               {selectedGroup && (
@@ -608,7 +609,7 @@ export default function GroupManagementPresentation({
                   onPress={() => openDeleteModal(selectedGroup)}
                   className="text-sm"
                 >
-                  削除
+                  {dictionary.label.delete}
                 </Button>
               )}
             </div>
@@ -616,30 +617,30 @@ export default function GroupManagementPresentation({
             {selectedGroup ? (
               <div className="flex flex-col gap-6">
                 {/* グループ名フィールド */}
-                {renderField('groupName', 'グループ名', 'text', true)}
+                {renderField('groupName', dictionary.label.groupName, 'text', true)}
 
                 {/* 説明フィールド（オプション） */}
-                {renderField('description', '説明', 'textarea', false)}
+                {renderField('description', dictionary.label.description, 'textarea', false)}
                 
                 {/* ユーザー管理セクション */}
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-gray-700">
                     <FaUsers className="inline mr-2" />
-                    グループのユーザー
-                    <span className="text-red-500 ml-1">*</span>
+                    {dictionary.label.groupUsers}
+                    <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
                   </label>
                   
                   {isLoadingUsers ? (
-                    <div className="text-center py-4 text-gray-500">ユーザー情報を読み込み中...</div>
+                    <div className="text-center py-4 text-gray-500">{dictionary.label.loadingUsers}</div>
                   ) : (
                     <>
                       {/* 現在のユーザー表示（Chip形式） */}
                       {groupUsers.length > 0 && (
                         <div className="mb-2">
                           <div className="text-xs text-gray-600 mb-2">
-                            現在のユーザー ({groupUsers.length}人):
+                            {dictionary.label.currentUsers.replace('{count}', groupUsers.length.toString())}
                             {groupUsers.length <= 1 && (
-                              <span className="text-red-500 ml-2 text-xs">※最後の1人は削除できません</span>
+                              <span className="text-red-500 ml-2 text-xs">{dictionary.label.lastUserCannotRemove}</span>
                             )}
                           </div>
                           <div className="flex flex-wrap gap-2">
@@ -655,7 +656,7 @@ export default function GroupManagementPresentation({
                                   onClose={isLastUser ? undefined : () => handleRemoveUserFromGroup(userGroup.userId)}
                                   className={isLastUser ? 'cursor-not-allowed' : ''}
                                 >
-                                  {user?.userName || user?.email || '不明なユーザー'}
+                                  {user?.userName || user?.email || dictionary.label.unknownUser}
                                 </Chip>
                               );
                             })}
@@ -665,7 +666,7 @@ export default function GroupManagementPresentation({
                       
                       {/* ユーザー追加 */}
                       <Autocomplete
-                        placeholder="ユーザーを検索・選択してください"
+                        placeholder={dictionary.label.searchAndSelectUser}
                         variant="bordered"
                         allowsCustomValue={false}
                         inputValue={userSearchTerm}
@@ -695,7 +696,7 @@ export default function GroupManagementPresentation({
                           <AutocompleteItem 
                             key={user.userId} 
                             className="bg-white hover:bg-gray-100"
-                            textValue={user.userName || user.email || '名前未設定'}
+                            textValue={user.userName || user.email || dictionary.label.nameNotSet}
                           >
                             <div className="flex items-center gap-2 w-full">
                               <Checkbox
@@ -716,7 +717,7 @@ export default function GroupManagementPresentation({
                                 size="sm"
                               />
                               <span className="flex-1">
-                                {user.userName || user.email || '名前未設定'}
+                                {user.userName || user.email || dictionary.label.nameNotSet}
                               </span>
                             </div>
                           </AutocompleteItem>
@@ -736,7 +737,7 @@ export default function GroupManagementPresentation({
                                 color="success"
                                 onClose={() => setSelectedUserIds(prev => prev.filter(id => id !== userId))}
                               >
-                                {user?.userName || user?.email || '不明なユーザー'}
+                                {user?.userName || user?.email || dictionary.label.unknownUser}
                               </Chip>
                             );
                           })}
@@ -751,7 +752,7 @@ export default function GroupManagementPresentation({
                         className="mt-2"
                         isDisabled={selectedUserIds.length === 0}
                       >
-                        選択したユーザーを追加
+                        {dictionary.label.addSelectedUsers}
                       </Button>
                     </>
                   )}
@@ -761,21 +762,21 @@ export default function GroupManagementPresentation({
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-gray-700">
                     <FaFile className="inline mr-2" />
-                    グループのポリシー
-                    <span className="text-red-500 ml-1">*</span>
+                    {dictionary.label.groupPolicies}
+                    <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
                   </label>
                   
                   {isLoadingPolicies ? (
-                    <div className="text-center py-4 text-gray-500">ポリシー情報を読み込み中...</div>
+                    <div className="text-center py-4 text-gray-500">{dictionary.label.loadingPolicies}</div>
                   ) : (
                     <>
                       {/* 現在のポリシー表示（Chip形式） */}
                       {groupPolicies.length > 0 && (
                         <div className="mb-2">
                           <div className="text-xs text-gray-600 mb-2">
-                            現在のポリシー ({groupPolicies.length}個):
+                            {dictionary.label.currentPolicies.replace('{count}', groupPolicies.length.toString())}
                             {groupPolicies.length <= 1 && (
-                              <span className="text-red-500 ml-2 text-xs">※最後の1つは削除できません</span>
+                              <span className="text-red-500 ml-2 text-xs">{dictionary.label.lastPolicyCannotRemove}</span>
                             )}
                           </div>
                           <div className="flex flex-wrap gap-2">
@@ -791,7 +792,7 @@ export default function GroupManagementPresentation({
                                   onClose={isLastPolicy ? undefined : () => handleRemovePolicyFromGroup(policyGroup.policyId)}
                                   className={isLastPolicy ? 'cursor-not-allowed' : ''}
                                 >
-                                  {policy?.policyName || '不明なポリシー'}
+                                  {policy?.policyName || dictionary.label.unknownPolicy}
                                 </Chip>
                               );
                             })}
@@ -801,7 +802,7 @@ export default function GroupManagementPresentation({
                       
                       {/* ポリシー追加 */}
                       <Autocomplete
-                        placeholder="ポリシーを検索・選択してください"
+                        placeholder={dictionary.label.searchAndSelectPolicy}
                         variant="bordered"
                         allowsCustomValue={false}
                         inputValue={policySearchTerm}
@@ -872,7 +873,7 @@ export default function GroupManagementPresentation({
                                 color="warning"
                                 onClose={() => setSelectedPolicyIds(prev => prev.filter(id => id !== policyId))}
                               >
-                                {policy?.policyName || '不明なポリシー'}
+                                {policy?.policyName || dictionary.label.unknownPolicy}
                               </Chip>
                             );
                           })}
@@ -887,7 +888,7 @@ export default function GroupManagementPresentation({
                         className="mt-2"
                         isDisabled={selectedPolicyIds.length === 0}
                       >
-                        選択したポリシーを追加
+                        {dictionary.label.addSelectedPolicies}
                       </Button>
                     </>
                   )}
@@ -895,17 +896,17 @@ export default function GroupManagementPresentation({
                 
                 {/* グループ情報 */}
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">グループ情報</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">{dictionary.label.groupInfo}</h3>
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p>作成日: {new Date(selectedGroup.createdAt).toLocaleDateString('ja-JP')}</p>
-                    <p>更新日: {new Date(selectedGroup.updatedAt).toLocaleDateString('ja-JP')}</p>
-                    <p>グループID: {selectedGroup.groupId}</p>
+                    <p>{dictionary.label.createdAt} {new Date(selectedGroup.createdAt).toLocaleDateString('ja-JP')}</p>
+                    <p>{dictionary.label.updatedAt} {new Date(selectedGroup.updatedAt).toLocaleDateString('ja-JP')}</p>
+                    <p>{dictionary.label.groupId} {selectedGroup.groupId}</p>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <p>左側のリストからグループを選択して編集を開始してください</p>
+                <p>{dictionary.label.selectGroupToEdit}</p>
               </div>
             )}
           </Card>
@@ -922,13 +923,13 @@ export default function GroupManagementPresentation({
         }}
       >
         <ModalContent className="bg-white">
-          <ModalHeader className="bg-white">グループの削除</ModalHeader>
+          <ModalHeader className="bg-white">{dictionary.label.deleteGroupTitle}</ModalHeader>
           <ModalBody className="bg-white">
             <p>
-              「{groupToDelete?.groupName}」を削除してもよろしいですか？
+              {dictionary.label.deleteGroupConfirm.replace('{groupName}', groupToDelete?.groupName || '')}
             </p>
             <p className="text-sm text-gray-600">
-              この操作は取り消すことができません。
+              {dictionary.label.deleteGroupWarning}
             </p>
           </ModalBody>
           <ModalFooter className="bg-white">
@@ -937,7 +938,7 @@ export default function GroupManagementPresentation({
               onPress={onDeleteModalClose}
               isDisabled={isDeleting}
             >
-              キャンセル
+              {dictionary.label.cancelButton}
             </Button>
             <Button
               color="danger"
@@ -945,7 +946,7 @@ export default function GroupManagementPresentation({
               isLoading={isDeleting}
               isDisabled={isDeleting}
             >
-              削除
+              {dictionary.label.delete}
             </Button>
           </ModalFooter>
         </ModalContent>

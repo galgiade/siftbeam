@@ -63,14 +63,14 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
     
     // パスワード確認の再チェック
     if (confirmPassword) {
-      setConfirmPasswordError(confirmPassword !== value ? 'パスワードが一致しません' : '');
+      setConfirmPasswordError(confirmPassword !== value ? dictionary.alert.passwordMismatch : '');
     }
   };
 
   // パスワード確認変更時のハンドラー
   const handleConfirmPasswordChange = (value: string) => {
     setConfirmPassword(value);
-    setConfirmPasswordError(password !== value ? 'パスワードが一致しません' : '');
+    setConfirmPasswordError(password !== value ? dictionary.alert.passwordMismatch : '');
   };
 
   // フォーム送信前のバリデーション（クライアントサイド）
@@ -110,7 +110,7 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
     // パスワード確認チェック
     if (passwordValue !== confirmPasswordValue) {
       event.preventDefault();
-      setConfirmPasswordError('パスワードが一致しません');
+      setConfirmPasswordError(dictionary.alert.passwordMismatch);
       console.log('パスワード不一致のため送信を中止');
       return;
     }
@@ -182,7 +182,7 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
               {dictionary.label.signUpTitle}
             </h1>
             <p className="mt-3 text-gray-600">
-              アカウントを作成してSiftBeamを始めましょう
+              {dictionary.label.welcomeMessage}
             </p>
           </div>
 
@@ -193,21 +193,21 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
                 <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
                   ✓
                 </div>
-                <span className="ml-2 text-sm font-medium text-green-600">アカウント作成</span>
+                <span className="ml-2 text-sm font-medium text-green-600">{dictionary.label.accountCreation}</span>
               </div>
               <div className="w-8 h-px bg-blue-600"></div>
               <div className="flex items-center">
                 <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
                   2
                 </div>
-                <span className="ml-2 text-sm font-medium text-blue-600">認証コード</span>
+                <span className="ml-2 text-sm font-medium text-blue-600">{dictionary.label.verificationTitle}</span>
               </div>
               <div className="w-8 h-px bg-gray-300"></div>
               <div className="flex items-center">
                 <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">
                   3
                 </div>
-                <span className="ml-2 text-sm text-gray-500">完了</span>
+                <span className="ml-2 text-sm text-gray-500">{dictionary.label.completed}</span>
               </div>
             </div>
           </div>
@@ -224,7 +224,7 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
           {/* フッター */}
           <div className="mt-8 text-center">
             <p className="text-xs text-gray-500">
-              © 2024 SiftBeam. All rights reserved.
+              {dictionary.label.copyright}
             </p>
           </div>
         </div>
@@ -247,7 +247,7 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
             {dictionary.label.signUpTitle}
           </h1>
           <p className="mt-3 text-gray-600">
-            アカウントを作成してSiftBeamを始めましょう
+            {dictionary.label.welcomeMessage}
           </p>
         </div>
 
@@ -258,26 +258,26 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
               <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
                 1
               </div>
-              <span className="ml-2 text-sm font-medium text-blue-600">アカウント作成</span>
+              <span className="ml-2 text-sm font-medium text-blue-600">{dictionary.label.accountCreation}</span>
             </div>
             <div className="flex items-center">
               <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">
                 2
               </div>
-              <span className="ml-2 text-sm text-gray-500">会社情報</span>
+              <span className="ml-2 text-sm text-gray-500">{dictionary.label.companyInfo}</span>
             </div>
             <div className="flex items-center">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">
                 3
               </div>
-              <span className="ml-2 text-sm text-gray-500">管理者</span>
+              <span className="ml-2 text-sm text-gray-500">{dictionary.label.adminSetup}</span>
             </div>
             <div className="flex items-center">
               <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">
                 4
               </div>
-              <span className="ml-2 text-sm text-gray-500">支払い設定</span>
+              <span className="ml-2 text-sm text-gray-500">{dictionary.label.paymentSetup}</span>
             </div>
               
             </div>
@@ -358,14 +358,14 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
             {/* パスワード確認入力 */}
             <div className="space-y-2">
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                パスワード確認
+                {dictionary.label.confirmPasswordLabel}
                 <span className="text-red-500 ml-1">*</span>
               </label>
               <Input
                 id="confirmPassword"
                 type="password"
                 name="confirmPassword"
-                placeholder="パスワードを再入力してください"
+                placeholder={dictionary.label.confirmPasswordPlaceholder}
                 value={confirmPassword}
                 onValueChange={handleConfirmPasswordChange}
                 isDisabled={isPending}
@@ -439,20 +439,20 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">または</span>
+                <span className="px-4 bg-white text-gray-500">{dictionary.label.orDivider}</span>
               </div>
             </div>
             
             {/* サインインリンク */}
             <div className="text-center space-y-4">
               <p className="text-sm text-gray-600">
-                既にアカウントをお持ちですか？
+                {dictionary.label.alreadyHaveAccount}
               </p>
               <Link
                 href={`/${locale}/signin`}
                 className="inline-flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200"
               >
-                サインイン
+                {dictionary.label.signIn}
               </Link>
             </div>
           </form>
@@ -461,7 +461,7 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
         {/* フッター */}
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            © 2024 SiftBeam. All rights reserved.
+            {dictionary.label.copyright}
           </p>
         </div>
       </div>

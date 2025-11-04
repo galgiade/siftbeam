@@ -24,7 +24,7 @@ export default async function AccountLayout(
   // 管理者以外は特定リンクを非表示
   const isAdmin = userAttributes.role === 'admin';
   const modeLabel = isAdmin ? account.adminMode : account.userMode;
-  const hiddenForNonAdmin = new Set(['/account/delete-account', '/account/payment']);
+  const hiddenForNonAdmin = new Set(['/account/account-deletion', '/account/payment']);
   // ナビゲーション項目の翻訳されたラベルを含む配列を作成
   const localizedNavItems = ACCOUNT_NAVIGATION_ITEMS
     .filter(item => isAdmin || !hiddenForNonAdmin.has(item.href))

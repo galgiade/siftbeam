@@ -1,4 +1,6 @@
-export default {
+import type { SignInLocale } from './signIn.d.ts';
+
+const id: SignInLocale = {
   label: {
     back: "Kembali",
     submit: "Kirim",
@@ -10,6 +12,8 @@ export default {
     passwordLabel: "Kata Sandi",
     passwordPlaceholder: "Masukkan kata sandi",
     passwordDescription: "Minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan simbol",
+    showPassword: "Tampilkan kata sandi",
+    hidePassword: "Sembunyikan kata sandi",
     signIn: "Masuk",
     signingIn: "Sedang masuk...",
     signUp: "Daftar",
@@ -26,9 +30,15 @@ export default {
     resendingCode: "Mengirim ulang...",
     codeExpired: "Kode verifikasi kedaluwarsa",
     enterVerificationCode: "Masukkan kode verifikasi",
+    twoFactorAuthTitle: "Autentikasi Dua Faktor",
+    twoFactorAuthDescription: "Masukkan kode verifikasi yang dikirim ke {email}",
     expirationTime: "Waktu Kedaluwarsa",
     attemptCount: "Percobaan",
-    verificationSuccess: "✅ Autentikasi berhasil. Mengalihkan..."
+    verificationSuccess: "✅ Autentikasi berhasil. Mengalihkan...",
+
+    // Lainnya
+    orDivider: "atau",
+    copyright: "© 2024 Hak cipta dilindungi."
   },
   alert: {
     emailRequired: "Masukkan alamat email",
@@ -61,6 +71,6 @@ export default {
       tooManyRequests: "Terlalu banyak permintaan. Coba lagi nanti"
     }
   }
-} as const;
+};
 
-
+export default id;

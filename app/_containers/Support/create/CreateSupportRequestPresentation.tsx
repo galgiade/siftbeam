@@ -4,7 +4,8 @@ import { useState, useActionState, useEffect, startTransition, useCallback } fro
 import { Button, Card, Input, Textarea, Select, SelectItem } from "@heroui/react"
 import { createSupportRequest } from "@/app/lib/actions/support-api"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { SupportCenterLocale } from '@/app/dictionaries/supportCenter/supportCenter.d.ts';
+import type { CommonLocale } from '@/app/dictionaries/common/common.d.ts';
 import { useRouter } from "next/navigation"
 import { FaLifeRing } from "react-icons/fa6"
 import FileUploader from "@/app/_components/FileUploader"
@@ -12,7 +13,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 interface CreateSupportRequestPresentationProps {
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: SupportCenterLocale;
+  commonDictionary: CommonLocale;
 }
 
 // サポートリクエスト作成フォームのデータ型
@@ -24,18 +26,19 @@ interface CreateSupportRequestFormData {
   fileKeys: string[];
 }
 
-// 問題タイプの選択肢
-const issueTypeOptions = [
-  { key: 'technical', label: '技術的な問題' },
-  { key: 'billing', label: '請求・支払いに関する問題' },
-  { key: 'feature', label: '機能追加のリクエスト' },
-  { key: 'bug', label: 'バグ報告' },
-  { key: 'other', label: 'その他' },
+// 問題タイプの選択肢を取得する関数
+const getIssueTypeOptions = (dictionary: SupportCenterLocale) => [
+  { key: 'technical', label: dictionary.label.issueTypeTechnicalOption },
+  { key: 'billing', label: dictionary.label.issueTypeBillingOption },
+  { key: 'feature', label: dictionary.label.issueTypeFeatureOption },
+  { key: 'bug', label: dictionary.label.issueTypeBugOption },
+  { key: 'other', label: dictionary.label.issueTypeOtherOption },
 ];
 
 export default function CreateSupportRequestPresentation({ 
   userAttributes, 
-  dictionary 
+  dictionary,
+  commonDictionary
 }: CreateSupportRequestPresentationProps) {
   const router = useRouter();
   
@@ -59,7 +62,7 @@ export default function CreateSupportRequestPresentation({
           'support-requestId': JSON.parse(formData.get('supportRequestId') as string),
           customerId: userAttributes.customerId,
           userId: userAttributes.sub,
-          userName: userAttributes.preferred_username || 'ユーザー',
+          userName: userAttributes.preferred_username || dictionary.label.customer,
           issueType: formData.get('issueType') as 'technical' | 'billing' | 'feature' | 'bug' | 'other',
           subject: formData.get('subject') as string,
           description: formData.get('description') as string,
@@ -77,8 +80,8 @@ export default function CreateSupportRequestPresentation({
         console.error('Error in form action:', error);
         return {
           success: false,
-          message: 'フォーム送信中にエラーが発生しました。',
-          errors: { general: [error?.message || '不明なエラー'] },
+          message: dictionary.alert.formSubmissionError,
+          errors: { general: [error?.message || dictionary.alert.unknownError] },
           data: undefined
         };
       }
@@ -134,15 +137,15 @@ export default function CreateSupportRequestPresentation({
     const errors: Record<string, string> = {};
 
     if (!formData.subject.trim()) {
-      errors.subject = '件名は必須です。';
+      errors.subject = dictionary.alert.subjectRequired;
     }
 
     if (!formData.description.trim()) {
-      errors.description = '問題の詳細は必須です。';
+      errors.description = dictionary.alert.descriptionRequired;
     }
 
     if (!formData.issueType) {
-      errors.issueType = '問題タイプを選択してください。';
+      errors.issueType = dictionary.alert.issueTypeRequired;
     }
 
     setClientErrors(errors);
@@ -176,15 +179,15 @@ export default function CreateSupportRequestPresentation({
       <div className="max-w-2xl mx-auto">
         <Card className="p-8 shadow-lg">
           <div className="flex items-center gap-3 mb-8">
-            <h1 className="text-3xl font-bold">サポートリクエストを作成</h1>
+            <h1 className="text-3xl font-bold">{dictionary.label.createSupportRequest}</h1>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 問題タイプ */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                問題タイプ
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.issueTypeLabel2}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Select
                 name="issueType"
@@ -194,7 +197,7 @@ export default function CreateSupportRequestPresentation({
                   handleFieldChange('issueType', selectedKey);
                 }}
                 variant="bordered"
-                placeholder="問題タイプを選択"
+                placeholder={dictionary.label.selectIssueType}
                 isInvalid={!!(clientErrors.issueType || getErrorMessage('issueType'))}
                 errorMessage={clientErrors.issueType || getErrorMessage('issueType')}
                 classNames={{
@@ -202,7 +205,7 @@ export default function CreateSupportRequestPresentation({
                   popoverContent: "bg-white shadow-lg border border-gray-200"
                 }}
               >
-                {issueTypeOptions.map(option => (
+                {getIssueTypeOptions(dictionary).map(option => (
                   <SelectItem key={option.key} className="bg-white hover:bg-gray-100">
                     {option.label}
                   </SelectItem>
@@ -213,14 +216,14 @@ export default function CreateSupportRequestPresentation({
             {/* 件名 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                件名
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.subjectLabel}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Input
                 name="subject"
                 value={formData.subject}
                 onValueChange={(value) => handleFieldChange('subject', value)}
-                placeholder="問題の件名を入力"
+                placeholder={dictionary.label.subjectPlaceholder2}
                 variant="bordered"
                 isInvalid={!!(clientErrors.subject || getErrorMessage('subject'))}
                 errorMessage={clientErrors.subject || getErrorMessage('subject')}
@@ -230,14 +233,14 @@ export default function CreateSupportRequestPresentation({
             {/* 問題の詳細 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                問題の詳細
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.problemDetailsLabel}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Textarea
                 name="description"
                 value={formData.description}
                 onValueChange={(value) => handleFieldChange('description', value)}
-                placeholder="問題の詳細を具体的に記述してください。エラーメッセージ、発生状況、期待する動作などを含めてください。"
+                placeholder={dictionary.label.problemDetailsPlaceholder}
                 variant="bordered"
                 minRows={5}
                 isInvalid={!!(clientErrors.description || getErrorMessage('description'))}
@@ -248,8 +251,8 @@ export default function CreateSupportRequestPresentation({
             {/* ファイル添付 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                ファイル添付
-                <span className="text-gray-500 ml-2 text-xs">(任意)</span>
+                {dictionary.label.fileAttachment}
+                <span className="text-gray-500 ml-2 text-xs">{dictionary.label.optionalLabel}</span>
               </label>
               <FileUploader
                 customerId={userAttributes.customerId}
@@ -260,10 +263,11 @@ export default function CreateSupportRequestPresentation({
                 maxFiles={5}
                 maxFileSize={10}
                 disabled={isPending}
+                commonDictionary={commonDictionary}
               />
               {formData.fileKeys.length > 0 && (
                 <p className="text-xs text-gray-600">
-                  {formData.fileKeys.length}個のファイルが選択されています
+                  {formData.fileKeys.length}{dictionary.label.filesSelected}
                 </p>
               )}
             </div>
@@ -281,7 +285,7 @@ export default function CreateSupportRequestPresentation({
                 {/* 詳細エラー表示 */}
                 {state.errors && Object.keys(state.errors).length > 0 && (
                   <div className="mt-2 space-y-2">
-                    <p className="text-red-600 text-xs font-medium">詳細エラー:</p>
+                    <p className="text-red-600 text-xs font-medium">{dictionary.label.detailedErrors}</p>
                     {Object.entries(state.errors).map(([field, fieldErrors]) => (
                       <div key={field} className="text-xs text-red-600">
                         <span className="font-medium">{field}:</span>
@@ -295,7 +299,7 @@ export default function CreateSupportRequestPresentation({
                 
                 {/* デバッグ情報 */}
                 <details className="mt-2">
-                  <summary className="text-xs text-red-500 cursor-pointer">デバッグ情報を表示</summary>
+                  <summary className="text-xs text-red-500 cursor-pointer">{dictionary.label.showDebugInfo}</summary>
                   <pre className="mt-2 text-xs text-red-600 bg-red-100 p-2 rounded overflow-auto">
                     {JSON.stringify(state, null, 2)}
                   </pre>
@@ -321,7 +325,7 @@ export default function CreateSupportRequestPresentation({
                 onPress={() => router.back()}
                 className="flex-1"
               >
-                キャンセル
+                {dictionary.label.cancelButton}
               </Button>
               <Button
                 type="submit"
@@ -330,7 +334,7 @@ export default function CreateSupportRequestPresentation({
                 isLoading={isPending}
                 isDisabled={isPending}
               >
-                {isPending ? 'サポートリクエスト作成中...' : 'サポートリクエストを作成'}
+                {isPending ? dictionary.label.creatingRequest : dictionary.label.createRequestButton}
               </Button>
             </div>
           </form>

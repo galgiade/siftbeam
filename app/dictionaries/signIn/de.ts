@@ -1,4 +1,6 @@
-export default {
+import type { SignInLocale } from './signIn.d.ts';
+
+const de: SignInLocale = {
   label: {
     back: "Zurück",
     submit: "Senden",
@@ -10,6 +12,8 @@ export default {
     passwordLabel: "Passwort",
     passwordPlaceholder: "Passwort eingeben",
     passwordDescription: "Mindestens 8 Zeichen mit Groß-/Kleinbuchstaben, Zahlen und Symbolen",
+    showPassword: "Passwort anzeigen",
+    hidePassword: "Passwort verbergen",
     signIn: "Anmelden",
     signingIn: "Anmeldung...",
     signUp: "Konto erstellen",
@@ -26,9 +30,15 @@ export default {
     resendingCode: "Wird erneut gesendet...",
     codeExpired: "Der Bestätigungscode ist abgelaufen",
     enterVerificationCode: "Bestätigungscode eingeben",
+    twoFactorAuthTitle: "Zwei-Faktor-Authentifizierung",
+    twoFactorAuthDescription: "Geben Sie den Bestätigungscode ein, der an {email} gesendet wurde",
     expirationTime: "Gültigkeitsdauer",
     attemptCount: "Versuche",
-    verificationSuccess: "✅ Authentifizierung erfolgreich. Weiterleitung..."
+    verificationSuccess: "✅ Authentifizierung erfolgreich. Weiterleitung...",
+
+    // Sonstiges
+    orDivider: "oder",
+    copyright: "© 2024 Alle Rechte vorbehalten."
   },
   alert: {
     emailRequired: "Bitte E-Mail-Adresse eingeben",
@@ -61,6 +71,6 @@ export default {
       tooManyRequests: "Zu viele Versuche. Bitte später erneut versuchen"
     }
   }
-} as const;
+};
 
-
+export default de;

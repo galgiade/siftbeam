@@ -1,4 +1,6 @@
-export default {
+import type { CreatePaymentLocale } from './createPayment.d.ts';
+
+const ko: CreatePaymentLocale = {
   label: {
     back: "뒤로",
     submit: "제출",
@@ -22,6 +24,7 @@ export default {
     linkCompatibleStores: "기본 사운드박스를 포함한 Link 호환 매장에서 빠르게 결제할 수 있습니다.",
     cardInfoEncrypted: "카드 정보는 암호화되어 안전하게 저장됩니다.",
     billingBasedOnUsage: "실제 청구는 사용량에 따라 나중에 이루어집니다.",
+    dataRetentionNotice: "처리된 데이터는 1년간 무료로 저장되며 이후 자동으로 삭제됩니다",
     authenticationFlowDescription: "보안상 카드 인증이 필요할 수 있습니다.",
     authenticationFlowSteps: "인증이 필요한 경우 은행 인증 화면이 표시됩니다. 인증을 완료해 주세요.",
     agreeNoticePrefix: "등록을 완료하면 ",
@@ -44,6 +47,6 @@ export default {
     authenticationCancelled: "카드 인증이 취소되었습니다.",
     authenticationIncomplete: "카드 인증이 완료되지 않았습니다. 인증을 완료해 주세요."
   }
-} as const;
+};
 
-
+export default ko;

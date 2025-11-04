@@ -1,4 +1,6 @@
-export default {
+import type { PolicyManagementLocale } from './policy-management.d.ts';
+
+const de: PolicyManagementLocale = {
   label: {
     policyList: "Richtlinienliste",
     policyNotRegistered: "Keine Richtlinien registriert",
@@ -21,8 +23,73 @@ export default {
       'application/msword': 'Word-Datei (.doc)',
       'text/plain': 'Textdatei',
       'application/json': 'JSON-Datei',
-      'application/zip': 'ZIP-Archiv'
-    }
+      'application/zip': 'ZIP-Archiv',
+      'video/mp4': 'MP4-Video',
+      'audio/mpeg': 'MP3-Audio'
+    },
+    policyManagement: "Richtlinienverwaltung",
+    errorOccurred: "Ein Fehler ist aufgetreten",
+    contactAdmin: "Wenn das Problem weiterhin besteht, wenden Sie sich bitte an Ihren Systemadministrator.",
+    reloadPage: "Seite neu laden",
+    goBack: "Zurück",
+    createNewPolicy: "Neue Richtlinie erstellen",
+    requiredField: "*",
+    allowedFileTypesLabel: "Zulässige Dateitypen",
+    selectFileTypesPlaceholder: "Bitte Dateitypen auswählen",
+    cancel: "Abbrechen",
+    createPolicy: "Richtlinie erstellen",
+    detailedError: "Detaillierter Fehler",
+    debugInfo: "Debug-Informationen anzeigen",
+    policyCount: "{count} Richtlinien",
+    searchPlaceholder: "Nach Richtlinienname, Beschreibung suchen...",
+    noPoliciesFound: "Keine Richtlinien gefunden",
+    fileTypeCount: "{count} Dateitypen",
+    editingPolicy: "{policyName} bearbeiten",
+    selectPolicy: "Wählen Sie eine Richtlinie",
+    selectPolicyPrompt: "Wählen Sie eine Richtlinie aus der Liste links aus, um mit der Bearbeitung zu beginnen",
+    readOnly: "(Schreibgeschützt)",
+    notSet: "Nicht festgelegt",
+    policyInfo: "Richtlinieninformationen",
+    createdAt: "Erstellt",
+    updatedAt: "Aktualisiert",
+    policyId: "Richtlinien-ID",
+    fileTypeRestriction: "※ Zulässige Dateitypen können nicht geändert werden.",
+    performanceAnalysisTitle: "Leistungsanalyseergebnisse für {policyName}",
+    analysisCount: "{count} Analyseergebnisse",
+    error: "Fehler",
+    success: "Erfolg",
+    aiPerformanceAnalysis: "KI-Leistungsanalyseergebnisse",
+    noAnalysisResults: "Keine Analyseergebnisse",
+    noAnalysisYet: "Mit dieser Richtlinie wurde noch keine KI-Analyse durchgeführt.",
+    startAnalysisPrompt: "Starten Sie eine neue Analyse über das obige Formular.",
+    analysisDate: "Analysedatum",
+    modelUsed: "Verwendetes Modell",
+    status: "Status",
+    top1Accuracy: "Top-1-Genauigkeit",
+    defectDetectionRate: "Fehlererkennungsrate",
+    f1Score: "F1-Score",
+    latencyP95: "Latenz (P95)",
+    errorRate: "Fehlerrate",
+    report: "Bericht",
+    usageStatus: "Nutzungsstatus",
+    viewReport: "Bericht anzeigen",
+    inUse: "In Verwendung",
+    select: "Auswählen",
+    deletePolicy: "Richtlinie löschen",
+    confirmDelete: "Möchten Sie \"{policyName}\" wirklich löschen?",
+    cannotUndo: "Diese Aktion kann nicht rückgängig gemacht werden.",
+    delete: "Löschen",
+    statusPending: "Ausstehend",
+    statusRunning: "Läuft",
+    statusCompleted: "Abgeschlossen",
+    statusFailed: "Fehlgeschlagen",
+    statusCancelled: "Abgebrochen",
+    analysisStarted: "Die Richtlinienanalyse wurde gestartet",
+    analysisStartFailed: "Fehler beim Starten der Richtlinienanalyse",
+    analysisStartError: "Beim Starten der Richtlinienanalyse ist ein Fehler aufgetreten",
+    analysisSwitched: "Das Analysemodell wurde gewechselt",
+    analysisSwitchFailed: "Fehler beim Wechseln des Analysemodells",
+    analysisSwitchError: "Beim Wechseln des Analysemodells ist ein Fehler aufgetreten"
   },
   alert: {
     required: "Dieses Feld ist erforderlich",
@@ -32,7 +99,29 @@ export default {
     adminOnlyCreateMessage: "Nur Administratoren können Richtlinien erstellen. Bitte wenden Sie sich an Ihren Administrator.",
     updateSuccess: "Richtlinie erfolgreich aktualisiert",
     updateFailed: "Fehler beim Aktualisieren der Richtlinie",
-    validationError: "Bitte überprüfen Sie Ihre Eingabe"
+    validationError: "Bitte überprüfen Sie Ihre Eingabe",
+    fieldUpdateSuccess: "{fieldName} wurde erfolgreich aktualisiert.",
+    fieldUpdateFail: "Aktualisierung von {fieldName} fehlgeschlagen.",
+    updateError: "Während des Aktualisierungsvorgangs ist ein Fehler aufgetreten.",
+    fieldRequired: "{fieldLabel} ist erforderlich.",
+    policyNotSelected: "Keine Richtlinie ausgewählt.",
+    selectPolicyAndModel: "Bitte wählen Sie eine Richtlinie und ein Modell aus",
+    accessDenied: "Sie haben keine Berechtigung, auf diese Seite zuzugreifen. Nur Administratoren haben Zugriff.",
+    fetchPoliciesFailed: "Fehler beim Abrufen der Richtlinienliste.",
+    errorLabel: "Fehler",
+    customerIdLabel: "Kunden-ID",
+    timestampLabel: "Zeitstempel",
+    detailedErrorLabel: "Detaillierter Fehler",
+    authError: "Authentifizierungsfehler",
+    errorType: "Fehlertyp",
+    localeLabel: "Gebietsschema",
+    stackTrace: "Stack-Trace",
+    unknownError: "Unbekannter Fehler",
+    noStackTrace: "Kein Stack-Trace",
+    policyNameRequired: "Richtlinienname ist erforderlich.",
+    descriptionRequired: "Beschreibung ist erforderlich.",
+    fileTypeSelectionRequired: "Bitte wählen Sie mindestens einen zulässigen Dateityp aus.",
+    formSubmissionError: "Beim Absenden des Formulars ist ein Fehler aufgetreten."
   },
   analysis: {
     title: "Analyse",
@@ -55,7 +144,6 @@ export default {
       view: "Anzeigen"
     }
   }
-} as const;
+};
 
-
-
+export default de;

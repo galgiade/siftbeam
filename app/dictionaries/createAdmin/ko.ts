@@ -1,4 +1,6 @@
-export default {
+import type { CreateAdminLocale } from './createAdmin.d.ts';
+
+const ko: CreateAdminLocale = {
   label: {
     back: "뒤로",
     submit: "제출",
@@ -12,6 +14,7 @@ export default {
     positionLabel: "직책",
     positionPlaceholder: "매니저",
     languageLabel: "언어",
+    languagePlaceholder: "언어를 선택하세요",
     japanese: "일본어",
     english: "영어",
     spanish: "스페인어",
@@ -37,6 +40,6 @@ export default {
     adminCreationFailed: "관리자 계정 생성에 실패했습니다",
     networkError: "네트워크 오류가 발생했습니다"
   }
-} as const;
+};
 
-
+export default ko;

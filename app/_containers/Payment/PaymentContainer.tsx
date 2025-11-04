@@ -1,7 +1,7 @@
 import PaymentPresentation from "./PaymentPresentation";
 import { getUserCustomAttributes } from '@/app/utils/cognito-utils';
-import { paymentMethodsDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
-import type { PaymentMethodsLocale } from '@/app/dictionaries/paymentMethods/paymentMethods.d.ts';
+import { paymentDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import type { PaymentLocale } from '@/app/dictionaries/payment/payment.d.ts';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -12,7 +12,7 @@ export default async function PaymentContainer({ locale }: { locale: string }) {
   const customerId = userAttributes?.['custom:customerId'];
   
   // 辞書を取得
-  const dictionary: PaymentMethodsLocale = pickDictionary(paymentMethodsDictionaries, locale, 'en');
+  const dictionary: PaymentLocale = pickDictionary(paymentDictionaries, locale, 'en');
 
   // customerIdが存在する場合、Stripe APIから直接データを取得
   let paymentMethods = null;

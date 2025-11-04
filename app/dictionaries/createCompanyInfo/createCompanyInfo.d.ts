@@ -4,6 +4,7 @@ export type CreateCompanyInfoLocale = {
     back: string;
     submit: string;
     next: string;
+    submitting: string;
     loading: string;
     
     // ページタイトル

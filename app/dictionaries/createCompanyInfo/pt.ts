@@ -1,8 +1,11 @@
-export default {
+import type { CreateCompanyInfoLocale } from './createCompanyInfo.d.ts';
+
+const pt: CreateCompanyInfoLocale = {
   label: {
     back: "Voltar",
     submit: "Enviar",
     next: "Próximo",
+    submitting: "Enviando...",
     loading: "Carregando...",
     companyInfoTitle: "Informações da empresa",
     countryLabel: "País",
@@ -41,6 +44,6 @@ export default {
     stripeCustomerCreationFailed: "Falha ao criar cliente Stripe",
     communicationError: "Erro de comunicação"
   }
-} as const;
+};
 
-
+export default pt;

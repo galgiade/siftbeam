@@ -1,4 +1,6 @@
-export default {
+import type { AccountLocale } from './AccountLocale.d.ts';
+
+const de: AccountLocale = {
   user: "Benutzer",
   company: "Unternehmen",
   userManagement: "Benutzerverwaltung",
@@ -21,6 +23,6 @@ export default {
   userProfile: "Benutzerprofil",
   paymentSettings: "Zahlungseinstellungen",
   groupManagement: "Gruppenverwaltung"
-} as const;
+};
 
-
+export default de;

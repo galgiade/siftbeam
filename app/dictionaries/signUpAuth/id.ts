@@ -1,4 +1,6 @@
-export default {
+import type { SignUpAuthLocale } from './signUpAuth.d.ts';
+
+const id: SignUpAuthLocale = {
   label: {
     back: "Kembali",
     submit: "Kirim",
@@ -10,6 +12,8 @@ export default {
     passwordLabel: "Kata Sandi",
     passwordPlaceholder: "Masukkan kata sandi",
     passwordDescription: "Minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan simbol",
+    confirmPasswordLabel: "Konfirmasi Kata Sandi",
+    confirmPasswordPlaceholder: "Masukkan kembali kata sandi",
     verificationCodeLabel: "Kode Verifikasi",
     verificationCodeDescription: "Masukkan kode 6 digit yang dikirim ke",
     register: "Daftar",
@@ -21,7 +25,13 @@ export default {
     accountCreation: "Pembuatan Akun",
     companyInfo: "Informasi Perusahaan",
     adminSetup: "Pengaturan Admin",
-    paymentSetup: "Pengaturan Pembayaran"
+    paymentSetup: "Pengaturan Pembayaran",
+    completed: "Selesai",
+    welcomeMessage: "Buat akun dan mulai gunakan SiftBeam",
+    orDivider: "atau",
+    alreadyHaveAccount: "Sudah punya akun?",
+    signIn: "Masuk",
+    copyright: "© 2024 SiftBeam. Hak cipta dilindungi."
   },
   alert: {
     emailRequired: "Masukkan alamat email",
@@ -29,6 +39,7 @@ export default {
     emailAndPasswordRequired: "Masukkan email dan kata sandi",
     invalidEmailFormat: "Masukkan format email yang valid",
     invalidPasswordFormat: "Kata sandi minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan simbol",
+    passwordMismatch: "Kata sandi tidak cocok",
     verificationCodeRequired: "Masukkan kode verifikasi",
     verificationCodeLength: "Masukkan kode 6 digit",
     codeResent: "Kode verifikasi telah dikirim ulang",
@@ -55,6 +66,6 @@ export default {
     confirm: "Konfirmasi",
     verifying: "Memverifikasi..."
   }
-} as const;
+};
 
-
+export default id;

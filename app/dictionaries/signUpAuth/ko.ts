@@ -1,4 +1,6 @@
-export default {
+import type { SignUpAuthLocale } from './signUpAuth.d.ts';
+
+const ko: SignUpAuthLocale = {
   label: {
     back: "뒤로",
     submit: "제출",
@@ -10,6 +12,8 @@ export default {
     passwordLabel: "비밀번호",
     passwordPlaceholder: "비밀번호를 입력하세요",
     passwordDescription: "대문자/소문자/숫자/기호를 포함하여 최소 8자",
+    confirmPasswordLabel: "비밀번호 확인",
+    confirmPasswordPlaceholder: "비밀번호를 다시 입력하세요",
     verificationCodeLabel: "인증 코드",
     verificationCodeDescription: "전송된 6자리 인증 코드를 입력하세요",
     register: "등록",
@@ -21,7 +25,13 @@ export default {
     accountCreation: "계정 생성",
     companyInfo: "회사 정보",
     adminSetup: "관리자 설정",
-    paymentSetup: "결제 설정"
+    paymentSetup: "결제 설정",
+    completed: "완료",
+    welcomeMessage: "계정을 만들고 SiftBeam을 시작하세요",
+    orDivider: "또는",
+    alreadyHaveAccount: "이미 계정이 있으신가요?",
+    signIn: "로그인",
+    copyright: "© 2024 SiftBeam. 모든 권리 보유."
   },
   alert: {
     emailRequired: "이메일 주소를 입력하세요",
@@ -29,6 +39,7 @@ export default {
     emailAndPasswordRequired: "이메일과 비밀번호를 입력하세요",
     invalidEmailFormat: "유효한 이메일 주소 형식을 입력하세요",
     invalidPasswordFormat: "비밀번호는 대문자/소문자/숫자/기호를 포함하여 최소 8자여야 합니다",
+    passwordMismatch: "비밀번호가 일치하지 않습니다",
     verificationCodeRequired: "인증 코드를 입력하세요",
     verificationCodeLength: "6자리 인증 코드를 입력하세요",
     codeResent: "인증 코드가 재전송되었습니다",
@@ -55,6 +66,6 @@ export default {
     confirm: "확인",
     verifying: "확인 중..."
   }
-} as const;
+};
 
-
+export default ko;

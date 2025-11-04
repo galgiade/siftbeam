@@ -4,13 +4,13 @@ import { useState, useActionState, useEffect, startTransition } from "react"
 import { Button, Card, Input, Select, SelectItem } from "@heroui/react"
 import { createUser } from "@/app/lib/actions/user-api"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { UserManagementLocale } from '@/app/dictionaries/user-management/user-management.d.ts';
 import { useRouter } from "next/navigation"
 import VerificationForm from "@/app/_components/VerificationForm"
 
 interface CreateUserManagementPresentationProps {
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: UserManagementLocale;
 }
 
 // ユーザー作成フォームのデータ型
@@ -77,8 +77,8 @@ export default function CreateUserManagementPresentation({
         console.error('Error in form action:', error);
         return {
           success: false,
-          message: 'フォーム送信中にエラーが発生しました。',
-          errors: { general: [error?.message || '不明なエラー'] },
+          message: dictionary.label.errorOccurredGeneric,
+          errors: { general: [error?.message || dictionary.label.unknownError] },
           data: undefined,
           verificationId: undefined,
           email: undefined
@@ -144,30 +144,30 @@ export default function CreateUserManagementPresentation({
     const errors: Record<string, string> = {};
 
     if (!formData.userName.trim()) {
-      errors.userName = 'ユーザー名は必須です。';
+      errors.userName = dictionary.alert.required.replace('{label}', dictionary.label.userName);
     }
 
     if (!formData.email.trim()) {
-      errors.email = 'メールアドレスは必須です。';
+      errors.email = dictionary.alert.required.replace('{label}', dictionary.label.email);
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        errors.email = '有効なメールアドレスを入力してください。';
+        errors.email = dictionary.alert.invalidEmail;
       }
     }
 
     if (!formData.department.trim()) {
-      errors.department = '部署は必須です。';
+      errors.department = dictionary.alert.required.replace('{label}', dictionary.label.department);
     }
 
     if (!formData.position.trim()) {
-      errors.position = '役職は必須です。';
+      errors.position = dictionary.alert.required.replace('{label}', dictionary.label.position);
     }
 
     if (!formData.password.trim()) {
-      errors.password = 'パスワードは必須です。';
+      errors.password = dictionary.alert.passwordRequired;
     } else if (formData.password.length < 8) {
-      errors.password = 'パスワードは8文字以上で入力してください。';
+      errors.password = dictionary.alert.passwordPolicy;
     }
 
     setClientErrors(errors);
@@ -217,8 +217,8 @@ export default function CreateUserManagementPresentation({
 
   // ロール選択肢
   const roleOptions = [
-    { key: 'user', label: 'ユーザー' },
-    { key: 'admin', label: '管理者' },
+    { key: 'user', label: dictionary.label.roleUser },
+    { key: 'admin', label: dictionary.label.roleAdmin },
   ];
 
   // 2段階認証フォームを表示
@@ -241,20 +241,20 @@ export default function CreateUserManagementPresentation({
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-2xl mx-auto">
         <Card className="p-8 shadow-lg">
-          <h1 className="text-3xl font-bold mb-8 text-center">新しいユーザーを作成</h1>
+          <h1 className="text-3xl font-bold mb-8 text-center">{dictionary.label.createNewUser}</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* ユーザー名 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                ユーザー名
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.userName}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Input
                 name="userName"
                 value={formData.userName}
                 onValueChange={(value) => handleFieldChange('userName', value)}
-                placeholder="ユーザー名を入力"
+                placeholder={dictionary.label.userNamePlaceholder}
                 variant="bordered"
                 isInvalid={!!(clientErrors.userName || getErrorMessage('userName'))}
                 errorMessage={clientErrors.userName || getErrorMessage('userName')}
@@ -264,15 +264,15 @@ export default function CreateUserManagementPresentation({
             {/* メールアドレス */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                メールアドレス
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.email}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Input
                 name="email"
                 type="email"
                 value={formData.email}
                 onValueChange={(value) => handleFieldChange('email', value)}
-                placeholder="メールアドレスを入力"
+                placeholder={dictionary.label.emailPlaceholder}
                 variant="bordered"
                 isInvalid={!!(clientErrors.email || getErrorMessage('email'))}
                 errorMessage={clientErrors.email || getErrorMessage('email')}
@@ -282,14 +282,14 @@ export default function CreateUserManagementPresentation({
             {/* 部署 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                部署
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.department}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Input
                 name="department"
                 value={formData.department}
                 onValueChange={(value) => handleFieldChange('department', value)}
-                placeholder="部署を入力"
+                placeholder={dictionary.label.departmentPlaceholder}
                 variant="bordered"
                 isInvalid={!!(clientErrors.department || getErrorMessage('department'))}
                 errorMessage={clientErrors.department || getErrorMessage('department')}
@@ -299,14 +299,14 @@ export default function CreateUserManagementPresentation({
             {/* 役職 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                役職
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.position}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Input
                 name="position"
                 value={formData.position}
                 onValueChange={(value) => handleFieldChange('position', value)}
-                placeholder="役職を入力"
+                placeholder={dictionary.label.positionPlaceholder}
                 variant="bordered"
                 isInvalid={!!(clientErrors.position || getErrorMessage('position'))}
                 errorMessage={clientErrors.position || getErrorMessage('position')}
@@ -316,8 +316,8 @@ export default function CreateUserManagementPresentation({
             {/* ロール */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                ロール
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.role}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Select
                 name="role"
@@ -327,7 +327,7 @@ export default function CreateUserManagementPresentation({
                   handleFieldChange('role', selectedKey);
                 }}
                 variant="bordered"
-                placeholder="ロールを選択"
+                placeholder={dictionary.label.rolePlaceholder2}
                 classNames={{
                   listbox: "bg-white shadow-lg border border-gray-200",
                   popoverContent: "bg-white shadow-lg border border-gray-200"
@@ -344,8 +344,8 @@ export default function CreateUserManagementPresentation({
             {/* 言語設定 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                言語設定
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.locale}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Select
                 name="locale"
@@ -355,7 +355,7 @@ export default function CreateUserManagementPresentation({
                   handleFieldChange('locale', selectedKey);
                 }}
                 variant="bordered"
-                placeholder="言語を選択"
+                placeholder={dictionary.label.localePlaceholder}
                 classNames={{
                   listbox: "bg-white shadow-lg border border-gray-200",
                   popoverContent: "bg-white shadow-lg border border-gray-200"
@@ -372,15 +372,15 @@ export default function CreateUserManagementPresentation({
             {/* パスワード */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                パスワード
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.password}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Input
                 name="password"
                 type="password"
                 value={formData.password}
                 onValueChange={(value) => handleFieldChange('password', value)}
-                placeholder="パスワードを入力（8文字以上）"
+                placeholder={dictionary.label.passwordPlaceholder}
                 variant="bordered"
                 isInvalid={!!(clientErrors.password || getErrorMessage('password'))}
                 errorMessage={clientErrors.password || getErrorMessage('password')}
@@ -400,7 +400,7 @@ export default function CreateUserManagementPresentation({
                 {/* 詳細エラー表示 */}
                 {state.errors && Object.keys(state.errors).length > 0 && (
                   <div className="mt-2 space-y-2">
-                    <p className="text-red-600 text-xs font-medium">詳細エラー:</p>
+                    <p className="text-red-600 text-xs font-medium">{dictionary.label.detailedErrors}</p>
                     {Object.entries(state.errors).map(([field, fieldErrors]) => (
                       <div key={field} className="text-xs text-red-600">
                         <span className="font-medium">{field}:</span>
@@ -414,7 +414,7 @@ export default function CreateUserManagementPresentation({
                 
                 {/* デバッグ情報 */}
                 <details className="mt-2">
-                  <summary className="text-xs text-red-500 cursor-pointer">デバッグ情報を表示</summary>
+                  <summary className="text-xs text-red-500 cursor-pointer">{dictionary.label.showDebugInfo}</summary>
                   <pre className="mt-2 text-xs text-red-600 bg-red-100 p-2 rounded overflow-auto">
                     {JSON.stringify(state, null, 2)}
                   </pre>
@@ -440,7 +440,7 @@ export default function CreateUserManagementPresentation({
                 onPress={() => router.back()}
                 className="flex-1"
               >
-                キャンセル
+                {dictionary.label.cancelButton}
               </Button>
               <Button
                 type="submit"
@@ -449,7 +449,7 @@ export default function CreateUserManagementPresentation({
                 isLoading={isPending}
                 isDisabled={isPending}
               >
-                ユーザーを作成
+                {dictionary.label.createUserButton}
               </Button>
             </div>
           </form>

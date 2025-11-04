@@ -1,4 +1,6 @@
-export default {
+import type { SignInLocale } from './signIn.d.ts';
+
+const ja: SignInLocale = {
   label: {
     back: "戻る",
     submit: "送信",
@@ -10,6 +12,8 @@ export default {
     passwordLabel: "パスワード",
     passwordPlaceholder: "パスワードを入力してください",
     passwordDescription: "8文字以上で、英大文字・小文字・数字・記号を含めてください",
+    showPassword: "パスワードを表示",
+    hidePassword: "パスワードを隠す",
     signIn: "サインイン",
     signingIn: "サインイン中...",
     signUp: "新規登録",
@@ -26,9 +30,15 @@ export default {
     resendingCode: "再送信中...",
     codeExpired: "認証コードの有効期限が切れました",
     enterVerificationCode: "認証コードを入力してください",
+    twoFactorAuthTitle: "二段階認証",
+    twoFactorAuthDescription: "{email} に送信された認証コードを入力してください",
     expirationTime: "有効期限",
     attemptCount: "試行回数",
-    verificationSuccess: "✅ 認証に成功しました。リダイレクト中..."
+    verificationSuccess: "✅ 認証に成功しました。リダイレクト中...",
+    
+    // その他
+    orDivider: "または",
+    copyright: "© 2024 All rights reserved."
   },
   alert: {
     emailRequired: "メールアドレスを入力してください",
@@ -62,6 +72,6 @@ export default {
       tooManyRequests: "リクエストが多すぎます。しばらく後に再試行してください"
     }
   }
-} as const;
+};
 
-
+export default ja;

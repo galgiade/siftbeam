@@ -1,4 +1,6 @@
-export default {
+import type { PolicyManagementLocale } from './policy-management.d.ts';
+
+const id: PolicyManagementLocale = {
   label: {
     policyList: "Daftar Kebijakan",
     policyNotRegistered: "Tidak ada kebijakan terdaftar",
@@ -21,8 +23,73 @@ export default {
       "application/msword": "Berkas Word (.doc)",
       "text/plain": "Berkas Teks",
       "application/json": "Berkas JSON",
-      "application/zip": "Arsip ZIP"
-    }
+      "application/zip": "Arsip ZIP",
+      "video/mp4": "Video MP4",
+      "audio/mpeg": "Audio MP3"
+    },
+    policyManagement: "Manajemen Kebijakan",
+    errorOccurred: "Terjadi Kesalahan",
+    contactAdmin: "Jika masalah berlanjut, silakan hubungi administrator sistem Anda.",
+    reloadPage: "Muat Ulang Halaman",
+    goBack: "Kembali",
+    createNewPolicy: "Buat Kebijakan Baru",
+    requiredField: "*",
+    allowedFileTypesLabel: "Jenis File yang Diizinkan",
+    selectFileTypesPlaceholder: "Silakan pilih jenis file",
+    cancel: "Batal",
+    createPolicy: "Buat Kebijakan",
+    detailedError: "Kesalahan Terperinci",
+    debugInfo: "Tampilkan Info Debug",
+    policyCount: "{count} kebijakan",
+    searchPlaceholder: "Cari berdasarkan nama kebijakan, deskripsi...",
+    noPoliciesFound: "Tidak ada kebijakan yang ditemukan",
+    fileTypeCount: "{count} jenis file",
+    editingPolicy: "Mengedit {policyName}",
+    selectPolicy: "Pilih Kebijakan",
+    selectPolicyPrompt: "Pilih kebijakan dari daftar di sebelah kiri untuk mulai mengedit",
+    readOnly: "(Hanya baca)",
+    notSet: "Tidak diatur",
+    policyInfo: "Informasi Kebijakan",
+    createdAt: "Dibuat",
+    updatedAt: "Diperbarui",
+    policyId: "ID Kebijakan",
+    fileTypeRestriction: "※ Jenis file yang diizinkan tidak dapat diubah.",
+    performanceAnalysisTitle: "Hasil Analisis Kinerja untuk {policyName}",
+    analysisCount: "{count} hasil analisis",
+    error: "Kesalahan",
+    success: "Berhasil",
+    aiPerformanceAnalysis: "Hasil Analisis Kinerja AI",
+    noAnalysisResults: "Tidak ada hasil analisis",
+    noAnalysisYet: "Belum ada analisis AI yang dilakukan menggunakan kebijakan ini.",
+    startAnalysisPrompt: "Mulai analisis baru dari formulir di atas.",
+    analysisDate: "Tanggal Analisis",
+    modelUsed: "Model yang Digunakan",
+    status: "Status",
+    top1Accuracy: "Akurasi Top-1",
+    defectDetectionRate: "Tingkat Deteksi Cacat",
+    f1Score: "Skor F1",
+    latencyP95: "Latensi (P95)",
+    errorRate: "Tingkat Kesalahan",
+    report: "Laporan",
+    usageStatus: "Status Penggunaan",
+    viewReport: "Lihat Laporan",
+    inUse: "Sedang Digunakan",
+    select: "Pilih",
+    deletePolicy: "Hapus Kebijakan",
+    confirmDelete: "Apakah Anda yakin ingin menghapus \"{policyName}\"?",
+    cannotUndo: "Tindakan ini tidak dapat dibatalkan.",
+    delete: "Hapus",
+    statusPending: "Tertunda",
+    statusRunning: "Berjalan",
+    statusCompleted: "Selesai",
+    statusFailed: "Gagal",
+    statusCancelled: "Dibatalkan",
+    analysisStarted: "Analisis kebijakan telah dimulai",
+    analysisStartFailed: "Gagal memulai analisis kebijakan",
+    analysisStartError: "Terjadi kesalahan saat memulai analisis kebijakan",
+    analysisSwitched: "Model analisis telah diubah",
+    analysisSwitchFailed: "Gagal mengubah model analisis",
+    analysisSwitchError: "Terjadi kesalahan saat mengubah model analisis"
   },
   alert: {
     required: "Kolom ini wajib diisi",
@@ -32,7 +99,29 @@ export default {
     adminOnlyCreateMessage: "Hanya admin yang dapat membuat kebijakan. Silakan hubungi administrator Anda.",
     updateSuccess: "Kebijakan berhasil diperbarui",
     updateFailed: "Gagal memperbarui kebijakan",
-    validationError: "Silakan periksa input Anda"
+    validationError: "Silakan periksa input Anda",
+    fieldUpdateSuccess: "{fieldName} berhasil diperbarui.",
+    fieldUpdateFail: "Gagal memperbarui {fieldName}.",
+    updateError: "Terjadi kesalahan selama proses pembaruan.",
+    fieldRequired: "{fieldLabel} wajib diisi.",
+    policyNotSelected: "Tidak ada kebijakan yang dipilih.",
+    selectPolicyAndModel: "Silakan pilih kebijakan dan model",
+    accessDenied: "Anda tidak memiliki izin untuk mengakses halaman ini. Hanya administrator yang dapat mengakses.",
+    fetchPoliciesFailed: "Gagal mengambil daftar kebijakan.",
+    errorLabel: "Kesalahan",
+    customerIdLabel: "ID Pelanggan",
+    timestampLabel: "Stempel Waktu",
+    detailedErrorLabel: "Kesalahan Terperinci",
+    authError: "Kesalahan Autentikasi",
+    errorType: "Jenis Kesalahan",
+    localeLabel: "Lokal",
+    stackTrace: "Jejak Tumpukan",
+    unknownError: "Kesalahan tidak diketahui",
+    noStackTrace: "Tidak ada jejak tumpukan",
+    policyNameRequired: "Nama kebijakan wajib diisi.",
+    descriptionRequired: "Deskripsi wajib diisi.",
+    fileTypeSelectionRequired: "Silakan pilih setidaknya satu jenis file yang diizinkan.",
+    formSubmissionError: "Terjadi kesalahan saat mengirimkan formulir."
   },
   analysis: {
     title: "Analisis",
@@ -55,6 +144,6 @@ export default {
       view: "Lihat"
     }
   }
-} as const;
+};
 
-
+export default id;

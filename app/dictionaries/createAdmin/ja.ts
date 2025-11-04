@@ -1,4 +1,6 @@
-export default {
+import type { CreateAdminLocale } from './createAdmin.d.ts';
+
+const ja: CreateAdminLocale = {
   label: {
     back: "戻る",
     submit: "送信",
@@ -12,6 +14,7 @@ export default {
     positionLabel: "役職",
     positionPlaceholder: "部長",
     languageLabel: "言語",
+    languagePlaceholder: "言語を選択してください",
     japanese: "日本語",
     english: "English",
     spanish: "Español",
@@ -37,6 +40,6 @@ export default {
     adminCreationFailed: "管理者アカウントの作成に失敗しました",
     networkError: "ネットワークエラーが発生しました"
   }
-} as const;
+};
 
-
+export default ja;

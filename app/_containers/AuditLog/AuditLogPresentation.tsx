@@ -36,17 +36,20 @@ import {
   type GetAuditLogsResponse
 } from '@/app/lib/actions/audit-log-actions';
 import { UserAttributesDTO } from '@/app/lib/types/TypeAPIs';
+import type { AuditLogLocale } from '@/app/dictionaries/auditLog/auditLog.d.ts';
 
 interface AuditLogPresentationProps {
   userAttributes: UserAttributesDTO;
   initialAuditLogs: GetAuditLogsResponse;
   locale: string;
+  dictionary: AuditLogLocale;
 }
 
 export default function AuditLogPresentation({
   userAttributes,
   initialAuditLogs,
   locale,
+  dictionary,
 }: AuditLogPresentationProps) {
   // State管理
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(initialAuditLogs.data || []);
@@ -162,10 +165,10 @@ export default function AuditLogPresentation({
         setNextPageToken(result.nextToken);
         setCurrentPageToken(pageToken);
       } else {
-        setError(result.message || 'データの取得に失敗しました');
+        setError(result.message || dictionary.alert.fetchError);
       }
     } catch (err) {
-      setError('予期しないエラーが発生しました');
+      setError(dictionary.alert.unexpectedError);
     } finally {
       setLoading(false);
     }
@@ -259,9 +262,9 @@ export default function AuditLogPresentation({
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <DocumentTextIcon className="w-6 h-6" />
-            監査ログ
+            {dictionary.label.pageTitle}
           </h1>
-          <p className="text-gray-600 mt-1">システムの操作履歴を確認できます</p>
+          <p className="text-gray-600 mt-1">{dictionary.label.pageDescription}</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -269,7 +272,7 @@ export default function AuditLogPresentation({
             startContent={<FunnelIcon className="w-4 h-4" />}
             onPress={() => setShowFilters(!showFilters)}
           >
-            フィルター
+            {dictionary.label.filterButton}
           </Button>
           <Button
             color="primary"
@@ -277,7 +280,7 @@ export default function AuditLogPresentation({
             onPress={refreshData}
             isLoading={loading}
           >
-            更新
+            {dictionary.label.refreshButton}
           </Button>
         </div>
       </div>
@@ -297,20 +300,20 @@ export default function AuditLogPresentation({
       {showFilters && (
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-semibold">フィルター</h3>
+            <h3 className="text-lg font-semibold">{dictionary.label.filterTitle}</h3>
           </CardHeader>
           <Divider />
           <CardBody>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               <Input
-                placeholder="検索（ユーザー名、リソース、フィールド）"
+                placeholder={dictionary.label.searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
               />
               
               <Select
-                placeholder="アクション"
+                placeholder={dictionary.label.actionPlaceholder}
                 selectedKeys={filterAction ? [filterAction] : []}
                 onSelectionChange={(keys) => setFilterAction(Array.from(keys)[0] as string || '')}
               >
@@ -322,7 +325,7 @@ export default function AuditLogPresentation({
               </Select>
               
               <Select
-                placeholder="リソース"
+                placeholder={dictionary.label.resourcePlaceholder}
                 selectedKeys={filterResource ? [filterResource] : []}
                 onSelectionChange={(keys) => setFilterResource(Array.from(keys)[0] as string || '')}
               >
@@ -334,23 +337,23 @@ export default function AuditLogPresentation({
               </Select>
               
               <Select
-                placeholder="ステータス"
+                placeholder={dictionary.label.statusPlaceholder}
                 selectedKeys={filterStatus ? [filterStatus] : []}
                 onSelectionChange={(keys) => setFilterStatus(Array.from(keys)[0] as string || '')}
               >
-                <SelectItem key="SUCCESS">成功</SelectItem>
-                <SelectItem key="FAILED">失敗</SelectItem>
+                <SelectItem key="SUCCESS">{dictionary.label.statusSuccess}</SelectItem>
+                <SelectItem key="FAILED">{dictionary.label.statusFailed}</SelectItem>
               </Select>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <DatePicker
-                label="開始日"
+                label={dictionary.label.startDateLabel}
                 value={startDate}
                 onChange={setStartDate}
               />
               <DatePicker
-                label="終了日"
+                label={dictionary.label.endDateLabel}
                 value={endDate}
                 onChange={setEndDate}
               />
@@ -358,7 +361,7 @@ export default function AuditLogPresentation({
             
             <div className="flex gap-2">
               <Button size="sm" variant="light" onPress={clearFilters}>
-                クリア
+                {dictionary.label.clearButton}
               </Button>
             </div>
           </CardBody>
@@ -370,7 +373,7 @@ export default function AuditLogPresentation({
         <Card>
           <CardBody className="text-center">
             <div className="text-2xl font-bold text-blue-600">{auditLogs.length}</div>
-            <div className="text-sm text-gray-600">総ログ数</div>
+            <div className="text-sm text-gray-600">{dictionary.label.statsTotal}</div>
           </CardBody>
         </Card>
         <Card>
@@ -378,7 +381,7 @@ export default function AuditLogPresentation({
             <div className="text-2xl font-bold text-green-600">
               {auditLogs.filter(log => log.status === 'SUCCESS').length}
             </div>
-            <div className="text-sm text-gray-600">成功</div>
+            <div className="text-sm text-gray-600">{dictionary.label.statsSuccess}</div>
           </CardBody>
         </Card>
         <Card>
@@ -386,13 +389,13 @@ export default function AuditLogPresentation({
             <div className="text-2xl font-bold text-red-600">
               {auditLogs.filter(log => log.status === 'FAILED').length}
             </div>
-            <div className="text-sm text-gray-600">失敗</div>
+            <div className="text-sm text-gray-600">{dictionary.label.statsFailed}</div>
           </CardBody>
         </Card>
         <Card>
           <CardBody className="text-center">
             <div className="text-2xl font-bold text-purple-600">{filteredLogs.length}</div>
-            <div className="text-sm text-gray-600">フィルター結果</div>
+            <div className="text-sm text-gray-600">{dictionary.label.statsFiltered}</div>
           </CardBody>
         </Card>
       </div>
@@ -401,9 +404,9 @@ export default function AuditLogPresentation({
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between w-full">
-            <h3 className="text-lg font-semibold">監査ログ一覧</h3>
+            <h3 className="text-lg font-semibold">{dictionary.label.tableTitle}</h3>
             <div className="text-sm text-gray-600">
-              ページ {currentPage} ({sortedLogs.length}件)
+              {dictionary.label.pageLabel} {currentPage} ({sortedLogs.length}{dictionary.label.itemsCount})
             </div>
           </div>
         </CardHeader>
@@ -415,22 +418,22 @@ export default function AuditLogPresentation({
             </div>
           ) : (
             <Table 
-              aria-label="監査ログテーブル"
+              aria-label={dictionary.label.tableAriaLabel}
               sortDescriptor={sortDescriptor}
               onSortChange={(descriptor: any) => setSortDescriptor(descriptor)}
             >
               <TableHeader>
-                <TableColumn key="createdAt" allowsSorting>日時</TableColumn>
-                <TableColumn key="userName" allowsSorting>ユーザー</TableColumn>
-                <TableColumn key="action" allowsSorting>アクション</TableColumn>
-                <TableColumn key="resource" allowsSorting>リソース</TableColumn>
-                <TableColumn key="changedField" allowsSorting>変更フィールド</TableColumn>
-                <TableColumn>変更前</TableColumn>
-                <TableColumn>変更後</TableColumn>
-                <TableColumn key="status" allowsSorting>ステータス</TableColumn>
-                <TableColumn>エラー詳細</TableColumn>
+                <TableColumn key="createdAt" allowsSorting>{dictionary.label.columnDateTime}</TableColumn>
+                <TableColumn key="userName" allowsSorting>{dictionary.label.columnUser}</TableColumn>
+                <TableColumn key="action" allowsSorting>{dictionary.label.columnAction}</TableColumn>
+                <TableColumn key="resource" allowsSorting>{dictionary.label.columnResource}</TableColumn>
+                <TableColumn key="changedField" allowsSorting>{dictionary.label.columnChangedField}</TableColumn>
+                <TableColumn>{dictionary.label.columnOldValue}</TableColumn>
+                <TableColumn>{dictionary.label.columnNewValue}</TableColumn>
+                <TableColumn key="status" allowsSorting>{dictionary.label.columnStatus}</TableColumn>
+                <TableColumn>{dictionary.label.columnErrorDetail}</TableColumn>
               </TableHeader>
-              <TableBody emptyContent="データがありません">
+              <TableBody emptyContent={dictionary.label.noData}>
                 {sortedLogs.map((log) => (
                   <TableRow key={log['audit-logsId']}>
                     <TableCell>
@@ -482,7 +485,7 @@ export default function AuditLogPresentation({
                             <XCircleIcon className="w-3 h-3" />
                         }
                       >
-                        {log.status === 'SUCCESS' ? '成功' : '失敗'}
+                        {log.status === 'SUCCESS' ? dictionary.label.statusSuccess : dictionary.label.statusFailed}
                       </Chip>
                     </TableCell>
                     <TableCell>
@@ -510,10 +513,10 @@ export default function AuditLogPresentation({
           isDisabled={currentPage === 1 || loading}
           onPress={() => handlePageChange(currentPage - 1)}
         >
-          前へ
+          {dictionary.label.previousPage}
         </Button>
         <span className="text-sm text-gray-600">
-          ページ {currentPage}
+          {dictionary.label.pageLabel} {currentPage}
         </span>
         <Button
           size="sm"
@@ -521,7 +524,7 @@ export default function AuditLogPresentation({
           isDisabled={!nextPageToken || loading}
           onPress={() => handlePageChange(currentPage + 1)}
         >
-          次へ
+          {dictionary.label.nextPage}
         </Button>
       </div>
     </div>

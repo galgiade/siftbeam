@@ -7,7 +7,7 @@ import { parseDate, type DateValue } from '@internationalized/date';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardNumberElement, CardExpiryElement, CardCvcElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getPaymentMethodsAction, createSetupIntentAction, confirmSetupIntentAction, setDefaultPaymentMethodAction, getInvoicesAction, getInvoicePdfAction, getDefaultPaymentMethodAction, deletePaymentMethodAction } from '@/app/lib/actions/payment-actions';
-import type { PaymentMethodsLocale } from '@/app/dictionaries/paymentMethods/paymentMethods.d.ts';
+import type { PaymentLocale } from '@/app/dictionaries/payment/payment.d.ts';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -23,7 +23,7 @@ interface PaymentMethod {
 
 interface PaymentPresentationProps {
   customerId?: string;
-  dictionary: PaymentMethodsLocale;
+  dictionary: PaymentLocale;
   paymentMethods?: any[] | null;
   defaultPaymentMethodId?: string | null;
   invoices?: any[] | null;
@@ -40,7 +40,7 @@ interface Invoice {
 }
 
 // カード追加フォームコンポーネント
-function AddCardForm({ onSuccess, onCancel, dictionary }: { onSuccess: () => void; onCancel: () => void; dictionary: PaymentMethodsLocale }) {
+function AddCardForm({ onSuccess, onCancel, dictionary }: { onSuccess: () => void; onCancel: () => void; dictionary: PaymentLocale }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -97,7 +97,7 @@ function AddCardForm({ onSuccess, onCancel, dictionary }: { onSuccess: () => voi
     }
   };
 
-  const elementOptions = {
+  const cardNumberOptions = {
     style: {
       base: {
         fontSize: '16px',
@@ -108,6 +108,35 @@ function AddCardForm({ onSuccess, onCancel, dictionary }: { onSuccess: () => voi
         },
       },
     },
+    placeholder: dictionary.label.cardNumberPlaceholder,
+  };
+
+  const expiryOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        fontFamily: 'Arial, sans-serif',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+      },
+    },
+    placeholder: dictionary.label.expiryDatePlaceholder,
+  };
+
+  const cvcOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        fontFamily: 'Arial, sans-serif',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+      },
+    },
+    placeholder: dictionary.label.securityCodePlaceholder,
   };
 
   return (
@@ -117,7 +146,7 @@ function AddCardForm({ onSuccess, onCancel, dictionary }: { onSuccess: () => voi
           {dictionary.label.cardNumber}
         </label>
         <div className="border border-gray-300 rounded-md px-3 py-2 bg-white">
-          <CardNumberElement options={elementOptions} />
+          <CardNumberElement options={cardNumberOptions} />
         </div>
       </div>
 
@@ -127,7 +156,7 @@ function AddCardForm({ onSuccess, onCancel, dictionary }: { onSuccess: () => voi
             {dictionary.label.expiryDate}
           </label>
           <div className="border border-gray-300 rounded-md px-3 py-2 bg-white">
-            <CardExpiryElement options={elementOptions} />
+            <CardExpiryElement options={expiryOptions} />
           </div>
         </div>
         <div>
@@ -135,7 +164,7 @@ function AddCardForm({ onSuccess, onCancel, dictionary }: { onSuccess: () => voi
             {dictionary.label.securityCode}
           </label>
           <div className="border border-gray-300 rounded-md px-3 py-2 bg-white">
-            <CardCvcElement options={elementOptions} />
+            <CardCvcElement options={cvcOptions} />
           </div>
         </div>
       </div>
@@ -251,11 +280,11 @@ export default function PaymentPresentation({
   // 支払い方法を削除（デフォルト以外のみ）
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
     if (paymentMethodId === defaultPaymentMethodId) {
-      setError('デフォルトの支払い方法は削除できません。先に別のカードをデフォルトに設定してください。');
+      setError(dictionary.label.cannotDeleteDefault);
       return;
     }
 
-    if (!confirm('このカードを削除しますか？この操作は取り消せません。')) {
+    if (!confirm(dictionary.label.deleteCardConfirm)) {
       return;
     }
 
@@ -536,7 +565,7 @@ export default function PaymentPresentation({
                         startContent={<TrashIcon className="w-4 h-4" />}
                         onPress={() => handleDeletePaymentMethod(method.id)}
                       >
-                        削除
+                        {dictionary.label.delete}
                       </Button>
                     )}
                   </div>
@@ -555,7 +584,7 @@ export default function PaymentPresentation({
               <DocumentArrowDownIcon className="w-5 h-5" />
               <h2 className="text-lg font-semibold">{dictionary.label.invoicesTitle}</h2>
               <Chip size="sm" variant="flat">
-                {filteredInvoices.length}/{invoices.length}件
+                {dictionary.label.invoiceCount.replace('{filtered}', filteredInvoices.length.toString()).replace('{total}', invoices.length.toString())}
               </Chip>
             </div>
             <Button
@@ -564,7 +593,7 @@ export default function PaymentPresentation({
               startContent={<FunnelIcon className="w-4 h-4" />}
               onPress={() => setShowFilters(!showFilters)}
             >
-              フィルター
+              {dictionary.label.filterButton}
             </Button>
           </div>
         </CardHeader>
@@ -575,7 +604,7 @@ export default function PaymentPresentation({
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">最小金額 (円)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{dictionary.label.minAmount}</label>
                   <Input
                     placeholder="0"
                     value={minAmount}
@@ -585,7 +614,7 @@ export default function PaymentPresentation({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">最大金額 (円)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{dictionary.label.maxAmount}</label>
                   <Input
                     placeholder="100000"
                     value={maxAmount}
@@ -595,7 +624,7 @@ export default function PaymentPresentation({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">開始日</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{dictionary.label.startDate}</label>
                   <DatePicker
                     value={startDate}
                     onChange={setStartDate}
@@ -603,7 +632,7 @@ export default function PaymentPresentation({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">終了日</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{dictionary.label.endDate}</label>
                   <DatePicker
                     value={endDate}
                     onChange={setEndDate}
@@ -617,7 +646,7 @@ export default function PaymentPresentation({
                   variant="light"
                   onPress={clearFilters}
                 >
-                  クリア
+                  {dictionary.label.clearFilters}
                 </Button>
               </div>
             </div>
@@ -631,7 +660,7 @@ export default function PaymentPresentation({
             ) : filteredInvoices.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <DocumentArrowDownIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>{invoices.length === 0 ? dictionary.message.noInvoices : 'フィルター条件に一致する請求書がありません'}</p>
+                <p>{invoices.length === 0 ? dictionary.message.noInvoices : dictionary.message.noFilteredInvoices}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -677,17 +706,17 @@ export default function PaymentPresentation({
                       onPress={handlePreviousPage}
                       isDisabled={!hasPreviousPage || invoicesLoading}
                     >
-                      前へ
+                      {dictionary.label.previousPage}
                     </Button>
                     <span className="text-sm text-gray-600">
-                      ページ {currentPage}
+                      {dictionary.label.pageNumber.replace('{page}', currentPage.toString())}
                     </span>
                     <Button
                       variant="flat"
                       onPress={handleNextPage}
                       isDisabled={!hasMoreInvoices || invoicesLoading}
                     >
-                      次へ
+                      {dictionary.label.nextPage}
                     </Button>
                   </div>
                 )}

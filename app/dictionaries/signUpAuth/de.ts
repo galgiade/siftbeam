@@ -1,4 +1,6 @@
-export default {
+import type { SignUpAuthLocale } from './signUpAuth.d.ts';
+
+const de: SignUpAuthLocale = {
   label: {
     back: "Zurück",
     submit: "Senden",
@@ -10,6 +12,8 @@ export default {
     passwordLabel: "Passwort",
     passwordPlaceholder: "Passwort eingeben",
     passwordDescription: "Mindestens 8 Zeichen mit Groß-/Kleinbuchstaben, Zahlen und Symbolen",
+    confirmPasswordLabel: "Passwort bestätigen",
+    confirmPasswordPlaceholder: "Passwort erneut eingeben",
     verificationCodeLabel: "Bestätigungscode",
     verificationCodeDescription: "6-stelligen Code eingeben, gesendet an",
     register: "Registrieren",
@@ -19,9 +23,15 @@ export default {
     resendCode: "Code erneut senden",
     resendingCode: "Sende erneut...",
     accountCreation: "Kontoerstellung",
-    companyInfo: "Unternehmensdaten",
+    companyInfo: "Unternehmensinformationen",
     adminSetup: "Admin-Einrichtung",
-    paymentSetup: "Zahlungsmethode"
+    paymentSetup: "Zahlungseinrichtung",
+    completed: "Abgeschlossen",
+    welcomeMessage: "Erstellen Sie ein Konto und beginnen Sie mit SiftBeam",
+    orDivider: "oder",
+    alreadyHaveAccount: "Haben Sie bereits ein Konto?",
+    signIn: "Anmelden",
+    copyright: "© 2024 SiftBeam. Alle Rechte vorbehalten."
   },
   alert: {
     emailRequired: "Bitte E-Mail-Adresse eingeben",
@@ -29,6 +39,7 @@ export default {
     emailAndPasswordRequired: "Bitte E-Mail-Adresse und Passwort eingeben",
     invalidEmailFormat: "Bitte eine gültige E-Mail-Adresse eingeben",
     invalidPasswordFormat: "Passwort: mind. 8 Zeichen, Groß-/Kleinbuchstaben, Zahl, Symbol",
+    passwordMismatch: "Passwörter stimmen nicht überein",
     verificationCodeRequired: "Bitte Bestätigungscode eingeben",
     verificationCodeLength: "Bitte 6-stelligen Code eingeben",
     codeResent: "Bestätigungscode erneut gesendet",
@@ -55,6 +66,6 @@ export default {
     confirm: "Bestätigen",
     verifying: "Bestätigung..."
   }
-} as const;
+};
 
-
+export default de;

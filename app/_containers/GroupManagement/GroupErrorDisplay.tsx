@@ -2,11 +2,11 @@
 
 import { Card, Button } from "@heroui/react"
 import Link from "next/link"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { GroupManagementLocale } from '@/app/dictionaries/group-management/group-management.d.ts';
 
 interface GroupErrorDisplayProps {
   error: string;
-  dictionary: UserProfileLocale;
+  dictionary: GroupManagementLocale;
 }
 
 /**
@@ -38,15 +38,15 @@ export default function GroupErrorDisplay({ error, dictionary }: GroupErrorDispl
                 />
               </svg>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                グループ管理エラー
+                {dictionary.label.groupManagement}
               </h1>
               <p className="text-gray-600">
-                グループ管理ページの読み込み中にエラーが発生しました。
+                {dictionary.label.errorOccurred}
               </p>
             </div>
             
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-left">
-              <h3 className="text-sm font-medium text-red-800 mb-2">エラー詳細:</h3>
+              <h3 className="text-sm font-medium text-red-800 mb-2">{dictionary.label.errorDetails}</h3>
               <pre className="text-sm text-red-700 whitespace-pre-wrap break-words">
                 {error}
               </pre>
@@ -58,7 +58,7 @@ export default function GroupErrorDisplay({ error, dictionary }: GroupErrorDispl
                 onPress={handleReload}
                 className="font-medium"
               >
-                ページを再読み込み
+                {dictionary.label.reloadPage}
               </Button>
               
               <Button
@@ -67,13 +67,13 @@ export default function GroupErrorDisplay({ error, dictionary }: GroupErrorDispl
                 href="/ja/account"
                 className="font-medium"
               >
-                アカウントページに戻る
+                {dictionary.label.backToAccount}
               </Button>
             </div>
             
             <div className="mt-6 text-sm text-gray-500">
               <p>
-                問題が解決しない場合は、システム管理者にお問い合わせください。
+                {dictionary.label.contactAdmin}
               </p>
             </div>
           </div>

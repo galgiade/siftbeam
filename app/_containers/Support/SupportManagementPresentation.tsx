@@ -5,59 +5,65 @@ import { Button, Card, Input, Select, SelectItem, Chip } from "@heroui/react"
 import { SupportRequest } from "@/app/lib/types/TypeAPIs"
 import Link from "next/link"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { SupportCenterLocale } from '@/app/dictionaries/supportCenter/supportCenter.d.ts';
 import { FaPlus, FaLifeRing, FaEye, FaClock, FaCircleCheck, FaCircleExclamation } from "react-icons/fa6"
 
 interface SupportManagementPresentationProps {
   supportRequests: SupportRequest[];
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: SupportCenterLocale;
 }
 
-// 問題タイプのラベル
-const issueTypeLabels = {
-  'technical': '技術的な問題',
-  'billing': '請求・支払い',
-  'feature': '機能追加',
-  'bug': 'バグ報告',
-  'other': 'その他'
-} as const;
+// 問題タイプのラベルを取得する関数
+const getIssueTypeLabel = (issueType: string, dictionary: SupportCenterLocale): string => {
+  const labels: Record<string, string> = {
+    'technical': dictionary.label.issueTypeTechnical,
+    'billing': dictionary.label.issueTypeBilling,
+    'feature': dictionary.label.issueTypeFeature,
+    'bug': dictionary.label.issueTypeBug,
+    'other': dictionary.label.issueTypeOther
+  };
+  return labels[issueType] || issueType;
+};
 
-// ステータスのラベルとアイコン
-const statusConfig = {
-  'open': { 
-    label: '未対応', 
-    color: 'danger' as const, 
-    icon: FaCircleExclamation,
-    bgColor: 'bg-red-50',
-    textColor: 'text-red-700',
-    borderColor: 'border-red-200'
-  },
-  'in_progress': { 
-    label: '対応中', 
-    color: 'warning' as const, 
-    icon: FaClock,
-    bgColor: 'bg-yellow-50',
-    textColor: 'text-yellow-700',
-    borderColor: 'border-yellow-200'
-  },
-  'resolved': { 
-    label: '解決済み', 
-    color: 'success' as const, 
-    icon: FaCircleCheck,
-    bgColor: 'bg-green-50',
-    textColor: 'text-green-700',
-    borderColor: 'border-green-200'
-  },
-  'closed': { 
-    label: 'クローズ', 
-    color: 'default' as const, 
-    icon: FaCircleCheck,
-    bgColor: 'bg-gray-50',
-    textColor: 'text-gray-700',
-    borderColor: 'border-gray-200'
-  }
-} as const;
+// ステータスのラベルとアイコンを取得する関数
+const getStatusConfig = (status: string, dictionary: SupportCenterLocale) => {
+  const configs: Record<string, any> = {
+    'open': { 
+      label: dictionary.label.statusOpen, 
+      color: 'danger' as const, 
+      icon: FaCircleExclamation,
+      bgColor: 'bg-red-50',
+      textColor: 'text-red-700',
+      borderColor: 'border-red-200'
+    },
+    'in_progress': { 
+      label: dictionary.label.statusInProgress, 
+      color: 'warning' as const, 
+      icon: FaClock,
+      bgColor: 'bg-yellow-50',
+      textColor: 'text-yellow-700',
+      borderColor: 'border-yellow-200'
+    },
+    'resolved': { 
+      label: dictionary.label.statusResolved, 
+      color: 'success' as const, 
+      icon: FaCircleCheck,
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-700',
+      borderColor: 'border-green-200'
+    },
+    'closed': { 
+      label: dictionary.label.statusClosed, 
+      color: 'default' as const, 
+      icon: FaCircleCheck,
+      bgColor: 'bg-gray-50',
+      textColor: 'text-gray-700',
+      borderColor: 'border-gray-200'
+    }
+  };
+  return configs[status] || configs['open'];
+};
 
 export default function SupportManagementPresentation({ 
   supportRequests: initialSupportRequests, 
@@ -103,7 +109,7 @@ export default function SupportManagementPresentation({
 
   // ステータスチップコンポーネント
   const StatusChip = ({ status }: { status: SupportRequest['status'] }) => {
-    const config = statusConfig[status];
+    const config = getStatusConfig(status, dictionary);
     const Icon = config.icon;
     
     return (
@@ -121,7 +127,7 @@ export default function SupportManagementPresentation({
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
             <FaLifeRing className="text-blue-600" size={32} />
-            <h1 className="text-3xl font-bold">サポートリクエスト管理</h1>
+            <h1 className="text-3xl font-bold">{dictionary.label.supportManagement}</h1>
           </div>
           <Button
             color="primary"
@@ -130,7 +136,7 @@ export default function SupportManagementPresentation({
             startContent={<FaPlus size={16} />}
             className="font-medium"
           >
-            新しいリクエストを作成
+            {dictionary.label.createNewRequest}
           </Button>
         </div>
         
@@ -141,7 +147,7 @@ export default function SupportManagementPresentation({
             <div>
               {isMounted ? (
                 <Input
-                  placeholder="件名、説明、ユーザー名で検索..."
+                  placeholder={dictionary.label.searchPlaceholder}
                   value={searchTerm}
                   onValueChange={setSearchTerm}
                   variant="bordered"
@@ -161,17 +167,17 @@ export default function SupportManagementPresentation({
                     setStatusFilter(selectedKey);
                   }}
                   variant="bordered"
-                  placeholder="ステータスでフィルター"
+                  placeholder={dictionary.label.filterByStatus}
                   classNames={{
                     listbox: "bg-white shadow-lg border border-gray-200",
                     popoverContent: "bg-white shadow-lg border border-gray-200"
                   }}
                 >
-                  <SelectItem key="all" className="bg-white hover:bg-gray-100">すべて</SelectItem>
-                  <SelectItem key="open" className="bg-white hover:bg-gray-100">未対応</SelectItem>
-                  <SelectItem key="in_progress" className="bg-white hover:bg-gray-100">対応中</SelectItem>
-                  <SelectItem key="resolved" className="bg-white hover:bg-gray-100">解決済み</SelectItem>
-                  <SelectItem key="closed" className="bg-white hover:bg-gray-100">クローズ</SelectItem>
+                  <SelectItem key="all" className="bg-white hover:bg-gray-100">{dictionary.label.filterAll}</SelectItem>
+                  <SelectItem key="open" className="bg-white hover:bg-gray-100">{dictionary.label.statusOpen}</SelectItem>
+                  <SelectItem key="in_progress" className="bg-white hover:bg-gray-100">{dictionary.label.statusInProgress}</SelectItem>
+                  <SelectItem key="resolved" className="bg-white hover:bg-gray-100">{dictionary.label.statusResolved}</SelectItem>
+                  <SelectItem key="closed" className="bg-white hover:bg-gray-100">{dictionary.label.statusClosed}</SelectItem>
                 </Select>
               ) : (
                 <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
@@ -188,18 +194,18 @@ export default function SupportManagementPresentation({
                     setIssueTypeFilter(selectedKey);
                   }}
                   variant="bordered"
-                  placeholder="問題タイプでフィルター"
+                  placeholder={dictionary.label.filterByIssueType}
                   classNames={{
                     listbox: "bg-white shadow-lg border border-gray-200",
                     popoverContent: "bg-white shadow-lg border border-gray-200"
                   }}
                 >
-                  <SelectItem key="all" className="bg-white hover:bg-gray-100">すべて</SelectItem>
-                  <SelectItem key="technical" className="bg-white hover:bg-gray-100">技術的な問題</SelectItem>
-                  <SelectItem key="billing" className="bg-white hover:bg-gray-100">請求・支払い</SelectItem>
-                  <SelectItem key="feature" className="bg-white hover:bg-gray-100">機能追加</SelectItem>
-                  <SelectItem key="bug" className="bg-white hover:bg-gray-100">バグ報告</SelectItem>
-                  <SelectItem key="other" className="bg-white hover:bg-gray-100">その他</SelectItem>
+                  <SelectItem key="all" className="bg-white hover:bg-gray-100">{dictionary.label.filterAll}</SelectItem>
+                  <SelectItem key="technical" className="bg-white hover:bg-gray-100">{dictionary.label.issueTypeTechnical}</SelectItem>
+                  <SelectItem key="billing" className="bg-white hover:bg-gray-100">{dictionary.label.issueTypeBilling}</SelectItem>
+                  <SelectItem key="feature" className="bg-white hover:bg-gray-100">{dictionary.label.issueTypeFeature}</SelectItem>
+                  <SelectItem key="bug" className="bg-white hover:bg-gray-100">{dictionary.label.issueTypeBug}</SelectItem>
+                  <SelectItem key="other" className="bg-white hover:bg-gray-100">{dictionary.label.issueTypeOther}</SelectItem>
                 </Select>
               ) : (
                 <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
@@ -212,18 +218,18 @@ export default function SupportManagementPresentation({
         <Card className="p-6 shadow-lg">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">
-              リクエスト一覧 ({filteredSupportRequests.length}件)
+              {dictionary.label.requestList} ({filteredSupportRequests.length}{dictionary.label.requestListCount})
             </h2>
           </div>
           
           {filteredSupportRequests.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <FaLifeRing size={48} className="mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium mb-2">サポートリクエストが見つかりません</p>
+              <p className="text-lg font-medium mb-2">{dictionary.label.noRequestsFound}</p>
               <p className="text-sm">
                 {supportRequests.length === 0 
-                  ? '新しいサポートリクエストを作成してください'
-                  : '検索条件を変更してください'
+                  ? dictionary.label.createFirstRequest
+                  : dictionary.label.changeSearchCriteria
                 }
               </p>
             </div>
@@ -244,11 +250,11 @@ export default function SupportManagementPresentation({
                       </div>
                       
                       <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                        <span>問題タイプ: {issueTypeLabels[request.issueType]}</span>
-                        <span>作成者: {request.userName}</span>
-                        <span>作成日: {formatDate(request.createdAt)}</span>
+                        <span>{dictionary.label.issueTypeLabel} {getIssueTypeLabel(request.issueType, dictionary)}</span>
+                        <span>{dictionary.label.creator} {request.userName}</span>
+                        <span>{dictionary.label.createdAt} {formatDate(request.createdAt)}</span>
                         {request.updatedAt !== request.createdAt && (
-                          <span>更新日: {formatDate(request.updatedAt)}</span>
+                          <span>{dictionary.label.updatedAt} {formatDate(request.updatedAt)}</span>
                         )}
                       </div>
                       
@@ -258,9 +264,9 @@ export default function SupportManagementPresentation({
                       
                       {request.fileKeys.length > 0 && (
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="text-xs text-gray-500">添付ファイル:</span>
+                          <span className="text-xs text-gray-500">{dictionary.label.attachedFiles}:</span>
                           <Chip size="sm" variant="flat" color="primary">
-                            {request.fileKeys.length}件
+                            {request.fileKeys.length}{dictionary.label.filesCount}
                           </Chip>
                         </div>
                       )}
@@ -275,13 +281,13 @@ export default function SupportManagementPresentation({
                         href={`/${userAttributes.locale}/account/support/request/${request['support-requestId']}`}
                         startContent={<FaEye size={14} />}
                       >
-                        詳細を見る
+                        {dictionary.label.viewDetails}
                       </Button>
                     </div>
                   </div>
                   
                   <div className="text-xs text-gray-500 border-t pt-2">
-                    リクエストID: {request['support-requestId']}
+                    {dictionary.label.requestId} {request['support-requestId']}
                   </div>
                 </div>
               ))}

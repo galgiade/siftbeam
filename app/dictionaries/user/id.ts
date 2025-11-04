@@ -1,8 +1,13 @@
+import type { UserProfileLocale } from './user.d.ts';
+
 // 当面は英語を転用（将来の完全翻訳に備えてファイルを分離）
-export const id = {
+const id: UserProfileLocale = {
   alert: {
     updateSuccess: "Informasi pengguna berhasil diperbarui.",
     updateFail: "Gagal memperbarui informasi pengguna.",
+    updateError: "Terjadi kesalahan saat pembaruan.",
+    fieldUpdateSuccess: "{field} berhasil diperbarui.",
+    fieldUpdateFail: "Gagal memperbarui {field}.",
     emailSent: "Kode konfirmasi telah dikirim ke alamat email baru Anda.",
     emailUpdateSuccess: "Alamat email berhasil diperbarui.",
     emailUpdateFail: "Gagal memperbarui alamat email.",
@@ -11,32 +16,42 @@ export const id = {
     confirmFail: "Kode konfirmasi salah atau pembaruan database gagal.",
     invalidConfirmationCode: "Kode konfirmasi salah. Silakan masukkan kode 6 digit yang benar.",
     expiredConfirmationCode: "Kode konfirmasi telah kedaluwarsa. Silakan minta kode baru.",
-    userAlreadyExists: "Alamat email ini sudah terdaftar. Silakan gunakan alamat email yang berbeda.",
-    usernameExists: "Nama pengguna ini sudah digunakan. Silakan gunakan nama pengguna yang berbeda.",
     noEmailChange: "Tidak ada perubahan pada alamat email.",
     invalidEmailFormat: "Format email tidak valid. Silakan masukkan alamat email yang valid.",
-    emailChangeCancelled: "Perubahan alamat email telah dibatalkan.",
-    emailChangeCancelFailed: "Gagal membatalkan perubahan alamat email.",
-    emailChangeReset: "Perubahan alamat email yang belum dikonfirmasi telah direset.",
     noChange: "Tidak ada perubahan pada nama pengguna.",
-    resendLimitExceeded: "Batas pengiriman ulang telah terlampaui. Silakan coba lagi nanti.",
-    resendFailed: "Gagal mengirim ulang kode konfirmasi. Silakan coba lagi.",
     invalidConfirmationCodeFormat: "Silakan masukkan kode konfirmasi 6 digit.",
-    confirmationAttemptLimitExceeded: "Batas percobaan konfirmasi telah terlampaui. Silakan coba lagi nanti.",
-    authenticationFailed: "Autentikasi gagal. Silakan masuk kembali dan coba lagi.",
-    invalidUsernameFormat: "Format nama pengguna tidak valid. Silakan masukkan nama pengguna yang valid.",
-    usernameChangeLimitExceeded: "Batas perubahan nama pengguna telah terlampaui. Silakan coba lagi nanti.",
-    atLeastOneFieldRequired: "Setidaknya satu field harus diperbarui",
     verificationCodeNotFound: "Kode verifikasi tidak ditemukan atau kedaluwarsa",
     remainingAttempts: "Percobaan tersisa",
-    verificationCodeStoreFailed: "Gagal menyimpan kode verifikasi. Silakan periksa izin IAM."
+    verificationCodeStoreFailed: "Gagal menyimpan kode verifikasi. Silakan periksa izin IAM.",
+    codeStoreFailed: "Gagal menyimpan kode.",
+    adminOnlyEdit: "Hanya administrator yang dapat mengedit bidang ini.",
+    validEmailRequired: "Masukkan alamat email yang valid."
   },
   label: {
     title: "Informasi Pengguna",
     userName: "Nama Pengguna",
     department: "Departemen",
     position: "Posisi",
-    email: "Alamat Email"
+    email: "Alamat Email",
+    locale: "Bahasa",
+    role: "Peran",
+    edit: "Edit",
+    save: "Simpan",
+    cancel: "Batal",
+    adminOnly: "(Hanya admin)",
+    readOnly: "(Tidak dapat diubah)",
+    editableFields: "Dapat diedit: Nama pengguna, Bahasa",
+    adminOnlyFields: "Hanya admin: Email, Departemen, Posisi",
+    allFieldsEditable: "Semua bidang dapat diedit",
+    newEmailSent: "Kode verifikasi dikirim ke \"{email}\".",
+    roleAdmin: "Administrator",
+    roleUser: "Pengguna",
+    lastAdminRestriction: "Perubahan peran dibatasi jika Anda adalah administrator terakhir",
+    lastAdminNote: "※ Jika hanya ada satu administrator dalam organisasi, peran tidak dapat diubah menjadi pengguna biasa.",
+    generalUserPermission: "Izin Pengguna Umum",
+    adminPermission: "Izin Administrator",
+    verifyAndUpdate: "Verifikasi dan Perbarui",
+    verificationCodePlaceholder: "Kode verifikasi (6 digit)"
   },
   modal: {
     modalTitle: "Konfirmasi Email",

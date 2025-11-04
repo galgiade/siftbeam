@@ -1,7 +1,7 @@
 import CreateGroupManagementPresentation from './CreateGroupManagementPresentation'
 import GroupErrorDisplay from '../GroupErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
+import { groupManagementDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 import { queryUsers } from '@/app/lib/actions/user-api'
 import { queryPolicies } from '@/app/lib/actions/policy-api'
 
@@ -18,15 +18,14 @@ export default async function CreateGroupManagementContainer({ locale }: CreateG
     // 並列実行で高速化
     const [userProfile, dictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(groupManagementDictionaries, locale, 'en'))
     ]);
     
     // 管理者権限チェック
     if (userProfile.role !== 'admin') {
-      const errorMessage = 'このページにアクセスする権限がありません。管理者のみアクセス可能です。';
       return (
         <GroupErrorDisplay 
-          error={errorMessage}
+          error={dictionary.alert.accessDenied}
           dictionary={dictionary} 
         />
       );
@@ -43,7 +42,7 @@ export default async function CreateGroupManagementContainer({ locale }: CreateG
       console.error('Failed to fetch users:', usersResult);
       return (
         <GroupErrorDisplay 
-          error={`ユーザー情報の取得に失敗しました: ${usersResult.message}`}
+          error={`${dictionary.alert.fetchUsersFailed} ${usersResult.message}`}
           dictionary={dictionary} 
         />
       );
@@ -53,7 +52,7 @@ export default async function CreateGroupManagementContainer({ locale }: CreateG
       console.error('Failed to fetch policies:', policiesResult);
       return (
         <GroupErrorDisplay 
-          error={`ポリシー情報の取得に失敗しました: ${policiesResult.message}`}
+          error={`${dictionary.alert.fetchPoliciesFailed} ${policiesResult.message}`}
           dictionary={dictionary} 
         />
       );
@@ -90,16 +89,16 @@ export default async function CreateGroupManagementContainer({ locale }: CreateG
     console.error('Error in CreateGroupManagementContainer:', errorDetails);
     
     // 辞書を取得してエラー表示
-    const dictionary = pickDictionary(userDictionaries, locale, 'en');
-    const errorMessage = error?.message || '予期しないエラーが発生しました。';
+    const dictionary = pickDictionary(groupManagementDictionaries, locale, 'en');
+    const errorMessage = error?.message || dictionary.alert.unknownError;
     
-    let detailedError = `認証エラー: ${errorMessage}\n`;
-    detailedError += `エラータイプ: ${errorDetails.name}\n`;
-    detailedError += `ロケール: ${locale}\n`;
-    detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+    let detailedError = `${dictionary.alert.authError} ${errorMessage}\n`;
+    detailedError += `${dictionary.alert.errorType} ${errorDetails.name}\n`;
+    detailedError += `${dictionary.alert.localeLabel} ${locale}\n`;
+    detailedError += `${dictionary.alert.timestampLabel} ${errorDetails.timestamp}\n`;
     
-    if (errorDetails.stack !== 'スタックトレースなし') {
-      detailedError += `\nスタックトレース:\n${errorDetails.stack}`;
+    if (errorDetails.stack !== dictionary.alert.noStackTrace) {
+      detailedError += `\n${dictionary.alert.stackTrace}\n${errorDetails.stack}`;
     }
     
     return (

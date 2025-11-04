@@ -15,22 +15,37 @@ const es: CommonLocale = {
       announcement: 'Anuncios',
       services: 'Servicios',
       myPage: 'Mi página',
-      supportCenter: 'Soporte',
+      supportCenter: 'Centro de soporte',
     },
     footer: {
       title: 'siftbeam',
       description:
-        'Plataforma inteligente de análisis predictivo para liberar el poder de los datos.',
+        'Una plataforma de análisis predictivo inteligente que libera el poder de los datos para dar forma al futuro de su negocio.',
       links: {
         terms: 'Términos de servicio',
         privacy: 'Política de privacidad',
-        legalDisclosures: 'Avisos Legales',
+        legalDisclosures: 'Divulgaciones legales',
       },
       copyright: 'Connect Tech Inc.',
+    },
+    fileUploader: {
+      dragAndDrop: 'Arrastrar y soltar archivos',
+      or: 'o',
+      selectFile: 'Seleccionar archivos',
+      maxFilesAndSize: 'Máx. {maxFiles} archivos, {maxFileSize}MB cada uno',
+      supportedFormats: 'Formatos compatibles: Imágenes, Videos, Audio, Documentos',
+      pendingFiles: 'Pendientes ({count} archivos)',
+      uploadStart: 'Iniciar carga',
+      uploading: 'Cargando...',
+      uploadedFiles: 'Cargados ({count} archivos)',
+      uploadComplete: 'Carga completa',
+      uploadError: 'Error de carga',
+      uploadFailed: 'La carga falló',
+      maxFilesExceeded: 'Puede cargar hasta {maxFiles} archivos.',
+      fileSizeExceeded: 'El tamaño del archivo debe ser de {maxFileSize}MB o menos.\nArchivos demasiado grandes: {files}',
+      oversizedFiles: 'Archivos demasiado grandes',
     },
   },
 };
 
 export default es;
-
-

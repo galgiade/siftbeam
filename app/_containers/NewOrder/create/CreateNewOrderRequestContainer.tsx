@@ -1,7 +1,7 @@
 import CreateNewOrderRequestPresentation from './CreateNewOrderRequestPresentation'
 import NewOrderErrorDisplay from '../NewOrderErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { newOrderDictionaries, commonDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 
 interface CreateNewOrderRequestContainerProps {
   locale: string;
@@ -14,17 +14,17 @@ interface CreateNewOrderRequestContainerProps {
 export default async function CreateNewOrderRequestContainer({ locale }: CreateNewOrderRequestContainerProps) {
   try {
     // 並列実行で高速化
-    const [userProfile, dictionary] = await Promise.all([
+    const [userProfile, dictionary, commonDictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(newOrderDictionaries, locale, 'en')),
+      Promise.resolve(pickDictionary(commonDictionaries, locale, 'en'))
     ]);
     
     // 認証済みユーザーであることを確認（管理者権限は不要）
     if (!userProfile.sub) {
-      const errorMessage = 'ログインが必要です。';
       return (
         <NewOrderErrorDisplay 
-          error={errorMessage}
+          error={dictionary.alert.loginRequired}
           dictionary={dictionary} 
         />
       );
@@ -43,7 +43,8 @@ export default async function CreateNewOrderRequestContainer({ locale }: CreateN
     return (
       <CreateNewOrderRequestPresentation
         userAttributes={userAttributesDTO} 
-        dictionary={dictionary} 
+        dictionary={dictionary}
+        commonDictionary={commonDictionary}
       />
     );
   } catch (error: any) {
@@ -58,16 +59,16 @@ export default async function CreateNewOrderRequestContainer({ locale }: CreateN
     console.error('Error in CreateNewOrderRequestContainer:', errorDetails);
     
     // 辞書を取得してエラー表示
-    const dictionary = pickDictionary(userDictionaries, locale, 'en');
-    const errorMessage = error?.message || '予期しないエラーが発生しました。';
+    const dictionary = pickDictionary(newOrderDictionaries, locale, 'en');
+    const errorMessage = error?.message || dictionary.alert.unknownError;
     
-    let detailedError = `認証エラー: ${errorMessage}\n`;
-    detailedError += `エラータイプ: ${errorDetails.name}\n`;
-    detailedError += `ロケール: ${locale}\n`;
-    detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+    let detailedError = `${dictionary.alert.authError} ${errorMessage}\n`;
+    detailedError += `${dictionary.alert.errorType} ${errorDetails.name}\n`;
+    detailedError += `${dictionary.alert.localeLabel} ${locale}\n`;
+    detailedError += `${dictionary.alert.timestampLabel} ${errorDetails.timestamp}\n`;
     
-    if (errorDetails.stack !== 'スタックトレースなし') {
-      detailedError += `\nスタックトレース:\n${errorDetails.stack}`;
+    if (errorDetails.stack !== dictionary.alert.noStackTrace) {
+      detailedError += `\n${dictionary.alert.stackTrace}\n${errorDetails.stack}`;
     }
     
     return (

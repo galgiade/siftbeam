@@ -1,4 +1,6 @@
-export default {
+import type { SupportCenterLocale } from './createSupportCenter.d.ts';
+
+const id: SupportCenterLocale = {
   label: {
     pageTitle: "Pusat Dukungan",
     supportRequestList: "Permintaan Dukungan",
@@ -48,6 +50,6 @@ export default {
     messageRequired: "Silakan masukkan pesan",
     supportRequestError: "Kesalahan pengambilan permintaan dukungan:"
   }
-} as const;
+};
 
-
+export default id;

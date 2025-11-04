@@ -25,5 +25,22 @@ export interface CommonLocale {
       };
       copyright: string;
     };
+    fileUploader: {
+      dragAndDrop: string;
+      or: string;
+      selectFile: string;
+      maxFilesAndSize: string;
+      supportedFormats: string;
+      pendingFiles: string;
+      uploadStart: string;
+      uploading: string;
+      uploadedFiles: string;
+      uploadComplete: string;
+      uploadError: string;
+      uploadFailed: string;
+      maxFilesExceeded: string;
+      fileSizeExceeded: string;
+      oversizedFiles: string;
+    };
   };
 }

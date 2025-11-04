@@ -1,10 +1,11 @@
 'use client'
 
 import { Card, CardBody } from '@heroui/react';
+import type { ServiceLocale } from '@/app/dictionaries/service/ServiceLocale.d.ts';
 
 interface ServiceErrorDisplayProps {
   error: string;
-  dictionary: any;
+  dictionary: ServiceLocale;
 }
 
 /**
@@ -20,14 +21,14 @@ export default function ServiceErrorDisplay({ error, dictionary }: ServiceErrorD
               ⚠️
             </div>
             <h2 className="text-2xl font-bold text-danger-800 mb-4">
-              {dictionary?.service?.error?.title || 'エラーが発生しました'}
+              {dictionary.error.title}
             </h2>
             <p className="text-danger-700 mb-6">
               {error}
             </p>
             <div className="space-y-2 text-sm text-danger-600">
-              <p>{dictionary?.service?.error?.suggestion1 || 'ページを再読み込みしてください。'}</p>
-              <p>{dictionary?.service?.error?.suggestion2 || '問題が続く場合は、サポートにお問い合わせください。'}</p>
+              <p>{dictionary.error.suggestion1}</p>
+              <p>{dictionary.error.suggestion2}</p>
             </div>
           </CardBody>
         </Card>

@@ -6,7 +6,7 @@ import { Button, Card, Input, Select, SelectItem, Modal, ModalContent, ModalHead
 import { User } from "@/app/lib/types/TypeAPIs"
 import { updateUser, deleteUser } from "@/app/lib/actions/user-api"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { UserManagementLocale } from '@/app/dictionaries/user-management/user-management.d.ts';
 import { RiEdit2Fill } from "react-icons/ri"
 import { FaCheck, FaXmark, FaPlus, FaTrash } from "react-icons/fa6"
 import { sendVerificationEmailAction, storeVerificationCodeAction, verifyEmailCodeForUpdateAction } from "@/app/lib/actions/user-verification-actions"
@@ -15,7 +15,7 @@ import Link from "next/link"
 interface UserManagementPresentationProps {
   users: User[];
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: UserManagementLocale;
 }
 
 // 編集可能なフィールドの型定義
@@ -26,7 +26,8 @@ async function updateSingleFieldForUser(
   fieldName: EditableField,
   value: string,
   targetUser: User,
-  adminUserAttributes: UserAttributesDTO
+  adminUserAttributes: UserAttributesDTO,
+  dictionary: UserManagementLocale
 ): Promise<{ success: boolean; message: string; errors?: Record<string, string>; updatedUser?: User }> {
   try {
     console.log('updateSingleFieldForUser called with:', { fieldName, value, userId: targetUser.userId });
@@ -50,13 +51,13 @@ async function updateSingleFieldForUser(
     if (result.success) {
       return {
         success: true,
-        message: result.message || `${fieldName}が正常に更新されました。`,
+        message: result.message || dictionary.label.fieldUpdateSuccess.replace('{fieldName}', fieldName),
         updatedUser: result.data
       };
     } else {
       return {
         success: false,
-        message: result.message || `${fieldName}の更新に失敗しました。`,
+        message: result.message || dictionary.label.fieldUpdateFail.replace('{fieldName}', fieldName),
         errors: result.errors ? Object.fromEntries(
           Object.entries(result.errors).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value])
         ) : {},
@@ -66,8 +67,8 @@ async function updateSingleFieldForUser(
     console.error('Error in updateSingleFieldForUser:', error);
     return {
       success: false,
-      message: error?.message || '更新処理でエラーが発生しました。',
-      errors: { [fieldName]: error?.message || '更新処理でエラーが発生しました。' }
+      message: error?.message || dictionary.label.updateError,
+      errors: { [fieldName]: error?.message || dictionary.label.updateError }
     };
   }
 }
@@ -223,19 +224,19 @@ export default function UserManagementPresentation({
   // バリデーション
   const validateField = (field: EditableField, value: string): string | null => {
     if (!value.trim()) {
-      return `${field}は必須です。`;
+      return dictionary.alert.required.replace('{label}', field);
     }
     
     if (field === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) {
-        return '有効なメールアドレスを入力してください。';
+        return dictionary.alert.invalidEmail;
       }
     }
     
     if (field === 'role') {
       if (!['admin', 'user'].includes(value)) {
-        return '有効なロールを選択してください。';
+        return dictionary.label.validRole;
       }
     }
     
@@ -260,7 +261,7 @@ export default function UserManagementPresentation({
       );
       
       if (!storeResult.success) {
-        setFieldErrors({ ...fieldErrors, email: storeResult.error || 'コードの保存に失敗しました。' });
+        setFieldErrors({ ...fieldErrors, email: storeResult.error || dictionary.label.codeSaveFailed });
         return;
       }
       
@@ -280,10 +281,10 @@ export default function UserManagementPresentation({
         }));
         setFieldErrors({ ...fieldErrors, email: '' });
       } else {
-        setFieldErrors({ ...fieldErrors, email: emailResult.error || 'メール送信に失敗しました。' });
+        setFieldErrors({ ...fieldErrors, email: emailResult.error || dictionary.label.emailSendFailed });
       }
     } catch (error: any) {
-      setFieldErrors({ ...fieldErrors, email: error?.message || 'エラーが発生しました。' });
+      setFieldErrors({ ...fieldErrors, email: error?.message || dictionary.label.errorOccurredGeneric });
     } finally {
       setEmailVerificationState(prev => ({ ...prev, isSendingCode: false }));
     }
@@ -306,7 +307,7 @@ export default function UserManagementPresentation({
       
       if (result.success) {
         // 認証成功後、実際にメールアドレスを更新
-        const updateResult = await updateSingleFieldForUser('email', emailVerificationState.newEmail, selectedUser, userAttributes);
+        const updateResult = await updateSingleFieldForUser('email', emailVerificationState.newEmail, selectedUser, userAttributes, dictionary);
         
         if (updateResult.success) {
           setFieldValues({ ...fieldValues, email: emailVerificationState.newEmail });
@@ -321,13 +322,13 @@ export default function UserManagementPresentation({
           });
           setFieldErrors({ ...fieldErrors, email: '' });
         } else {
-          setFieldErrors({ ...fieldErrors, email: updateResult.message || 'メールアドレスの更新に失敗しました。' });
+          setFieldErrors({ ...fieldErrors, email: updateResult.message || dictionary.label.emailUpdateFailed });
         }
       } else {
-        setFieldErrors({ ...fieldErrors, email: result.error || '認証コードが正しくありません。' });
+        setFieldErrors({ ...fieldErrors, email: result.error || dictionary.label.invalidVerificationCode });
       }
     } catch (error: any) {
-      setFieldErrors({ ...fieldErrors, email: error?.message || 'エラーが発生しました。' });
+      setFieldErrors({ ...fieldErrors, email: error?.message || dictionary.label.errorOccurredGeneric });
     } finally {
       setIsUpdating(false);
     }
@@ -363,7 +364,7 @@ export default function UserManagementPresentation({
     } catch (error: any) {
       setDeleteResult({
         success: false,
-        message: error?.message || 'ユーザー削除中にエラーが発生しました。'
+        message: error?.message || dictionary.label.errorOccurredGeneric
       });
     } finally {
       setIsDeleting(false);
@@ -382,7 +383,7 @@ export default function UserManagementPresentation({
   // 更新実行
   const saveField = async (field: EditableField) => {
     if (!selectedUser) {
-      setFieldErrors({ ...fieldErrors, [field]: 'ユーザーが選択されていません。' });
+      setFieldErrors({ ...fieldErrors, [field]: dictionary.label.userNotSelected });
       return;
     }
 
@@ -405,7 +406,7 @@ export default function UserManagementPresentation({
 
     try {
       console.log('Updating field:', { field, value, userId: selectedUser.userId });
-      const result = await updateSingleFieldForUser(field, value, selectedUser, userAttributes);
+      const result = await updateSingleFieldForUser(field, value, selectedUser, userAttributes, dictionary);
       console.log('Update result:', result);
       
       if (result.success && result.updatedUser) {
@@ -435,7 +436,7 @@ export default function UserManagementPresentation({
       }
     } catch (error: any) {
       console.error('Update error:', error);
-      const errorMessage = error?.message || '更新中にエラーが発生しました。';
+      const errorMessage = error?.message || dictionary.label.errorOccurredGeneric;
       setFieldErrors({ ...fieldErrors, [field]: errorMessage });
     } finally {
       setIsUpdating(false);
@@ -507,14 +508,14 @@ export default function UserManagementPresentation({
               <div className="flex flex-col gap-3">
                 <div className="p-3 bg-blue-50 rounded-md border border-blue-200">
                   <p className="text-sm text-blue-800">
-                    新しいメールアドレス「{emailVerificationState.newEmail}」に認証コードを送信しました。
+                    {dictionary.label.newEmailSent.replace('{email}', emailVerificationState.newEmail)}
                   </p>
                 </div>
                 <Input
                   type="text"
                   value={emailVerificationState.verificationCode}
                   onValueChange={(val) => setEmailVerificationState(prev => ({ ...prev, verificationCode: val }))}
-                  placeholder="認証コード（6桁）"
+                  placeholder={dictionary.label.verificationCodePlaceholder}
                   variant="bordered"
                   isDisabled={isUpdating}
                   maxLength={6}
@@ -527,7 +528,7 @@ export default function UserManagementPresentation({
                     isDisabled={isUpdating || emailVerificationState.verificationCode.length !== 6}
                     isLoading={isUpdating}
                   >
-                    認証して更新
+                    {dictionary.label.verifyAndUpdate}
                   </Button>
                   <Button
                     size="sm"
@@ -545,7 +546,7 @@ export default function UserManagementPresentation({
                     }}
                     isDisabled={isUpdating}
                   >
-                    キャンセル
+                    {dictionary.label.cancel}
                   </Button>
                 </div>
               </div>
@@ -604,12 +605,12 @@ export default function UserManagementPresentation({
           <div className="p-3 bg-gray-50 rounded-md border">
             <span className="text-gray-900">
               {field === 'locale' 
-                ? (value ? localeOptions.find(opt => opt.key === value)?.label || value : '未設定')
+                ? (value ? localeOptions.find(opt => opt.key === value)?.label || value : dictionary.label.notSet)
                 : field === 'role'
-                ? (value ? roleOptions.find(opt => opt.key === value)?.label || value : '未設定')
+                ? (value ? roleOptions.find(opt => opt.key === value)?.label || value : dictionary.label.notSet)
                 : type === 'select' && selectOptions
-                ? (value ? selectOptions?.find(opt => opt.key === value)?.label || value : '未設定')
-                : value || '未設定'
+                ? (value ? selectOptions?.find(opt => opt.key === value)?.label || value : dictionary.label.notSet)
+                : value || dictionary.label.notSet
               }
             </span>
           </div>
@@ -633,15 +634,15 @@ export default function UserManagementPresentation({
 
   // ロール選択肢
   const roleOptions = [
-    { key: 'user', label: 'ユーザー' },
-    { key: 'admin', label: '管理者' },
+    { key: 'user', label: dictionary.label.roleUser },
+    { key: 'admin', label: dictionary.label.roleAdmin },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">ユーザー管理</h1>
+          <h1 className="text-3xl font-bold">{dictionary.label.userManagement}</h1>
             <Button
               color="primary"
               as={Link}
@@ -649,20 +650,20 @@ export default function UserManagementPresentation({
               startContent={<FaPlus size={16} />}
               className="font-medium"
             >
-              新しいユーザーを作成
+              {dictionary.label.createNewUser}
             </Button>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* 左側: ユーザー一覧 */}
           <Card className="lg:col-span-1 p-6 shadow-lg">
-            <h2 className="text-xl font-bold mb-4">ユーザー一覧 ({filteredUsers.length}人)</h2>
+            <h2 className="text-xl font-bold mb-4">{dictionary.label.userListTitle} ({dictionary.label.userCount.replace('{count}', filteredUsers.length.toString())})</h2>
             
             {/* 検索・フィルター */}
             <div className="flex flex-col gap-4 mb-6">
               {isMounted ? (
                 <Input
-                  placeholder="ユーザー名、メール、部署で検索..."
+                  placeholder={dictionary.label.searchPlaceholder}
                   value={searchTerm}
                   onValueChange={handleSearchChange}
                   variant="bordered"
@@ -675,15 +676,15 @@ export default function UserManagementPresentation({
                   selectedKeys={[roleFilter]}
                   onSelectionChange={(keys) => handleRoleFilterChange(Array.from(keys)[0] as 'all' | 'admin' | 'user')}
                   variant="bordered"
-                  placeholder="ロールでフィルター"
+                  placeholder={dictionary.label.filterByRole}
                   classNames={{
                     listbox: "bg-white shadow-lg border border-gray-200",
                     popoverContent: "bg-white shadow-lg border border-gray-200"
                   }}
                 >
-                  <SelectItem key="all" className="bg-white hover:bg-gray-100">すべて</SelectItem>
-                  <SelectItem key="admin" className="bg-white hover:bg-gray-100">管理者</SelectItem>
-                  <SelectItem key="user" className="bg-white hover:bg-gray-100">ユーザー</SelectItem>
+                  <SelectItem key="all" className="bg-white hover:bg-gray-100">{dictionary.label.all}</SelectItem>
+                  <SelectItem key="admin" className="bg-white hover:bg-gray-100">{dictionary.label.admin}</SelectItem>
+                  <SelectItem key="user" className="bg-white hover:bg-gray-100">{dictionary.label.user}</SelectItem>
                 </Select>
               ) : (
                 <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
@@ -694,7 +695,7 @@ export default function UserManagementPresentation({
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {filteredUsers.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  ユーザーが見つかりません
+                  {dictionary.label.noUsersFound}
                 </div>
               ) : (
                 filteredUsers.map((user) => (
@@ -709,10 +710,10 @@ export default function UserManagementPresentation({
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-medium text-gray-900">{user.userName || '名前未設定'}</h3>
-                        <p className="text-sm text-gray-600">{user.email || 'メール未設定'}</p>
+                        <h3 className="font-medium text-gray-900">{user.userName || dictionary.label.nameNotSet}</h3>
+                        <p className="text-sm text-gray-600">{user.email || dictionary.label.emailNotSet}</p>
                         <p className="text-sm text-gray-500">
-                          {user.department || '部署未設定'} - {user.position || '役職未設定'}
+                          {user.department || dictionary.label.departmentNotSet} - {user.position || dictionary.label.positionNotSet}
                         </p>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -722,7 +723,7 @@ export default function UserManagementPresentation({
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {user.role === 'admin' ? '管理者' : user.role === 'user' ? 'ユーザー' : 'ロール未設定'} ({user.role || '未設定'})
+                        {user.role === 'admin' ? dictionary.label.roleAdmin : user.role === 'user' ? dictionary.label.roleUser : dictionary.label.roleNotSet} ({user.role || dictionary.label.notSet})
                       </span>
                     </div>
                   </div>
@@ -735,7 +736,7 @@ export default function UserManagementPresentation({
           <Card className="lg:col-span-2 p-6 shadow-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
-                {selectedUser ? `${selectedUser.userName} の編集` : 'ユーザーを選択してください'}
+                {selectedUser ? dictionary.label.editingUser.replace('{userName}', selectedUser.userName) : dictionary.label.selectUser}
               </h2>
               {selectedUser && (
                 <div className="flex flex-col items-end gap-2">
@@ -747,11 +748,11 @@ export default function UserManagementPresentation({
                     size="sm"
                     isDisabled={selectedUser.role === 'admin' && adminCount === 1}
                   >
-                    ユーザーを削除
+                    {dictionary.label.deleteUser}
                   </Button>
                   {selectedUser.role === 'admin' && adminCount === 1 && (
                     <span className="text-xs text-yellow-600">
-                      最後の管理者は削除できません
+                      {dictionary.label.lastAdminCannotDelete}
                     </span>
                   )}
                 </div>
@@ -774,7 +775,7 @@ export default function UserManagementPresentation({
 
                 {/* ロールフィールド（編集可能） */}
                 <div className="flex flex-col gap-2">
-                  {renderField('role', 'ロール', 'select', roleOptions)}
+                  {renderField('role', dictionary.label.role, 'select', roleOptions)}
                   {selectedUser.role === 'admin' && adminCount === 1 && (
                     <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                       <div className="flex items-start gap-2">
@@ -782,7 +783,7 @@ export default function UserManagementPresentation({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
                         <p className="text-xs text-yellow-800">
-                          このユーザーは組織唯一の管理者です。ロールを変更する前に、別のユーザーを管理者に昇格させてください。
+                          {dictionary.label.lastAdminRoleWarning}
                         </p>
                       </div>
                     </div>
@@ -790,20 +791,20 @@ export default function UserManagementPresentation({
                 </div>
 
           {/* 言語設定フィールド */}
-          {renderField('locale', '言語設定', 'select', localeOptions)}
+          {renderField('locale', dictionary.label.locale, 'select', localeOptions)}
                 
                 {/* ユーザー情報 */}
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">ユーザー情報</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">{dictionary.label.userInfo}</h3>
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p>作成日: {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString('ja-JP') : '不明'}</p>
-                    <p>更新日: {selectedUser.updatedAt ? new Date(selectedUser.updatedAt).toLocaleDateString('ja-JP') : '不明'}</p>
+                    <p>{dictionary.label.createdAt}: {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString('ja-JP') : dictionary.label.unknown}</p>
+                    <p>{dictionary.label.updatedAt}: {selectedUser.updatedAt ? new Date(selectedUser.updatedAt).toLocaleDateString('ja-JP') : dictionary.label.unknown}</p>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <p>左側のリストからユーザーを選択して編集を開始してください</p>
+                <p>{dictionary.label.selectUserToEdit}</p>
               </div>
             )}
           </Card>
@@ -824,7 +825,7 @@ export default function UserManagementPresentation({
         >
           <ModalContent className="bg-white">
             <ModalHeader className="flex flex-col gap-1 bg-white">
-              <h3 className="text-lg font-semibold text-red-600">ユーザー削除の確認</h3>
+              <h3 className="text-lg font-semibold text-red-600">{dictionary.label.deleteConfirmationTitle}</h3>
             </ModalHeader>
             <ModalBody className="bg-white">
               {userToDelete && !deleteResult && (
@@ -838,10 +839,10 @@ export default function UserManagementPresentation({
                         </svg>
                         <div>
                           <p className="text-red-900 font-bold text-lg">
-                            削除不可
+                            {dictionary.label.cannotDelete}
                           </p>
                           <p className="text-red-800 text-sm mt-1">
-                            このユーザーは組織唯一の管理者のため削除できません。先に別のユーザーを管理者に昇格させてください。
+                            {dictionary.label.lastAdminCannotDeleteMessage}
                           </p>
                         </div>
                       </div>
@@ -853,23 +854,23 @@ export default function UserManagementPresentation({
                       <FaTrash className="text-red-500 mt-1 flex-shrink-0" size={16} />
                       <div>
                         <p className="text-red-800 font-medium">
-                          以下のユーザーを完全に削除しますか？
+                          {dictionary.label.confirmDeleteUser}
                         </p>
                         <p className="text-red-700 text-sm mt-1">
-                          この操作は取り消すことができません。
+                          {dictionary.label.cannotUndo}
                         </p>
                       </div>
                     </div>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-gray-900 mb-2">削除対象ユーザー:</h4>
+                    <h4 className="font-medium text-gray-900 mb-2">{dictionary.label.deleteTargetUser}</h4>
                     <div className="space-y-1 text-sm text-gray-700">
-                      <p><span className="font-medium">名前:</span> {userToDelete.userName}</p>
-                      <p><span className="font-medium">メール:</span> {userToDelete.email}</p>
-                      <p><span className="font-medium">部署:</span> {userToDelete.department}</p>
-                      <p><span className="font-medium">役職:</span> {userToDelete.position}</p>
-                      <p><span className="font-medium">ロール:</span> {userToDelete.role === 'admin' ? '管理者' : 'ユーザー'}</p>
+                      <p><span className="font-medium">{dictionary.label.name}:</span> {userToDelete.userName}</p>
+                      <p><span className="font-medium">{dictionary.label.email}:</span> {userToDelete.email}</p>
+                      <p><span className="font-medium">{dictionary.label.department}:</span> {userToDelete.department}</p>
+                      <p><span className="font-medium">{dictionary.label.position}:</span> {userToDelete.position}</p>
+                      <p><span className="font-medium">{dictionary.label.role}:</span> {userToDelete.role === 'admin' ? dictionary.label.roleAdmin : dictionary.label.roleUser}</p>
                     </div>
                   </div>
 
@@ -879,12 +880,12 @@ export default function UserManagementPresentation({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
                       </svg>
                       <div>
-                        <p className="text-yellow-800 font-medium">削除による影響:</p>
+                        <p className="text-yellow-800 font-medium">{dictionary.label.deleteImpact}</p>
                         <ul className="text-yellow-700 text-sm mt-1 space-y-1">
-                          <li>• ユーザーアカウントが完全に削除されます</li>
-                          <li>• 参加しているグループから削除されます</li>
-                          <li>• 単独で参加しているグループは削除されます</li>
-                          <li>• アカウントも削除されます</li>
+                          <li>• {dictionary.label.deleteImpact1}</li>
+                          <li>• {dictionary.label.deleteImpact2}</li>
+                          <li>• {dictionary.label.deleteImpact3}</li>
+                          <li>• {dictionary.label.deleteImpact4}</li>
                         </ul>
                       </div>
                     </div>
@@ -912,7 +913,7 @@ export default function UserManagementPresentation({
                       <p className={`font-medium ${
                         deleteResult.success ? 'text-green-800' : 'text-red-800'
                       }`}>
-                        {deleteResult.success ? '削除完了' : '削除失敗'}
+                        {deleteResult.success ? dictionary.label.deleteCompleted : dictionary.label.deleteFailed}
                       </p>
                       <p className={`text-sm mt-1 ${
                         deleteResult.success ? 'text-green-700' : 'text-red-700'
@@ -932,7 +933,7 @@ export default function UserManagementPresentation({
                     onPress={closeDeleteModal}
                     isDisabled={isDeleting}
                   >
-                    キャンセル
+                    {dictionary.label.cancel}
                   </Button>
                   <Button 
                     color="danger" 
@@ -941,7 +942,7 @@ export default function UserManagementPresentation({
                     isDisabled={isDeleting || (userToDelete?.role === 'admin' && adminCount === 1)}
                     startContent={!isDeleting ? <FaTrash size={14} /> : undefined}
                   >
-                    {isDeleting ? '削除中...' : '削除実行'}
+                    {isDeleting ? dictionary.label.deleting : dictionary.label.executeDelete}
                   </Button>
                 </>
               ) : (
@@ -950,7 +951,7 @@ export default function UserManagementPresentation({
                   onPress={closeDeleteModal}
                   isDisabled={deleteResult.success && isDeleting}
                 >
-                  閉じる
+                  {dictionary.label.close}
                 </Button>
               )}
             </ModalFooter>

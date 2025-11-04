@@ -1,7 +1,7 @@
 import CreatePolicyManagementPresentation from './CreatePolicyManagementPresentation'
 import PolicyErrorDisplay from '../PolicyErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { policyManagementDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 
 interface CreatePolicyManagementContainerProps {
   locale: string;
@@ -16,15 +16,14 @@ export default async function CreatePolicyManagementContainer({ locale }: Create
     // 並列実行で高速化
     const [userProfile, dictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(policyManagementDictionaries, locale, 'en'))
     ]);
     
     // 管理者権限チェック
     if (userProfile.role !== 'admin') {
-      const errorMessage = 'このページにアクセスする権限がありません。管理者のみアクセス可能です。';
       return (
         <PolicyErrorDisplay 
-          error={errorMessage}
+          error={dictionary.alert.accessDenied}
           dictionary={dictionary} 
         />
       );
@@ -58,16 +57,16 @@ export default async function CreatePolicyManagementContainer({ locale }: Create
     console.error('Error in CreatePolicyManagementContainer:', errorDetails);
     
     // 辞書を取得してエラー表示
-    const dictionary = pickDictionary(userDictionaries, locale, 'en');
-    const errorMessage = error?.message || '予期しないエラーが発生しました。';
+    const dictionary = pickDictionary(policyManagementDictionaries, locale, 'en');
+    const errorMessage = error?.message || dictionary.alert.unknownError;
     
-    let detailedError = `認証エラー: ${errorMessage}\n`;
-    detailedError += `エラータイプ: ${errorDetails.name}\n`;
-    detailedError += `ロケール: ${locale}\n`;
-    detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+    let detailedError = `${dictionary.alert.authError}: ${errorMessage}\n`;
+    detailedError += `${dictionary.alert.errorType}: ${errorDetails.name}\n`;
+    detailedError += `${dictionary.alert.localeLabel}: ${locale}\n`;
+    detailedError += `${dictionary.alert.timestampLabel}: ${errorDetails.timestamp}\n`;
     
-    if (errorDetails.stack !== 'スタックトレースなし') {
-      detailedError += `\nスタックトレース:\n${errorDetails.stack}`;
+    if (errorDetails.stack !== dictionary.alert.noStackTrace) {
+      detailedError += `\n${dictionary.alert.stackTrace}:\n${errorDetails.stack}`;
     }
     
     return (

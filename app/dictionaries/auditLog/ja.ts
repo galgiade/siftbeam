@@ -1,8 +1,40 @@
-export default {
+import type { AuditLogLocale } from './auditLog.d.ts';
+
+const ja: AuditLogLocale = {
   label: {
     pageTitle: "監査ログ",
-    pageDescription: "システム操作の履歴を確認できます",
-    searchPlaceholder: "ユーザー名、リソース名で検索...",
+    pageDescription: "システムの操作履歴を確認できます",
+    filterButton: "フィルター",
+    refreshButton: "更新",
+    filterTitle: "フィルター",
+    clearButton: "クリア",
+    searchPlaceholder: "検索（ユーザー名、リソース、フィールド）",
+    actionPlaceholder: "アクション",
+    resourcePlaceholder: "リソース",
+    statusPlaceholder: "ステータス",
+    statusSuccess: "成功",
+    statusFailed: "失敗",
+    startDateLabel: "開始日",
+    endDateLabel: "終了日",
+    statsTotal: "総ログ数",
+    statsSuccess: "成功",
+    statsFailed: "失敗",
+    statsFiltered: "フィルター結果",
+    tableTitle: "監査ログ一覧",
+    pageLabel: "ページ",
+    itemsCount: "件",
+    columnDateTime: "日時",
+    columnUser: "ユーザー",
+    columnAction: "アクション",
+    columnResource: "リソース",
+    columnChangedField: "変更フィールド",
+    columnOldValue: "変更前",
+    columnNewValue: "変更後",
+    columnStatus: "ステータス",
+    columnErrorDetail: "エラー詳細",
+    noData: "データがありません",
+    previousPage: "前へ",
+    nextPage: "次へ",
     searchAriaLabel: "検索",
     dateRangeLabel: "期間選択",
     dateRangeAriaLabel: "日付範囲選択",
@@ -12,6 +44,7 @@ export default {
     actionCreate: "作成",
     actionUpdate: "更新",
     actionDelete: "削除",
+    actionRead: "読み取り",
     actionAttach: "アタッチ",
     actionDetach: "デタッチ",
     resourceSelect: "リソース選択",
@@ -20,27 +53,22 @@ export default {
     statusSelect: "ステータス選択",
     statusSelectAriaLabel: "ステータス選択",
     allStatuses: "全てのステータス",
-    statusSuccess: "成功",
-    statusFailed: "失敗",
     resetFilters: "フィルターをリセット",
     resetFiltersAriaLabel: "フィルターをリセット",
     tableAriaLabel: "監査ログテーブル",
     tableEmpty: "監査ログがありません。",
-    columnDateTime: "日時",
-    columnUser: "ユーザー",
-    columnAction: "アクション",
-    columnResource: "リソース",
     columnResourceName: "リソース名",
-    columnChangedField: "変更フィールド",
-    columnOldValue: "変更内容",
-    columnStatus: "ステータス",
-    columnErrorDetail: "エラーメッセージ",
     oldValuePrefix: "旧: ",
     newValuePrefix: "新: ",
     removedValuePrefix: "除去: ",
     addedValuePrefix: "追加: ",
     paginationAriaLabel: "ページネーション",
     displayCount: "{shown}件中 {total}件を表示（全{all}件）"
+  },
+  alert: {
+    fetchError: "データの取得に失敗しました",
+    unexpectedError: "予期しないエラーが発生しました",
+    adminRequired: "Admin privileges required"
   },
   resource: {
     User: "ユーザー",
@@ -53,6 +81,6 @@ export default {
     LimitUsage: "利用制限",
     APIKey: "APIキー"
   }
-} as const;
+};
 
-
+export default ja;

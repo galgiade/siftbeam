@@ -58,11 +58,11 @@ export default function SignInPresentation({ dictionary, locale }: SignInPresent
 
     let blocked = false;
     if (!emailVal) {
-      setEmailError('メールアドレスを入力してください');
+      setEmailError(dictionary.alert.emailRequired);
       blocked = true;
     }
     if (!passwordVal) {
-      setPasswordError('パスワードを入力してください');
+      setPasswordError(dictionary.alert.passwordRequired);
       blocked = true;
     }
     if (blocked) {
@@ -130,10 +130,10 @@ export default function SignInPresentation({ dictionary, locale }: SignInPresent
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-900">
-              二段階認証
+              {dictionary.label.twoFactorAuthTitle}
             </h1>
             <p className="mt-3 text-gray-600">
-              {state.email} に送信された認証コードを入力してください
+              {state.email} {dictionary.label.twoFactorAuthDescription}
             </p>
           </div>
 
@@ -148,7 +148,7 @@ export default function SignInPresentation({ dictionary, locale }: SignInPresent
 
           <div className="mt-8 text-center">
             <p className="text-xs text-gray-500">
-              © 2024 SiftBeam. All rights reserved.
+              {dictionary.label.copyright}
             </p>
           </div>
         </div>
@@ -245,7 +245,7 @@ export default function SignInPresentation({ dictionary, locale }: SignInPresent
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
                     className="text-gray-500 hover:text-gray-700"
-                    aria-label={showPassword ? 'パスワードを隠す' : 'パスワードを表示'}
+                    aria-label={showPassword ? dictionary.label.hidePassword : dictionary.label.showPassword}
                   >
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,7 +313,7 @@ export default function SignInPresentation({ dictionary, locale }: SignInPresent
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">または</span>
+                <span className="px-4 bg-white text-gray-500">{dictionary.label.orDivider}</span>
               </div>
             </div>
             
@@ -345,7 +345,7 @@ export default function SignInPresentation({ dictionary, locale }: SignInPresent
         {/* フッター */}
         <div className="mt-8 text-center">
           <p className="text-xs text-gray-500">
-            © 2024 SiftBeam. All rights reserved.
+            {dictionary.label.copyright}
           </p>
         </div>
       </div>

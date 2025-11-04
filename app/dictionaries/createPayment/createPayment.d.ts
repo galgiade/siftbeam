@@ -35,6 +35,7 @@ export type CreatePaymentLocale = {
     linkCompatibleStores: string;
     cardInfoEncrypted: string;
     billingBasedOnUsage: string;
+    dataRetentionNotice: string;
     
     // 認証フロー説明
     authenticationFlowDescription: string;

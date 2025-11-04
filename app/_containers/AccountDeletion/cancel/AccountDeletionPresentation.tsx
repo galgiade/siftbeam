@@ -8,17 +8,22 @@ import type { DeletionStatusResponse } from '@/app/lib/actions/account-deletion-
 import { calculateDaysUntilDeletion, calculateDeletionDate } from '@/app/lib/utils/account-deletion-utils';
 import { UserAttributesDTO } from '@/app/lib/types/TypeAPIs';
 import { useRouter } from 'next/navigation';
+import type { AccountDeletionLocale } from '@/app/dictionaries/account-deletion/account-deletion.d.ts';
 
 interface AccountDeletionCancelPresentationProps {
   userAttributes: UserAttributesDTO;
   deletionStatus: DeletionStatusResponse;
   locale: string;
+  dictionary: AccountDeletionLocale;
+  accessError?: 'adminOnly' | 'notDeleted';
 }
 
 export default function AccountDeletionCancelPresentation({
   userAttributes,
   deletionStatus,
   locale,
+  dictionary,
+  accessError,
 }: AccountDeletionCancelPresentationProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,10 +41,10 @@ export default function AccountDeletionCancelPresentation({
         // 成功時はメインページにリダイレクト
         router.push(`/${locale}/account/account-deletion`);
       } else {
-        setError(result.message || '削除リクエストの取り消しに失敗しました');
+        setError(result.message || dictionary.alert.cancelDeletionFailed);
       }
     } catch (err) {
-      setError('予期しないエラーが発生しました');
+      setError(dictionary.alert.unexpectedError);
     } finally {
       setLoading(false);
     }
@@ -55,6 +60,49 @@ export default function AccountDeletionCancelPresentation({
   const deletionDate = deletionRequestedAt ? calculateDeletionDate(deletionRequestedAt) : null;
   const daysUntilDeletion = deletionRequestedAt ? calculateDaysUntilDeletion(deletionRequestedAt) : null;
 
+  // アクセスエラーの表示
+  if (accessError) {
+    return (
+      <div className="max-w-3xl mx-auto p-6">
+        <Button
+          variant="light"
+          startContent={<ArrowLeftIcon className="w-4 h-4" />}
+          onPress={handleGoBack}
+          className="mb-4"
+        >
+          {dictionary.label.backButton}
+        </Button>
+
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+              <div>
+                <h1 className="text-xl font-bold text-red-700">
+                  {accessError === 'adminOnly' ? dictionary.alert.adminOnlyAccess : dictionary.alert.notDeletionRequested}
+                </h1>
+              </div>
+            </div>
+          </CardHeader>
+          <Divider />
+          <CardBody>
+            <p className="text-gray-700 mb-4">
+              {accessError === 'adminOnly' ? dictionary.alert.adminOnlyDescription : dictionary.alert.notDeletionRequestedDescription}
+            </p>
+            <Button
+              color="primary"
+              variant="solid"
+              startContent={<ArrowLeftIcon className="w-4 h-4" />}
+              onPress={handleGoBack}
+            >
+              {dictionary.label.backButton}
+            </Button>
+          </CardBody>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-6">
       {/* ヘッダー */}
@@ -65,14 +113,14 @@ export default function AccountDeletionCancelPresentation({
           onPress={handleGoBack}
           className="mb-4"
         >
-          戻る
+          {dictionary.label.backButton}
         </Button>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">削除リクエストの取り消し</h1>
-        <p className="text-gray-600">アカウント削除リクエストを取り消し、サービスの利用を再開します。</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{dictionary.label.cancelPageTitle}</h1>
+        <p className="text-gray-600">{dictionary.label.cancelPageDescription}</p>
       </div>
 
       {error && (
-        <Alert color="danger" className="mb-6" title="エラー" description={error} />
+        <Alert color="danger" className="mb-6" title={dictionary.alert.errorTitle} description={error} />
       )}
 
       {/* 現在の状態カード */}
@@ -81,8 +129,8 @@ export default function AccountDeletionCancelPresentation({
           <div className="flex items-center gap-3">
             <ExclamationTriangleIcon className="w-8 h-8 text-orange-500" />
             <div>
-              <h2 className="text-xl font-bold text-orange-700">削除申請中</h2>
-              <p className="text-sm text-orange-600">現在、アカウント削除が申請されています</p>
+              <h2 className="text-xl font-bold text-orange-700">{dictionary.label.deletionRequestedTitle}</h2>
+              <p className="text-sm text-orange-600">{dictionary.label.deletionRequestedDescription}</p>
             </div>
           </div>
         </CardHeader>
@@ -90,8 +138,8 @@ export default function AccountDeletionCancelPresentation({
         <CardBody>
           <Alert 
             color="warning" 
-            title="サービス利用停止中"
-            description="すべてのユーザーのサービス利用が停止されています。削除リクエストを取り消すことで、サービス利用を再開できます。"
+            title={dictionary.label.serviceSuspended}
+            description={dictionary.label.serviceSuspendedDescription}
           />
         </CardBody>
       </Card>
@@ -101,7 +149,7 @@ export default function AccountDeletionCancelPresentation({
         <CardHeader>
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <ClockIcon className="w-5 h-5" />
-            削除申請情報
+            {dictionary.label.deletionRequestInfo}
           </h2>
         </CardHeader>
         <Divider />
@@ -111,7 +159,7 @@ export default function AccountDeletionCancelPresentation({
               <div className="flex items-center gap-3">
                 <BuildingOfficeIcon className="w-5 h-5 text-blue-500" />
                 <div>
-                  <p className="font-medium">組織ID</p>
+                  <p className="font-medium">{dictionary.label.organizationId}</p>
                   <p className="text-sm text-gray-600">{userAttributes.customerId}</p>
                 </div>
               </div>
@@ -120,7 +168,7 @@ export default function AccountDeletionCancelPresentation({
                 <div className="flex items-center gap-3">
                   <ClockIcon className="w-5 h-5 text-gray-500" />
                   <div>
-                    <p className="font-medium">削除申請日時</p>
+                    <p className="font-medium">{dictionary.label.deletionRequestDateTime}</p>
                     <p className="text-sm text-gray-600">
                       {new Date(deletionRequestedAt).toLocaleString('ja-JP')}
                     </p>
@@ -132,9 +180,9 @@ export default function AccountDeletionCancelPresentation({
                 <div className="flex items-center gap-3">
                   <UserGroupIcon className="w-5 h-5 text-orange-500" />
                   <div>
-                    <p className="font-medium">影響ユーザー数</p>
+                    <p className="font-medium">{dictionary.label.affectedUsersCount}</p>
                     <Chip color="warning" variant="flat" size="sm">
-                      {deletionStatus.affectedUsers}名のユーザー
+                      {dictionary.label.usersAffected.replace('{count}', deletionStatus.affectedUsers.toString())}
                     </Chip>
                   </div>
                 </div>
@@ -146,7 +194,7 @@ export default function AccountDeletionCancelPresentation({
                 <div className="flex items-center gap-3">
                   <ClockIcon className="w-5 h-5 text-red-500" />
                   <div>
-                    <p className="font-medium">削除予定日</p>
+                    <p className="font-medium">{dictionary.label.scheduledDeletionDate}</p>
                     <p className="text-sm text-red-600 font-semibold">
                       {deletionDate.toLocaleDateString('ja-JP')}
                     </p>
@@ -158,9 +206,9 @@ export default function AccountDeletionCancelPresentation({
                 <div className="flex items-center gap-3">
                   <ExclamationTriangleIcon className="w-5 h-5 text-orange-500" />
                   <div>
-                    <p className="font-medium">削除まで</p>
+                    <p className="font-medium">{dictionary.label.daysUntilDeletion}</p>
                     <Chip color={daysUntilDeletion <= 7 ? "danger" : "warning"} variant="flat" size="sm">
-                      あと{daysUntilDeletion}日
+                      {dictionary.label.daysRemaining.replace('{days}', daysUntilDeletion.toString())}
                     </Chip>
                   </div>
                 </div>
@@ -175,44 +223,44 @@ export default function AccountDeletionCancelPresentation({
         <CardHeader>
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <CheckCircleIcon className="w-5 h-5" />
-            復旧される内容
+            {dictionary.label.restoredContentTitle2}
           </h2>
         </CardHeader>
         <Divider />
         <CardBody>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-medium mb-3 text-green-700">ユーザーアクセス</h3>
+              <h3 className="font-medium mb-3 text-green-700">{dictionary.label.userAccessTitle}</h3>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  すべてのユーザーアカウントへのアクセス
+                  {dictionary.label.allUserAccountsAccess2}
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  ユーザープロファイル機能
+                  {dictionary.label.userProfileFeatures}
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  アクセス権限の復旧
+                  {dictionary.label.accessPermissionsRestore}
                 </li>
               </ul>
             </div>
             
             <div>
-              <h3 className="font-medium mb-3 text-green-700">サービス機能</h3>
+              <h3 className="font-medium mb-3 text-green-700">{dictionary.label.serviceFeaturesTitle}</h3>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  ファイルとドキュメントへのアクセス
+                  {dictionary.label.filesAndDocumentsAccess}
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  設定とカスタマイズ機能
+                  {dictionary.label.settingsAndCustomizationFeatures}
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  すべてのサービス機能
+                  {dictionary.label.allServiceFunctions}
                 </li>
               </ul>
             </div>
@@ -220,7 +268,7 @@ export default function AccountDeletionCancelPresentation({
 
           <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
             <p className="text-sm text-green-800">
-              <strong>復旧について:</strong> 削除リクエストを取り消すことで、すべてのユーザーが即座にサービスを利用できるようになります。データは保持されており、完全に復旧されます。
+              <strong>{dictionary.label.restoreNote}</strong> {dictionary.label.restoreNoteDescription}
             </p>
           </div>
         </CardBody>
@@ -234,7 +282,7 @@ export default function AccountDeletionCancelPresentation({
           onPress={handleGoBack}
           className="min-w-[200px]"
         >
-          戻る
+          {dictionary.label.backButton}
         </Button>
         
         <Button
@@ -246,15 +294,15 @@ export default function AccountDeletionCancelPresentation({
           isLoading={loading}
           className="min-w-[200px]"
         >
-          {loading ? '復旧処理中...' : '削除リクエストを取り消す'}
+          {loading ? dictionary.label.restoringButton : dictionary.label.cancelDeletionButton}
         </Button>
       </div>
 
       <div className="text-center mt-6">
         <p className="text-sm text-gray-500">
-          この操作について不明な点がある場合は、
+          {dictionary.label.supportContact}
           <a href="mailto:support@example.com" className="text-blue-600 hover:underline ml-1">
-            サポートチーム
+            {dictionary.label.supportTeam}
           </a>
           にお問い合わせください。
         </p>

@@ -14,6 +14,17 @@ export type CompanyProfileLocale = {
     nameTooLong: string;
     addressTooLong: string;
     validationError: string;
+    fieldUpdateSuccess: string; // {fieldName}
+    fieldUpdateFail: string; // {fieldName}
+    updateError: string;
+    fieldRequired: string; // {fieldLabel}
+    invalidEmailFormat: string;
+    invalidPhoneFormat: string;
+    invalidPostalCodeFormat: string;
+    invalidCountryFormat: string;
+    countryRequired: string;
+    errorTitle: string;
+    fetchError: string;
   };
   label: {
     title: string;
@@ -27,6 +38,11 @@ export type CompanyProfileLocale = {
     name: string;
     phone: string;
     email: string;
+    notSet: string;
+    generalUserPermission: string;
+    adminPermission: string;
+    adminPermissionDescription: string;
+    selectPlaceholder: string; // {label}
   };
   placeholder: {
     postal_code: string;
@@ -37,6 +53,7 @@ export type CompanyProfileLocale = {
     name: string;
     phone: string;
     email: string;
+    phoneExample: string;
   };
   button: {
     cancel: string;

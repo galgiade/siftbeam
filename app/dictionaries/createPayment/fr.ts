@@ -1,4 +1,6 @@
-export default {
+import type { CreatePaymentLocale } from './createPayment.d.ts';
+
+const fr: CreatePaymentLocale = {
   label: {
     back: "Retour",
     submit: "Envoyer",
@@ -22,6 +24,7 @@ export default {
     linkCompatibleStores: "Payez rapidement dans les boutiques compatibles Link, y compris Soundbox par défaut.",
     cardInfoEncrypted: "Les informations de carte sont chiffrées et stockées en toute sécurité.",
     billingBasedOnUsage: "La facturation réelle aura lieu ultérieurement en fonction de l'utilisation.",
+    dataRetentionNotice: "Les données traitées seront stockées gratuitement pendant 1 an puis automatiquement supprimées",
     authenticationFlowDescription: "Pour des raisons de sécurité, l'authentification de la carte peut être requise.",
     authenticationFlowSteps: "Si l'authentification est requise, l'écran d'authentification de votre banque s'affichera. Veuillez terminer l'authentification.",
     agreeNoticePrefix: "En validant l'inscription, vous acceptez les ",
@@ -44,6 +47,6 @@ export default {
     authenticationCancelled: "L'authentification de la carte a été annulée.",
     authenticationIncomplete: "L'authentification de la carte n'est pas terminée. Veuillez terminer l'authentification."
   }
-} as const;
+};
 
-
+export default fr;

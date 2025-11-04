@@ -4,26 +4,18 @@ import { useState, useEffect } from "react"
 import { Button, Card, CardBody, CardHeader, Input, Textarea, Chip, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Select, SelectItem, Alert, Spinner, Divider, SortDescriptor } from "@heroui/react"
 import { APIKeyEntry, APIKeyStatus, updateAPIKeyAction, deleteAPIKeyAction, toggleAPIKeyStatusAction, getAPIKeyValueAction } from "@/app/lib/actions/api-key-actions"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { APIKeyLocale } from '@/app/dictionaries/apiKey/apiKey.d.ts';
 import { KeyIcon, PlusIcon, PencilIcon, TrashIcon, CheckCircleIcon, XCircleIcon, ClockIcon, ClipboardDocumentIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 
 interface ApiKeyManagementPresentationProps {
   apiKeys: APIKeyEntry[];
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: APIKeyLocale;
 }
 
 // 編集可能なフィールドの型定義
 type EditableField = 'apiName' | 'description' | 'status';
-
-// APIキーステータスの表示設定
-const statusConfig = {
-  active: { color: 'success' as const, icon: CheckCircleIcon, label: '有効' },
-  inactive: { color: 'warning' as const, icon: ClockIcon, label: '無効' },
-  expired: { color: 'danger' as const, icon: XCircleIcon, label: '期限切れ' },
-  revoked: { color: 'danger' as const, icon: XCircleIcon, label: '取り消し済み' },
-};
 
 export default function ApiKeyManagementPresentation({
   apiKeys: initialApiKeys,
@@ -34,6 +26,17 @@ export default function ApiKeyManagementPresentation({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // APIキーステータスの表示設定を動的に生成
+  const getStatusConfig = (status: APIKeyStatus) => {
+    const configs = {
+      active: { color: 'success' as const, icon: CheckCircleIcon, label: dictionary.status.active },
+      inactive: { color: 'warning' as const, icon: ClockIcon, label: dictionary.status.inactive },
+      expired: { color: 'danger' as const, icon: XCircleIcon, label: dictionary.status.expired },
+      revoked: { color: 'danger' as const, icon: XCircleIcon, label: dictionary.status.revoked },
+    };
+    return configs[status];
+  };
 
   // APIキーの表示/非表示管理
   const [visibleApiKeys, setVisibleApiKeys] = useState<Record<string, string>>({});
@@ -123,10 +126,10 @@ export default function ApiKeyManagementPresentation({
       if (result.success && result.value) {
         setVisibleApiKeys(prev => ({ ...prev, [apiKeyId]: result.value! }));
       } else {
-        setError(result.message || 'APIキーの取得に失敗しました');
+        setError(result.message || dictionary.messages.getApiFailed);
       }
     } catch (error: any) {
-      setError('APIキーの取得中にエラーが発生しました');
+      setError(dictionary.messages.getApiError);
       console.error('Show API key error:', error);
     } finally {
       setLoadingKeys(prev => ({ ...prev, [apiKeyId]: false }));
@@ -143,12 +146,12 @@ export default function ApiKeyManagementPresentation({
       
       if (result.success && result.value) {
         await navigator.clipboard.writeText(result.value);
-        setSuccess('APIキーをクリップボードにコピーしました');
+        setSuccess(dictionary.messages.apiKeyCopied);
       } else {
-        setError(result.message || 'APIキーの取得に失敗しました');
+        setError(result.message || dictionary.messages.getApiFailed);
       }
     } catch (error: any) {
-      setError('APIキーのコピー中にエラーが発生しました');
+      setError(dictionary.messages.getApiError);
       console.error('Copy API key error:', error);
     } finally {
       setLoadingKeys(prev => ({ ...prev, [apiKeyId]: false }));
@@ -159,9 +162,9 @@ export default function ApiKeyManagementPresentation({
   const handleCopyToClipboard = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setSuccess(`${label}をクリップボードにコピーしました`);
+      setSuccess(`${label}${dictionary.messages.copySuccess}`);
     } catch (err) {
-      setError('クリップボードへのコピーに失敗しました');
+      setError(dictionary.messages.copyFailed);
     }
   };
 
@@ -169,7 +172,7 @@ export default function ApiKeyManagementPresentation({
   // APIキー編集
   const handleEditApiKey = async () => {
     if (!editForm.apiName.trim()) {
-      setError('API名は必須です');
+      setError(dictionary.messages.apiNameRequired);
       return;
     }
 
@@ -188,13 +191,13 @@ export default function ApiKeyManagementPresentation({
         setApiKeys(prev => prev.map(apiKey => 
           apiKey['api-keysId'] === editForm.id ? result.apiKey! : apiKey
         ));
-        setSuccess('APIキーが正常に更新されました');
+        setSuccess(dictionary.messages.updateSuccess);
         onEditOpenChange();
       } else {
-        setError(result.message || 'APIキーの更新に失敗しました');
+        setError(result.message || dictionary.messages.updateFailed);
       }
     } catch (error: any) {
-      setError('APIキーの更新中にエラーが発生しました');
+      setError(dictionary.messages.updateFailed);
       console.error('Update API key error:', error);
     } finally {
       setLoading(false);
@@ -213,13 +216,13 @@ export default function ApiKeyManagementPresentation({
 
       if (result.success) {
         setApiKeys(prev => prev.filter(apiKey => apiKey['api-keysId'] !== selectedApiKey['api-keysId']));
-        setSuccess('APIキーが正常に削除されました');
+        setSuccess(dictionary.messages.deleteSuccess);
         onDeleteOpenChange();
       } else {
-        setError(result.message || 'APIキーの削除に失敗しました');
+        setError(result.message || dictionary.messages.deleteFailed);
       }
     } catch (error: any) {
-      setError('APIキーの削除中にエラーが発生しました');
+      setError(dictionary.messages.deleteFailed);
       console.error('Delete API key error:', error);
     } finally {
       setLoading(false);
@@ -239,19 +242,20 @@ export default function ApiKeyManagementPresentation({
           key['api-keysId'] === apiKey['api-keysId'] ? result.apiKey! : key
         ));
         
-        let successMessage = `APIキーのステータスが${result.apiKey.status === 'active' ? '有効' : '無効'}に変更されました`;
+        const statusLabel = result.apiKey.status === 'active' ? dictionary.messages.statusActive : dictionary.messages.statusInactive;
+        let successMessage = `${dictionary.messages.statusChangeSuccess}${statusLabel}${dictionary.messages.statusChangedTo}`;
         
         // 警告メッセージがある場合は追加
         if (result.warning) {
-          successMessage += `\n\n⚠️ 警告: ${result.warning}`;
+          successMessage += `\n\n⚠️ ${dictionary.messages.warning} ${result.warning}`;
         }
         
         setSuccess(successMessage);
       } else {
-        setError(result.message || 'ステータスの変更に失敗しました');
+        setError(result.message || dictionary.messages.statusChangeFailed);
       }
     } catch (error: any) {
-      setError('ステータスの変更中にエラーが発生しました');
+      setError(dictionary.messages.statusChangeError);
       console.error('Toggle status error:', error);
     } finally {
       setLoading(false);
@@ -277,7 +281,7 @@ export default function ApiKeyManagementPresentation({
 
   // ステータスチップの表示
   const renderStatusChip = (status: APIKeyStatus) => {
-    const config = statusConfig[status];
+    const config = getStatusConfig(status);
     const Icon = config.icon;
     
     return (
@@ -320,8 +324,8 @@ export default function ApiKeyManagementPresentation({
         <div className="flex items-center gap-3">
           <KeyIcon className="w-8 h-8 text-blue-600" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">APIキー管理</h1>
-            <p className="text-sm text-gray-600">APIキーの作成、編集、削除を行います</p>
+            <h1 className="text-2xl font-bold text-gray-900">{dictionary.title}</h1>
+            <p className="text-sm text-gray-600">{dictionary.subtitle}</p>
           </div>
         </div>
         <Button
@@ -330,16 +334,16 @@ export default function ApiKeyManagementPresentation({
           color="primary"
           startContent={<PlusIcon className="w-4 h-4" />}
         >
-          新しいAPIキーを作成
+          {dictionary.createButton}
         </Button>
       </div>
 
       {/* 通知 */}
       {error && (
-        <Alert color="danger" title="エラー" description={error} onClose={clearNotifications} />
+        <Alert color="danger" title={dictionary.messages.errorTitle} description={error} onClose={clearNotifications} />
       )}
       {success && (
-        <Alert color="success" title="成功" description={success} onClose={clearNotifications} />
+        <Alert color="success" title={dictionary.messages.successTitle} description={success} onClose={clearNotifications} />
       )}
 
       {/* フィルター */}
@@ -347,23 +351,23 @@ export default function ApiKeyManagementPresentation({
         <CardBody>
           <div className="flex flex-col md:flex-row gap-4">
             <Input
-              placeholder="APIキー名または説明で検索"
+              placeholder={dictionary.filter.searchPlaceholder}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="flex-1"
               startContent={<KeyIcon className="w-4 h-4 text-gray-400" />}
             />
             <Select
-              placeholder="ステータスで絞り込み"
+              placeholder={dictionary.filter.filterByStatus}
               selectedKeys={statusFilter === 'all' ? [] : [statusFilter]}
               onSelectionChange={(keys) => setStatusFilter(Array.from(keys)[0] as APIKeyStatus || 'all')}
               className="w-full md:w-48"
             >
-              <SelectItem key="all">すべてのステータス</SelectItem>
-              <SelectItem key="active">有効</SelectItem>
-              <SelectItem key="inactive">無効</SelectItem>
-              <SelectItem key="expired">期限切れ</SelectItem>
-              <SelectItem key="revoked">取り消し済み</SelectItem>
+              <SelectItem key="all">{dictionary.filter.allStatuses}</SelectItem>
+              <SelectItem key="active">{dictionary.status.active}</SelectItem>
+              <SelectItem key="inactive">{dictionary.status.inactive}</SelectItem>
+              <SelectItem key="expired">{dictionary.status.expired}</SelectItem>
+              <SelectItem key="revoked">{dictionary.status.revoked}</SelectItem>
             </Select>
           </div>
         </CardBody>
@@ -372,7 +376,7 @@ export default function ApiKeyManagementPresentation({
       {/* APIキー一覧 */}
       <Card className="shadow-lg">
         <CardHeader>
-          <h2 className="text-lg font-semibold">APIキー一覧 ({sortedApiKeys.length}件)</h2>
+          <h2 className="text-lg font-semibold">{dictionary.messages.apiKeyListTitle} {dictionary.messages.apiKeyCount.replace('{count}', sortedApiKeys.length.toString())}</h2>
         </CardHeader>
         <Divider />
         <CardBody>
@@ -383,22 +387,22 @@ export default function ApiKeyManagementPresentation({
           ) : filteredApiKeys.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <KeyIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>表示するAPIキーがありません。</p>
+              <p>{dictionary.messages.noApiKeys}</p>
             </div>
           ) : (
             <Table 
-              aria-label="APIキーテーブル" 
+              aria-label={dictionary.messages.apiKeyListTitle}
               selectionMode="none"
               sortDescriptor={sortDescriptor}
               onSortChange={(descriptor) => setSortDescriptor(descriptor)}
             >
               <TableHeader>
-                <TableColumn key="apiName" allowsSorting>API名</TableColumn>
-                <TableColumn key="apiKey">APIキー</TableColumn>
-                <TableColumn key="description">説明</TableColumn>
-                <TableColumn key="status" allowsSorting>ステータス</TableColumn>
-                <TableColumn key="createdAt" allowsSorting>作成日時</TableColumn>
-                <TableColumn key="actions">アクション</TableColumn>
+                <TableColumn key="apiName" allowsSorting>{dictionary.table.apiName}</TableColumn>
+                <TableColumn key="apiKey">{dictionary.table.apiKey}</TableColumn>
+                <TableColumn key="description">{dictionary.table.description}</TableColumn>
+                <TableColumn key="status" allowsSorting>{dictionary.table.status}</TableColumn>
+                <TableColumn key="createdAt" allowsSorting>{dictionary.table.createdAt}</TableColumn>
+                <TableColumn key="actions">{dictionary.table.actions}</TableColumn>
               </TableHeader>
               <TableBody>
                 {sortedApiKeys.map((apiKey) => (
@@ -428,7 +432,7 @@ export default function ApiKeyManagementPresentation({
                           onPress={() => handleShowApiKey(apiKey['api-keysId'])}
                           isDisabled={loadingKeys[apiKey['api-keysId']]}
                           className="min-w-unit-8 w-8 h-8"
-                          title={visibleApiKeys[apiKey['api-keysId']] ? 'APIキーを非表示' : 'APIキーを表示'}
+                          title={visibleApiKeys[apiKey['api-keysId']] ? dictionary.messages.hideApiKey : dictionary.messages.showApiKey}
                         >
                           {visibleApiKeys[apiKey['api-keysId']] ? (
                             <EyeSlashIcon className="w-4 h-4 text-gray-500 hover:text-blue-600" />
@@ -444,7 +448,7 @@ export default function ApiKeyManagementPresentation({
                           onPress={() => handleCopyApiKey(apiKey['api-keysId'])}
                           isDisabled={loadingKeys[apiKey['api-keysId']]}
                           className="min-w-unit-8 w-8 h-8"
-                          title="APIキーをクリップボードにコピー"
+                          title={dictionary.messages.copyApiKeyToClipboard}
                         >
                           <ClipboardDocumentIcon className="w-4 h-4 text-gray-500 hover:text-blue-600" />
                         </Button>
@@ -452,7 +456,7 @@ export default function ApiKeyManagementPresentation({
                     </TableCell>
                     <TableCell>
                       <p className="text-sm text-gray-600 max-w-xs truncate">
-                        {apiKey.description || '説明なし'}
+                        {apiKey.description || dictionary.modal.noDescription}
                       </p>
                     </TableCell>
                     <TableCell>
@@ -477,7 +481,7 @@ export default function ApiKeyManagementPresentation({
                           startContent={<PencilIcon className="w-4 h-4" />}
                           onPress={() => openEditModal(apiKey)}
                         >
-                          編集
+                          {dictionary.actions.edit}
                         </Button>
                         <Button
                           size="sm"
@@ -486,7 +490,7 @@ export default function ApiKeyManagementPresentation({
                           onPress={() => handleToggleStatus(apiKey)}
                           isLoading={loading}
                         >
-                          {apiKey.status === 'active' ? '無効化' : '有効化'}
+                          {apiKey.status === 'active' ? dictionary.actions.disable : dictionary.actions.enable}
                         </Button>
                         <Button
                           size="sm"
@@ -495,7 +499,7 @@ export default function ApiKeyManagementPresentation({
                           startContent={<TrashIcon className="w-4 h-4" />}
                           onPress={() => openDeleteModal(apiKey)}
                         >
-                          削除
+                          {dictionary.actions.delete}
                         </Button>
                       </div>
                     </TableCell>
@@ -514,16 +518,16 @@ export default function ApiKeyManagementPresentation({
           {(onClose) => (
             <>
               <ModalHeader className="bg-white">
-                <h2 className="text-xl font-bold">APIキーを編集</h2>
+                <h2 className="text-xl font-bold">{dictionary.modal.editTitle}</h2>
               </ModalHeader>
               <ModalBody className="bg-white">
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-2 block">
-                      API名 <span className="text-red-500">*</span>
+                      {dictionary.modal.apiName} <span className="text-red-500">{dictionary.modal.required}</span>
                     </label>
                     <Input
-                      placeholder="APIキーの名前を入力"
+                      placeholder={dictionary.modal.apiNamePlaceholder}
                       value={editForm.apiName}
                       onChange={(e) => setEditForm(prev => ({ ...prev, apiName: e.target.value }))}
                       variant="bordered"
@@ -531,10 +535,10 @@ export default function ApiKeyManagementPresentation({
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-2 block">
-                      説明
+                      {dictionary.modal.description}
                     </label>
                     <Textarea
-                      placeholder="APIキーの説明を入力（任意）"
+                      placeholder={dictionary.modal.descriptionPlaceholder}
                       value={editForm.description}
                       onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
                       variant="bordered"
@@ -544,14 +548,14 @@ export default function ApiKeyManagementPresentation({
               </ModalBody>
               <ModalFooter className="bg-white">
                 <Button variant="light" onPress={onClose}>
-                  キャンセル
+                  {dictionary.actions.cancel}
                 </Button>
                 <Button
                   color="primary"
                   onPress={handleEditApiKey}
                   isLoading={loading}
                 >
-                  更新
+                  {dictionary.actions.update}
                 </Button>
               </ModalFooter>
             </>
@@ -565,33 +569,33 @@ export default function ApiKeyManagementPresentation({
           {(onClose) => (
             <>
               <ModalHeader className="bg-white">
-                <h2 className="text-xl font-bold text-red-600">APIキーを削除</h2>
+                <h2 className="text-xl font-bold text-red-600">{dictionary.modal.deleteConfirmTitle}</h2>
               </ModalHeader>
               <ModalBody className="bg-white">
-                <p>以下のAPIキーを削除してもよろしいですか？</p>
+                <p>{dictionary.modal.deleteConfirmMessage}</p>
                 {selectedApiKey && (
                   <div className="bg-gray-100 p-3 rounded-lg">
-                    <p><strong>API名:</strong> {selectedApiKey.apiName}</p>
-                    <p><strong>説明:</strong> {selectedApiKey.description || '説明なし'}</p>
-                    <p><strong>ステータス:</strong> {statusConfig[selectedApiKey.status].label}</p>
+                    <p><strong>{dictionary.modal.apiNameLabel}</strong> {selectedApiKey.apiName}</p>
+                    <p><strong>{dictionary.modal.descriptionLabel}</strong> {selectedApiKey.description || dictionary.modal.noDescription}</p>
+                    <p><strong>{dictionary.modal.statusLabel}</strong> {getStatusConfig(selectedApiKey.status).label}</p>
                   </div>
                 )}
                 <Alert
                   color="warning"
-                  title="注意"
-                  description="この操作は取り消すことができません。APIキーを使用しているアプリケーションがある場合、アクセスできなくなります。"
+                  title={dictionary.modal.deleteWarningTitle}
+                  description={dictionary.modal.deleteWarningMessage}
                 />
               </ModalBody>
               <ModalFooter className="bg-white">
                 <Button variant="light" onPress={onClose}>
-                  キャンセル
+                  {dictionary.actions.cancel}
                 </Button>
                 <Button
                   color="danger"
                   onPress={handleDeleteApiKey}
                   isLoading={loading}
                 >
-                  削除
+                  {dictionary.actions.delete}
                 </Button>
               </ModalFooter>
             </>

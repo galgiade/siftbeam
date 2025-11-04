@@ -249,26 +249,26 @@ export default function CreatePaymentPresentation({
                 <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">
                   1
                 </div>
-                <span className="ml-2 text-sm  text-gray-500">アカウント作成</span>
+                <span className="ml-2 text-sm  text-gray-500">{dictionary.label.accountCreation}</span>
               </div>
               <div className="flex items-center">
                 <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">
                   2
                 </div>
-                <span className="ml-2 text-sm text-gray-500">会社情報</span>
+                <span className="ml-2 text-sm text-gray-500">{dictionary.label.companyInfo}</span>
               </div>
               <div className="flex items-center">
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">
                     3
                   </div>
-                  <span className="ml-2 text-sm text-gray-500">管理者</span>
+                  <span className="ml-2 text-sm text-gray-500">{dictionary.label.adminSetup}</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
                     4
                   </div>
-                  <span className="ml-2 text-sm font-medium text-blue-600">支払い設定</span>
+                  <span className="ml-2 text-sm font-medium text-blue-600">{dictionary.label.paymentSetup}</span>
                 </div>
 
               </div>
@@ -282,7 +282,7 @@ export default function CreatePaymentPresentation({
             <p>{dictionary.label.cardInfoEncrypted}</p>
             <p>{dictionary.label.billingBasedOnUsage}</p>
             <p className="mt-2 text-blue-600 font-medium">
-              処理後のデータは1年間無料で保管され、その後自動的に削除されます
+              {dictionary.label.dataRetentionNotice}
             </p>
             <p className="mt-2">
               {dictionary.label.agreeNoticePrefix}

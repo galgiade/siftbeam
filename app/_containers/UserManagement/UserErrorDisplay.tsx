@@ -1,5 +1,7 @@
 'use client'
 
+import type { UserManagementLocale } from '@/app/dictionaries/user-management/user-management.d.ts';
+
 /**
  * ユーザー情報取得エラー表示コンポーネント
  */
@@ -8,7 +10,7 @@ export default function UserErrorDisplay({
   dictionary 
 }: { 
   error: string; 
-  dictionary: any; 
+  dictionary: UserManagementLocale; 
 }) {
   const handleRetry = () => {
     window.location.reload();
@@ -34,7 +36,7 @@ export default function UserErrorDisplay({
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            ユーザー情報の取得に失敗しました
+            {dictionary.label.fetchUsersFailed}
           </h3>
           <div className="text-sm text-gray-500 mb-4 max-h-32 overflow-y-auto">
             <pre className="whitespace-pre-wrap text-left bg-gray-50 p-2 rounded text-xs">
@@ -43,18 +45,18 @@ export default function UserErrorDisplay({
           </div>
           <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
             <p className="text-xs text-red-800">
-              <strong>開発者向け情報:</strong><br />
-              • DynamoDB接続またはCognito設定を確認してください<br />
-              • 環境変数: USER_TABLE_NAME, COGNITO_USER_POOL_ID<br />
-              • IAM権限: dynamodb:GetItem, cognito-idp:AdminGetUser<br />
-              • ネットワーク接続を確認してください
+              <strong>{dictionary.label.developerInfo}</strong><br />
+              {dictionary.label.checkDynamoDBConnection}<br />
+              {dictionary.label.checkEnvironmentVariables}<br />
+              {dictionary.label.checkIAMPermissions}<br />
+              {dictionary.label.checkNetworkConnection}
             </p>
           </div>
           <button
             onClick={handleRetry}
             className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
           >
-            再試行
+            {dictionary.label.retry}
           </button>
         </div>
       </div>

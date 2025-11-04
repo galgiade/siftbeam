@@ -7,10 +7,11 @@ import { FaDownload, FaClock, FaExclamationTriangle, FaSync, FaCheck, FaTimes } 
 import { ProcessingHistory, updateProcessingHistory } from '@/app/lib/actions/processing-history-api';
 import { getProcessingStatusMessage, getDownloadableFiles, formatFileSize } from '@/app/lib/utils/s3-utils';
 import { downloadFiles } from '@/app/lib/actions/download-api';
+import type { ServiceLocale } from '@/app/dictionaries/service/ServiceLocale.d.ts';
 
 interface ProcessingHistoryListProps {
   processingHistory: ProcessingHistory[];
-  dictionary: any;
+  dictionary: ServiceLocale;
   refreshKey: number;
 }
 
@@ -52,7 +53,7 @@ export default function ProcessingHistoryList({
       const downloadableFiles = getDownloadableFiles(history);
       
       if (downloadableFiles.length === 0) {
-        alert('ダウンロード可能なファイルがありません。');
+        alert(dictionary.processingHistory.noDownloadableFiles);
         return;
       }
 
@@ -60,7 +61,7 @@ export default function ProcessingHistoryList({
       const outputFiles = downloadableFiles.filter(f => f.fileType === 'output');
       
       if (outputFiles.length === 0) {
-        alert('ダウンロード可能な出力ファイルがありません。');
+        alert(dictionary.processingHistory.noOutputFiles);
         return;
       }
 
@@ -71,7 +72,7 @@ export default function ProcessingHistoryList({
       const result = await downloadFiles(s3Keys);
       
       if (!result.success || !result.data) {
-        alert(result.error || 'ダウンロードに失敗しました。');
+        alert(result.error || dictionary.processingHistory.downloadFailed);
         return;
       }
 
@@ -106,7 +107,7 @@ export default function ProcessingHistoryList({
       
     } catch (error) {
       console.error('Download error:', error);
-      alert('ダウンロードに失敗しました。');
+      alert(dictionary.processingHistory.downloadFailed);
     }
   };
 
@@ -139,14 +140,14 @@ export default function ProcessingHistoryList({
       });
 
       if (!result.success) {
-        alert('AI学習使用の更新に失敗しました: ' + result.message);
+        alert(dictionary.processingHistory.aiTrainingUpdateFailed + ': ' + result.message);
       } else {
         // 更新成功時にデータを再取得
         await handleRefresh();
       }
     } catch (error) {
       console.error('Toggle AI training error:', error);
-      alert('AI学習使用の更新に失敗しました');
+      alert(dictionary.processingHistory.aiTrainingUpdateFailed);
     } finally {
       setUpdatingId(null);
     }
@@ -157,7 +158,7 @@ export default function ProcessingHistoryList({
       <Card>
         <CardHeader className="flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-900">
-            処理履歴 ({processingHistory.length}件)
+            {dictionary.processingHistory.title} {dictionary.processingHistory.count.replace('{count}', processingHistory.length.toString())}
           </h3>
           <Button
             color="primary"
@@ -167,27 +168,27 @@ export default function ProcessingHistoryList({
             isLoading={isRefreshing}
             startContent={!isRefreshing ? <FaSync /> : null}
           >
-            更新
+            {dictionary.processingHistory.refresh}
           </Button>
         </CardHeader>
         <CardBody>
           {processingHistory.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <FaClock className="text-4xl text-gray-400 mx-auto mb-4" />
-              <p className="font-semibold mb-2">処理履歴がありません</p>
-              <p className="text-sm">ファイルをアップロードして処理を開始すると、ここに履歴が表示されます。</p>
+              <p className="font-semibold mb-2">{dictionary.processingHistory.empty}</p>
+              <p className="text-sm">{dictionary.processingHistory.emptyDescription}</p>
             </div>
           ) : (
-            <Table aria-label="処理履歴テーブル">
+            <Table aria-label={dictionary.table.ariaLabel}>
               <TableHeader>
-                <TableColumn>ポリシー</TableColumn>
-                <TableColumn>ユーザー</TableColumn>
-                <TableColumn>ステータス</TableColumn>
-                <TableColumn>開始時刻</TableColumn>
-                <TableColumn>ファイルサイズ</TableColumn>
-                <TableColumn>AI学習使用</TableColumn>
-                <TableColumn>エラー詳細</TableColumn>
-                <TableColumn>ダウンロード</TableColumn>
+                <TableColumn>{dictionary.processingHistory.columns.policy}</TableColumn>
+                <TableColumn>{dictionary.processingHistory.columns.user}</TableColumn>
+                <TableColumn>{dictionary.processingHistory.columns.status}</TableColumn>
+                <TableColumn>{dictionary.processingHistory.columns.startTime}</TableColumn>
+                <TableColumn>{dictionary.processingHistory.columns.fileSize}</TableColumn>
+                <TableColumn>{dictionary.processingHistory.columns.aiTraining}</TableColumn>
+                <TableColumn>{dictionary.processingHistory.columns.errorDetail}</TableColumn>
+                <TableColumn>{dictionary.processingHistory.columns.download}</TableColumn>
               </TableHeader>
               <TableBody>
                 {processingHistory.map((history) => {
@@ -203,7 +204,7 @@ export default function ProcessingHistoryList({
                       {/* ユーザー */}
                       <TableCell>
                         <div className="text-sm">
-                          {history.userName || 'Unknown User'}
+                          {history.userName || dictionary.processingHistory.unknownUser}
                         </div>
                       </TableCell>
 
@@ -246,7 +247,7 @@ export default function ProcessingHistoryList({
                                 history.status === 'in_progress'
                               }
                             >
-                              許可
+                              {dictionary.processingHistory.allow}
                             </Button>
                           ) : (
                             <Button
@@ -259,7 +260,7 @@ export default function ProcessingHistoryList({
                                 history.status === 'in_progress'
                               }
                             >
-                              拒否
+                              {dictionary.processingHistory.deny}
                             </Button>
                           )}
                         </div>
@@ -290,7 +291,7 @@ export default function ProcessingHistoryList({
                           {history.status === 'success' && history.downloadS3Keys.length > 0 ? (
                             isFileExpired(history.createdAt) ? (
                               <Tooltip 
-                                content="ファイルは保存期間（1年）を過ぎたため削除されました" 
+                                content={dictionary.processingHistory.fileExpiredTooltip}
                                 color="warning"
                               >
                                 <Button

@@ -129,8 +129,11 @@ export interface NewOrderReply {
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
-  message?: string;
-  errors?: Record<string, string[]>;
+  message?: string; // 後方互換性のため残す（非推奨）
+  errorCode?: string; // 'user.createFailed', 'auth.notAuthenticated' など
+  errorDetails?: Record<string, any>; // 動的な値（{field: 'email', count: 5}など）
+  errors?: Record<string, string[]>; // フィールドごとのエラー（バリデーション用）
   verificationId?: string; // 2段階認証用
   email?: string; // 2段階認証用
+  debugMessage?: string; // 開発者向けメッセージ（本番では非表示推奨）
 }

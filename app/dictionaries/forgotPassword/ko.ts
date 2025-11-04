@@ -1,4 +1,6 @@
-export default {
+import type { ForgotPasswordLocale } from './forgotPassword.d.ts';
+
+const ko: ForgotPasswordLocale = {
   label: {
     back: "뒤로",
     submit: "제출",
@@ -48,6 +50,6 @@ export default {
       genericError: "오류가 발생했습니다. 다시 시도하세요."
     }
   }
-} as const;
+};
 
-
+export default ko;

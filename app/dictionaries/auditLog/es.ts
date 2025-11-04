@@ -1,17 +1,50 @@
-export default {
+import type { AuditLogLocale } from './auditLog.d.ts';
+
+const es: AuditLogLocale = {
   label: {
     pageTitle: "Registro de auditoría",
-    pageDescription: "Puede consultar el historial de operaciones del sistema",
-    searchPlaceholder: "Buscar por nombre de usuario o recurso...",
+    pageDescription: "Ver el historial de actividad del sistema",
+    filterButton: "Filtrar",
+    refreshButton: "Actualizar",
+    filterTitle: "Filtro",
+    clearButton: "Limpiar",
+    searchPlaceholder: "Buscar (usuario, recurso, campo)",
+    actionPlaceholder: "Acción",
+    resourcePlaceholder: "Recurso",
+    statusPlaceholder: "Estado",
+    statusSuccess: "Éxito",
+    statusFailed: "Fallido",
+    startDateLabel: "Fecha de inicio",
+    endDateLabel: "Fecha de fin",
+    statsTotal: "Registros totales",
+    statsSuccess: "Éxito",
+    statsFailed: "Fallido",
+    statsFiltered: "Filtrado",
+    tableTitle: "Registros de auditoría",
+    pageLabel: "Página",
+    itemsCount: "elementos",
+    columnDateTime: "Fecha/Hora",
+    columnUser: "Usuario",
+    columnAction: "Acción",
+    columnResource: "Recurso",
+    columnChangedField: "Campo modificado",
+    columnOldValue: "Valor anterior",
+    columnNewValue: "Valor nuevo",
+    columnStatus: "Estado",
+    columnErrorDetail: "Detalles del error",
+    noData: "Sin datos",
+    previousPage: "Anterior",
+    nextPage: "Siguiente",
     searchAriaLabel: "Buscar",
     dateRangeLabel: "Rango de fechas",
-    dateRangeAriaLabel: "Selección de rango de fechas",
+    dateRangeAriaLabel: "Seleccionar rango de fechas",
     actionSelect: "Seleccionar acción",
     actionSelectAriaLabel: "Seleccionar acción",
     allActions: "Todas las acciones",
     actionCreate: "Crear",
     actionUpdate: "Actualizar",
     actionDelete: "Eliminar",
+    actionRead: "Leer",
     actionAttach: "Adjuntar",
     actionDetach: "Desvincular",
     resourceSelect: "Seleccionar recurso",
@@ -20,27 +53,22 @@ export default {
     statusSelect: "Seleccionar estado",
     statusSelectAriaLabel: "Seleccionar estado",
     allStatuses: "Todos los estados",
-    statusSuccess: "Éxito",
-    statusFailed: "Fallido",
     resetFilters: "Restablecer filtros",
     resetFiltersAriaLabel: "Restablecer filtros",
     tableAriaLabel: "Tabla de registro de auditoría",
     tableEmpty: "No hay registros de auditoría.",
-    columnDateTime: "Fecha y hora",
-    columnUser: "Usuario",
-    columnAction: "Acción",
-    columnResource: "Recurso",
     columnResourceName: "Nombre del recurso",
-    columnChangedField: "Campo cambiado",
-    columnOldValue: "Contenido del cambio",
-    columnStatus: "Estado",
-    columnErrorDetail: "Mensaje de error",
     oldValuePrefix: "Ant.: ",
-    newValuePrefix: "Nuev.: ",
-    removedValuePrefix: "Elim.: ",
-    addedValuePrefix: "Agreg.: ",
+    newValuePrefix: "Nuevo: ",
+    removedValuePrefix: "Eliminado: ",
+    addedValuePrefix: "Añadido: ",
     paginationAriaLabel: "Paginación",
-    displayCount: "Mostrando {shown} de {total} (total {all})"
+    displayCount: "Mostrando {total} de {shown} (total {all})"
+  },
+  alert: {
+    fetchError: "Error al obtener los datos",
+    unexpectedError: "Se produjo un error inesperado",
+    adminRequired: "Se requieren privilegios de administrador"
   },
   resource: {
     User: "Usuario",
@@ -53,6 +81,6 @@ export default {
     LimitUsage: "Límite de uso",
     APIKey: "Clave API"
   }
-} as const;
+};
 
-
+export default es;

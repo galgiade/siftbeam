@@ -9,6 +9,7 @@ import { checkUsageLimits } from '@/app/lib/actions/usage-limit-check';
 import { sendUsageLimitNotificationEmailAction } from '@/app/lib/actions/email-actions';
 import { formatFileSize } from '@/app/lib/utils/s3-utils';
 import { UsageLimit } from '@/app/lib/actions/usage-limits-api';
+import type { ServiceLocale } from '@/app/dictionaries/service/ServiceLocale.d.ts';
 
 interface ServiceFileUploaderProps {
   customerId: string;
@@ -19,7 +20,7 @@ interface ServiceFileUploaderProps {
   notifyLimits: UsageLimit[];
   restrictLimits: UsageLimit[];
   onProcessingStarted: () => void;
-  dictionary: any;
+  dictionary: ServiceLocale;
   locale: string;
 }
 
@@ -81,7 +82,7 @@ export default function ServiceFileUploader({
       
       // ファイルサイズチェック
       if (file.size > maxFileSize) {
-        alert(`${file.name} のファイルサイズが大きすぎます。100MB以下のファイルを選択してください。`);
+        alert(dictionary.fileUpload.fileSizeLimit.replace('{name}', file.name));
         continue;
       }
 
@@ -143,14 +144,14 @@ export default function ServiceFileUploader({
       );
 
       if (!limitCheckResult.success) {
-        setUsageLimitError(limitCheckResult.message || '利用制限のチェックに失敗しました。');
+        setUsageLimitError(limitCheckResult.message || dictionary.notification.fetchFailed);
         setIsProcessing(false);
         return;
       }
 
       // アップロードできない場合
       if (!limitCheckResult.data?.canUpload) {
-        setUsageLimitError(limitCheckResult.data?.restrictReason || '利用停止制限に達しているため、アップロードできません。');
+        setUsageLimitError(limitCheckResult.data?.restrictReason || dictionary.fileUpload.uploadNotAllowed);
         setIsProcessing(false);
         return;
       }
@@ -179,7 +180,7 @@ export default function ServiceFileUploader({
       });
 
       if (!historyResult.success) {
-        throw new Error('処理履歴の作成に失敗しました: ' + historyResult.message);
+        throw new Error(dictionary.notification.uploadProcessingError + ': ' + historyResult.message);
       }
 
       console.log('処理履歴作成成功:', {
@@ -214,7 +215,7 @@ export default function ServiceFileUploader({
           });
 
           if (!presignedUrlResult.success || !presignedUrlResult.data) {
-            throw new Error(presignedUrlResult.message || '署名付きURLの生成に失敗しました');
+            throw new Error(presignedUrlResult.message || dictionary.notification.uploadError);
           }
 
           setFiles(prev => prev.map(f => 
@@ -231,7 +232,7 @@ export default function ServiceFileUploader({
           });
 
           if (!uploadResponse.ok) {
-            throw new Error(`S3アップロードに失敗しました: ${uploadResponse.status} ${uploadResponse.statusText}`);
+            throw new Error(`${dictionary.notification.uploadFailed}: ${uploadResponse.status} ${uploadResponse.statusText}`);
           }
 
           actualTotalFileSize += fileItem.file.size;
@@ -304,7 +305,7 @@ export default function ServiceFileUploader({
         });
 
         if (!triggerPresignedUrlResult.success || !triggerPresignedUrlResult.data) {
-          throw new Error(triggerPresignedUrlResult.message || 'トリガーファイル用署名付きURLの生成に失敗しました');
+          throw new Error(triggerPresignedUrlResult.message || dictionary.notification.uploadError);
         }
 
         // S3に直接アップロード
@@ -317,7 +318,7 @@ export default function ServiceFileUploader({
         });
 
         if (!triggerUploadResponse.ok) {
-          throw new Error(`トリガーファイルのS3アップロードに失敗しました: ${triggerUploadResponse.status}`);
+          throw new Error(`${dictionary.notification.uploadFailed}: ${triggerUploadResponse.status}`);
         }
 
         console.log('Trigger file uploaded successfully, Step Functions will be triggered');
@@ -350,23 +351,25 @@ export default function ServiceFileUploader({
 
         if (emailResult.success) {
           setUsageLimitWarning(
-            `通知制限（${exceedingLimitDescription}）に達しました。${emailResult.sentCount}件の通知メールを送信しました。`
+            dictionary.fileUpload.notifyLimitReachedMessage
+              .replace('{limit}', exceedingLimitDescription)
+              .replace('{count}', emailResult.sentCount.toString())
           );
         } else {
           setUsageLimitWarning(
-            `通知制限に達しましたが、メール送信に失敗しました: ${emailResult.message}`
+            `${dictionary.fileUpload.notifyLimitReached}: ${emailResult.message}`
           );
         }
       }
 
       // 成功時の処理
-      setSuccessMessage(`${uploadedFileKeys.length}個のファイルのアップロードが完了し、AI処理を開始しました！`);
+      setSuccessMessage(dictionary.fileUpload.uploadCompletedMessage.replace('{count}', uploadedFileKeys.length.toString()));
       setFiles([]);
       onProcessingStarted();
 
     } catch (error: any) {
       console.error('Processing start error:', error);
-      setUsageLimitError('処理の開始に失敗しました: ' + error.message);
+      setUsageLimitError(dictionary.notification.uploadProcessingError + ': ' + error.message);
     } finally {
       setIsProcessing(false);
     }
@@ -384,7 +387,7 @@ export default function ServiceFileUploader({
               <FaCheck className="text-success text-xl mt-1 flex-shrink-0" />
               <div className="flex-1">
                 <h4 className="font-semibold text-success-800 mb-1">
-                  アップロード完了
+                  {dictionary.fileUpload.uploadComplete}
                 </h4>
                 <p className="text-sm text-success-700">
                   {successMessage}
@@ -403,7 +406,7 @@ export default function ServiceFileUploader({
               <FaBan className="text-danger text-xl mt-1 flex-shrink-0" />
               <div className="flex-1">
                 <h4 className="font-semibold text-danger-800 mb-1">
-                  アップロード不可
+                  {dictionary.fileUpload.uploadNotAllowed}
                 </h4>
                 <p className="text-sm text-danger-700">
                   {usageLimitError}
@@ -422,7 +425,7 @@ export default function ServiceFileUploader({
               <FaTriangleExclamation className="text-warning text-xl mt-1 flex-shrink-0" />
               <div className="flex-1">
                 <h4 className="font-semibold text-warning-800 mb-1">
-                  通知制限に達しました
+                  {dictionary.fileUpload.notifyLimitReached}
                 </h4>
                 <p className="text-sm text-warning-700">
                   {usageLimitWarning}
@@ -452,14 +455,14 @@ export default function ServiceFileUploader({
             isDragOver ? 'text-primary' : 'text-gray-400'
           }`} />
           <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            ファイルをドラッグ&ドロップ
+            {dictionary.fileUpload.dragAndDrop}
           </h3>
           <p className="text-gray-500 mb-4">
-            または <span className="text-primary font-medium">クリックして選択</span>
+            {dictionary.fileUpload.orClickToSelect}
           </p>
           <div className="text-sm text-gray-400 space-y-1">
-            <p>最大 {maxFiles} ファイル、各ファイル 100MB まで</p>
-            <p>対応形式: {policyName} で指定された形式</p>
+            <p>{dictionary.fileUpload.maxFiles.replace('{max}', maxFiles.toString())}</p>
+            <p>{dictionary.fileUpload.supportedFormats.replace('{formats}', policyName)}</p>
           </div>
           
           <input
@@ -478,7 +481,9 @@ export default function ServiceFileUploader({
           <CardBody className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-semibold text-gray-900">
-                選択されたファイル ({files.length}/{maxFiles})
+                {dictionary.fileUpload.selectedFiles
+                  .replace('{count}', files.length.toString())
+                  .replace('{max}', maxFiles.toString())}
               </h4>
               <Button
                 color="danger"
@@ -492,7 +497,7 @@ export default function ServiceFileUploader({
                 }}
                 startContent={<FaTrash />}
               >
-                すべて削除
+                {dictionary.fileUpload.deleteAll}
               </Button>
             </div>
             
@@ -521,9 +526,9 @@ export default function ServiceFileUploader({
                             fileItem.status === 'error' ? <FaTriangleExclamation /> : null
                           }
                         >
-                          {fileItem.status === 'pending' ? '待機中' :
-                           fileItem.status === 'uploading' ? 'アップロード中' :
-                           fileItem.status === 'success' ? '完了' : 'エラー'}
+                          {fileItem.status === 'pending' ? dictionary.fileUpload.pending :
+                           fileItem.status === 'uploading' ? dictionary.fileUpload.uploading :
+                           fileItem.status === 'success' ? dictionary.fileUpload.completed : dictionary.fileUpload.error}
                         </Chip>
                       </div>
                       
@@ -575,7 +580,7 @@ export default function ServiceFileUploader({
             isDisabled={!canStartProcessing}
             isLoading={isProcessing}
           >
-            {isProcessing ? '処理開始中...' : '処理を開始'}
+            {isProcessing ? dictionary.fileUpload.processing : dictionary.fileUpload.startProcessing}
           </Button>
         </div>
       )}

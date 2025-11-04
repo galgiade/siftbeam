@@ -1,7 +1,7 @@
 import CreateSupportRequestPresentation from './CreateSupportRequestPresentation'
 import SupportErrorDisplay from '../SupportErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { supportCenterDictionaries, commonDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 
 interface CreateSupportRequestContainerProps {
   locale: string;
@@ -14,17 +14,17 @@ interface CreateSupportRequestContainerProps {
 export default async function CreateSupportRequestContainer({ locale }: CreateSupportRequestContainerProps) {
   try {
     // 並列実行で高速化
-    const [userProfile, dictionary] = await Promise.all([
+    const [userProfile, dictionary, commonDictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(supportCenterDictionaries, locale, 'en')),
+      Promise.resolve(pickDictionary(commonDictionaries, locale, 'en'))
     ]);
     
     // 認証済みユーザーであることを確認（管理者権限は不要）
     if (!userProfile.sub) {
-      const errorMessage = 'ログインが必要です。';
       return (
         <SupportErrorDisplay 
-          error={errorMessage}
+          error={dictionary.alert.loginRequired}
           dictionary={dictionary} 
         />
       );
@@ -43,7 +43,8 @@ export default async function CreateSupportRequestContainer({ locale }: CreateSu
     return (
       <CreateSupportRequestPresentation
         userAttributes={userAttributesDTO} 
-        dictionary={dictionary} 
+        dictionary={dictionary}
+        commonDictionary={commonDictionary}
       />
     );
   } catch (error: any) {
@@ -55,19 +56,19 @@ export default async function CreateSupportRequestContainer({ locale }: CreateSu
       timestamp: new Date().toISOString()
     };
     
-    console.error('Error in CreatePolicyManagementContainer:', errorDetails);
+    console.error('Error in CreateSupportRequestContainer:', errorDetails);
     
     // 辞書を取得してエラー表示
-    const dictionary = pickDictionary(userDictionaries, locale, 'en');
-    const errorMessage = error?.message || '予期しないエラーが発生しました。';
+    const dictionary = pickDictionary(supportCenterDictionaries, locale, 'en');
+    const errorMessage = error?.message || dictionary.alert.unknownError;
     
-    let detailedError = `認証エラー: ${errorMessage}\n`;
-    detailedError += `エラータイプ: ${errorDetails.name}\n`;
-    detailedError += `ロケール: ${locale}\n`;
-    detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+    let detailedError = `${dictionary.alert.authError} ${errorMessage}\n`;
+    detailedError += `${dictionary.alert.errorType} ${errorDetails.name}\n`;
+    detailedError += `${dictionary.alert.localeLabel} ${locale}\n`;
+    detailedError += `${dictionary.alert.timestampLabel} ${errorDetails.timestamp}\n`;
     
-    if (errorDetails.stack !== 'スタックトレースなし') {
-      detailedError += `\nスタックトレース:\n${errorDetails.stack}`;
+    if (errorDetails.stack !== dictionary.alert.noStackTrace) {
+      detailedError += `\n${dictionary.alert.stackTrace}\n${errorDetails.stack}`;
     }
     
     return (

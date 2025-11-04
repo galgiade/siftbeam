@@ -1,0 +1,164 @@
+export type UsageLimitLocale = {
+  label: {
+    // 共通
+    save: string;
+    cancel: string;
+    edit: string;
+    delete: string;
+    back: string;
+    add: string;
+    create: string;
+    creating: string;
+    update: string;
+    
+    // 作成ページ
+    createUsageLimitTitle: string;
+    createUsageLimitDescription: string;
+    usageLimitSettings: string;
+    exceedActionTitle: string;
+    selectAction: string;
+    notifyOnlyOption: string;
+    restrictOption: string;
+    notifyOnlyDescription: string;
+    restrictDescription: string;
+    limitTypeTitle: string;
+    dataLimitOption: string;
+    amountLimitOption: string;
+    dataLimitDescription: string;
+    amountLimitDescription: string;
+    dataLimitTitle: string;
+    enterLimitValue: string;
+    unit: string;
+    monthlyDataLimitDescription: string;
+    amountLimitTitle: string;
+    enterAmountValue: string;
+    monthlyAmountLimitDescription: string;
+    notificationSettingsTitle: string;
+    enterEmailPlaceholder: string;
+    notificationEmailList: string;
+    notificationEmailCount: string;
+    notifyOnlyEmailDescription: string;
+    restrictEmailDescription: string;
+    cancelButton: string;
+    createNotifyLimit: string;
+    createRestrictLimit: string;
+    processingFeeOnly: string;
+    conversionApproximate: string;
+    
+    // メイン画面
+    limitUsageTitle: string;
+    usageLimitManagement: string;
+    usageLimitDescription: string;
+    createLimit: string;
+    notificationTarget: string;
+    detail: string;
+    createdAt: string;
+    updatedAt: string;
+    limitValue: string;
+    notificationRecipients: string;
+    
+    // 通知タイプ
+    notify: string;
+    restrict: string;
+    exceedAction: string;
+    notifyOnly: string;
+    notifyLimit: string;
+    restrictLimit: string;
+    notifyLimitDescription: string;
+    restrictLimitDescription: string;
+    noNotifyLimits: string;
+    noRestrictLimits: string;
+    
+    // 金額・利用量
+    amount: string;
+    usage: string;
+    editTarget: string;
+    limitType: string;
+    selectLimitType: string;
+    dataLimitValue: string;
+    amountLimitValue: string;
+    dataLimitPlaceholder: string;
+    amountLimitPlaceholder: string;
+    orSeparator: string;
+    noLimit: string;
+    
+    // 受信者管理
+    recipients: string;
+    emailAddress: string;
+    emailPlaceholder: string;
+    noRecipientsRegistered: string;
+    addEmailAddress: string;
+    minOneEmailRequired: string;
+    
+    // 新規作成・編集
+    usageNotification: string;
+    selectNotifyOrRestrict: string;
+    selectNotificationMethod: string;
+    amountBasedNotification: string;
+    usageBasedNotification: string;
+    enterAmount: string;
+    enterUsage: string;
+    addNewRecipient: string;
+    usageConversion: string;
+    amountConversion: string;
+    createNewLimit: string;
+    editLimit: string;
+    dataLimit: string;
+    amountLimit: string;
+    
+    // 単位
+    yen: string;
+    unitKB: string;
+    unitMB: string;
+    unitGB: string;
+    unitTB: string;
+    usd: string;
+    
+    // エラー画面
+    errorOccurred: string;
+    contactSupport: string;
+  };
+  alert: {
+    // バリデーション
+    amountRequired: string;
+    usageRequired: string;
+    emailRequired: string;
+    invalidEmail: string;
+    enterPositiveAmount: string;
+    enterValidUsage: string;
+    enterPositiveDataLimit: string;
+    enterPositiveAmountLimit: string;
+    emailAlreadyAdded: string;
+    minOneEmail: string;
+    selectExceedAction: string;
+    selectLimitType: string;
+    dataLimitValueRequired: string;
+    dataLimitValueMax: string;
+    amountLimitValueRequired: string;
+    amountLimitValueMax: string;
+    minOneEmailRequired: string;
+    notifyLimitCreated: string;
+    restrictLimitCreated: string;
+    errorPrefix: string;
+    unexpectedError: string;
+    
+    // 操作結果
+    createFailed: string;
+    updateFailed: string;
+    sendingError: string;
+    savingInProgress: string;
+    createSuccess: string;
+    updateSuccess: string;
+    deleteSuccess: string;
+    deleteConfirm: string;
+    
+    // 権限
+    adminOnlyCreateMessage: string;
+    adminOnlyEditMessage: string;
+    adminOnlyDeleteMessage: string;
+    
+    // エラー
+    loginRequired: string;
+    unknownError: string;
+  };
+};

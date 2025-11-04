@@ -1,7 +1,7 @@
 import PolicyManagementPresentation from './PolicyManagementPresentation'
 import PolicyErrorDisplay from './PolicyErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { policyManagementDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import { queryPolicies, getAvailableModels } from '@/app/lib/actions/policy-api';
 import { PolicyAnalysisEntry, getPolicyAnalysesByPolicyIdAction } from '@/app/lib/actions/policy-analysis-actions';
 
@@ -19,16 +19,15 @@ export default async function PolicyManagementContainer({ locale }: PolicyManage
     // 並列実行で高速化
     const [userProfile, dictionary, availableModels] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en')),
+      Promise.resolve(pickDictionary(policyManagementDictionaries, locale, 'en')),
       getAvailableModels()
     ]);
     
     // 管理者権限チェック
     if (userProfile.role !== 'admin') {
-      const errorMessage = 'このページにアクセスする権限がありません。管理者のみアクセス可能です。';
       return (
         <PolicyErrorDisplay 
-          error={errorMessage}
+          error={dictionary.alert.accessDenied}
           dictionary={dictionary} 
         />
       );
@@ -62,13 +61,13 @@ export default async function PolicyManagementContainer({ locale }: PolicyManage
       
       console.error('Failed to get policies from API:', errorDetails);
       
-      const errorMessage = policiesResult.message || 'ポリシー一覧の取得に失敗しました。';
-      let detailedError = `エラー: ${errorMessage}\n`;
-      detailedError += `カスタマーID: ${userProfile.customerId}\n`;
-      detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+      const errorMessage = policiesResult.message || dictionary.alert.fetchPoliciesFailed;
+      let detailedError = `${dictionary.alert.errorLabel}: ${errorMessage}\n`;
+      detailedError += `${dictionary.alert.customerIdLabel}: ${userProfile.customerId}\n`;
+      detailedError += `${dictionary.alert.timestampLabel}: ${errorDetails.timestamp}\n`;
       
       if (policiesResult.errors) {
-        detailedError += `\n詳細エラー:\n${JSON.stringify(policiesResult.errors, null, 2)}`;
+        detailedError += `\n${dictionary.alert.detailedErrorLabel}:\n${JSON.stringify(policiesResult.errors, null, 2)}`;
       }
       
       return (
@@ -140,16 +139,16 @@ export default async function PolicyManagementContainer({ locale }: PolicyManage
     console.error('Error in PolicyManagementContainer:', errorDetails);
     
     // 辞書を取得してエラー表示
-    const dictionary = pickDictionary(userDictionaries, locale, 'en');
-    const errorMessage = error?.message || '予期しないエラーが発生しました。';
+    const dictionary = pickDictionary(policyManagementDictionaries, locale, 'en');
+    const errorMessage = error?.message || dictionary.alert.unknownError;
     
-    let detailedError = `認証エラー: ${errorMessage}\n`;
-    detailedError += `エラータイプ: ${errorDetails.name}\n`;
-    detailedError += `ロケール: ${locale}\n`;
-    detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+    let detailedError = `${dictionary.alert.authError}: ${errorMessage}\n`;
+    detailedError += `${dictionary.alert.errorType}: ${errorDetails.name}\n`;
+    detailedError += `${dictionary.alert.localeLabel}: ${locale}\n`;
+    detailedError += `${dictionary.alert.timestampLabel}: ${errorDetails.timestamp}\n`;
     
-    if (errorDetails.stack !== 'スタックトレースなし') {
-      detailedError += `\nスタックトレース:\n${errorDetails.stack}`;
+    if (errorDetails.stack !== dictionary.alert.noStackTrace) {
+      detailedError += `\n${dictionary.alert.stackTrace}:\n${errorDetails.stack}`;
     }
     
     return (

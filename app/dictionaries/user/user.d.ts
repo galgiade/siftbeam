@@ -5,10 +5,32 @@ export interface UserProfileLocale {
     email: string;
     department: string;
     position: string;
+    locale: string;
+    role: string;
+    edit: string;
+    save: string;
+    cancel: string;
+    adminOnly: string;
+    readOnly: string;
+    editableFields: string;
+    adminOnlyFields: string;
+    allFieldsEditable: string;
+    newEmailSent: string;
+    roleAdmin: string;
+    roleUser: string;
+    lastAdminRestriction: string;
+    lastAdminNote: string;
+    generalUserPermission: string;
+    adminPermission: string;
+    verifyAndUpdate: string;
+    verificationCodePlaceholder: string;
   };
   alert: {
     updateSuccess: string;
     updateFail: string;
+    updateError: string;
+    fieldUpdateSuccess: string;
+    fieldUpdateFail: string;
     emailUpdateFail: string;
     emailUpdateSuccess: string;
     emailSent: string;
@@ -23,7 +45,10 @@ export interface UserProfileLocale {
     confirmFail: string;
     verificationCodeNotFound: string;
     verificationCodeStoreFailed: string;
+    codeStoreFailed: string;
     remainingAttempts: string;
+    adminOnlyEdit: string;
+    validEmailRequired: string;
   };
   modal: {
     modalTitle: string;
