@@ -1,6 +1,6 @@
 import SupportDetailContainer from '@/app/_containers/Support/detail/SupportDetailContainer';
 import type { Metadata } from 'next';
-import { supportCenterDetailDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
+import { supportCenterDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 
 type SupportRequestPageProps = {
   params: Promise<{
@@ -13,7 +13,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ locale: string; id: string }> }
 ): Promise<Metadata> {
   const resolvedParams = await params
-  const dict = pickDictionary(supportCenterDetailDictionaries, resolvedParams.locale, 'en-US')
+  const dict = pickDictionary(supportCenterDictionaries, resolvedParams.locale, 'en-US')
   return {
     title: `${dict.label.pageTitle} | siftbeam` || 'Support Request Detail | siftbeam',
     description: dict.label.inquiryContent || 'View support request details and replies',

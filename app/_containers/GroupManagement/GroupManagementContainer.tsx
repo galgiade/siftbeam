@@ -1,7 +1,7 @@
 import GroupManagementPresentation from './GroupManagementPresentation'
 import GroupErrorDisplay from './GroupErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { groupManagementDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import { queryGroups } from '@/app/lib/actions/group-api'
 import { queryUsers } from '@/app/lib/actions/user-api'
 import { queryPolicies } from '@/app/lib/actions/policy-api'
@@ -19,15 +19,14 @@ export default async function GroupManagementContainer({ locale }: GroupManageme
     // 並列実行で高速化
     const [userProfile, dictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(groupManagementDictionaries, locale, 'en'))
     ]);
     
     // 管理者権限チェック
     if (userProfile.role !== 'admin') {
-      const errorMessage = 'このページにアクセスする権限がありません。管理者のみアクセス可能です。';
       return (
         <GroupErrorDisplay 
-          error={errorMessage}
+          error={dictionary.alert.accessDenied}
           dictionary={dictionary} 
         />
       );
@@ -65,13 +64,13 @@ export default async function GroupManagementContainer({ locale }: GroupManageme
       
       console.error('Failed to get groups from API:', errorDetails);
       
-      const errorMessage = groupsResult.message || 'グループ一覧の取得に失敗しました。';
-      let detailedError = `エラー: ${errorMessage}\n`;
-      detailedError += `カスタマーID: ${userProfile.customerId}\n`;
-      detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+      const errorMessage = groupsResult.message || dictionary.alert.fetchGroupsFailed;
+      let detailedError = `${dictionary.alert.errorLabel} ${errorMessage}\n`;
+      detailedError += `${dictionary.alert.customerIdLabel} ${userProfile.customerId}\n`;
+      detailedError += `${dictionary.alert.timestampLabel} ${errorDetails.timestamp}\n`;
       
       if (groupsResult.errors) {
-        detailedError += `\n詳細エラー:\n${JSON.stringify(groupsResult.errors, null, 2)}`;
+        detailedError += `\n${dictionary.alert.detailedErrorLabel}\n${JSON.stringify(groupsResult.errors, null, 2)}`;
       }
       
       return (
@@ -116,16 +115,16 @@ export default async function GroupManagementContainer({ locale }: GroupManageme
     console.error('Error in GroupManagementContainer:', errorDetails);
     
     // 辞書を取得してエラー表示
-    const dictionary = pickDictionary(userDictionaries, locale, 'en');
-    const errorMessage = error?.message || '予期しないエラーが発生しました。';
+    const dictionary = pickDictionary(groupManagementDictionaries, locale, 'en');
+    const errorMessage = error?.message || dictionary.alert.unknownError;
     
-    let detailedError = `認証エラー: ${errorMessage}\n`;
-    detailedError += `エラータイプ: ${errorDetails.name}\n`;
-    detailedError += `ロケール: ${locale}\n`;
-    detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+    let detailedError = `${dictionary.alert.authError} ${errorMessage}\n`;
+    detailedError += `${dictionary.alert.errorType} ${errorDetails.name}\n`;
+    detailedError += `${dictionary.alert.localeLabel} ${locale}\n`;
+    detailedError += `${dictionary.alert.timestampLabel} ${errorDetails.timestamp}\n`;
     
-    if (errorDetails.stack !== 'スタックトレースなし') {
-      detailedError += `\nスタックトレース:\n${errorDetails.stack}`;
+    if (errorDetails.stack !== dictionary.alert.noStackTrace) {
+      detailedError += `\n${dictionary.alert.stackTrace}\n${errorDetails.stack}`;
     }
     
     return (

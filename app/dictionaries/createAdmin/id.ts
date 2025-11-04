@@ -1,4 +1,6 @@
-export default {
+import type { CreateAdminLocale } from './createAdmin.d.ts';
+
+const id: CreateAdminLocale = {
   label: {
     back: "Kembali",
     submit: "Kirim",
@@ -12,6 +14,7 @@ export default {
     positionLabel: "Jabatan",
     positionPlaceholder: "Manajer",
     languageLabel: "Bahasa",
+    languagePlaceholder: "Pilih bahasa",
     japanese: "Jepang",
     english: "Inggris",
     spanish: "Spanyol",
@@ -37,6 +40,6 @@ export default {
     adminCreationFailed: "Gagal membuat akun admin",
     networkError: "Terjadi kesalahan jaringan"
   }
-} as const;
+};
 
-
+export default id;

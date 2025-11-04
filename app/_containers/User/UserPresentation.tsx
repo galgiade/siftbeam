@@ -25,7 +25,8 @@ async function updateSingleField(
   fieldName: EditableField,
   value: string,
   user: User,
-  userAttributes: UserAttributesDTO
+  userAttributes: UserAttributesDTO,
+  dictionary: UserProfileLocale
 ): Promise<{ success: boolean; message: string; errors?: Record<string, string> }> {
   try {
     console.log('updateSingleField called with:', { fieldName, value, userId: user.userId });
@@ -48,12 +49,12 @@ async function updateSingleField(
     if (result.success) {
       return {
         success: true,
-        message: result.message || `${fieldName}が正常に更新されました。`,
+        message: result.message || dictionary.alert.fieldUpdateSuccess.replace('{field}', fieldName),
       };
     } else {
       return {
         success: false,
-        message: result.message || `${fieldName}の更新に失敗しました。`,
+        message: result.message || dictionary.alert.fieldUpdateFail.replace('{field}', fieldName),
         errors: result.errors ? Object.fromEntries(
           Object.entries(result.errors).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value])
         ) : {},
@@ -63,8 +64,8 @@ async function updateSingleField(
     console.error('Error in updateSingleField:', error);
     return {
       success: false,
-      message: error?.message || '更新処理でエラーが発生しました。',
-      errors: { [fieldName]: error?.message || '更新処理でエラーが発生しました。' }
+      message: error?.message || dictionary.alert.updateError,
+      errors: { [fieldName]: error?.message || dictionary.alert.updateError }
     };
   }
 }
@@ -128,7 +129,7 @@ export default function UserProfilePresentation({
     if (!canEditField(field)) {
       setFieldErrors({ 
         ...fieldErrors, 
-        [field]: '管理者のみがこのフィールドを編集できます。' 
+        [field]: dictionary.alert.adminOnlyEdit
       });
       return;
     }
@@ -153,7 +154,7 @@ export default function UserProfilePresentation({
     if (field === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) {
-        return '有効なメールアドレスを入力してください。';
+        return dictionary.alert.validEmailRequired;
       }
     }
     
@@ -176,7 +177,7 @@ export default function UserProfilePresentation({
       );
       
       if (!storeResult.success) {
-        setFieldErrors({ ...fieldErrors, email: storeResult.error || 'コードの保存に失敗しました。' });
+        setFieldErrors({ ...fieldErrors, email: storeResult.error || dictionary.alert.codeStoreFailed });
         return;
       }
       
@@ -220,7 +221,7 @@ export default function UserProfilePresentation({
       
       if (result.success) {
         // 認証成功後、実際にメールアドレスを更新
-        const updateResult = await updateSingleField('email', emailVerificationState.newEmail, user, userAttributes);
+        const updateResult = await updateSingleField('email', emailVerificationState.newEmail, user, userAttributes, dictionary);
         
         if (updateResult.success) {
           setFieldValues({ ...fieldValues, email: emailVerificationState.newEmail });
@@ -235,13 +236,13 @@ export default function UserProfilePresentation({
           });
           setFieldErrors({ ...fieldErrors, email: '' });
         } else {
-          setFieldErrors({ ...fieldErrors, email: updateResult.message || 'メールアドレスの更新に失敗しました。' });
+          setFieldErrors({ ...fieldErrors, email: updateResult.message || dictionary.alert.emailUpdateFail });
         }
       } else {
-        setFieldErrors({ ...fieldErrors, email: result.error || '認証コードが正しくありません。' });
+        setFieldErrors({ ...fieldErrors, email: result.error || dictionary.alert.invalidConfirmationCode });
       }
     } catch (error: any) {
-      setFieldErrors({ ...fieldErrors, email: error?.message || 'エラーが発生しました。' });
+      setFieldErrors({ ...fieldErrors, email: error?.message || dictionary.alert.updateError });
     } finally {
       setIsUpdating(false);
     }
@@ -268,7 +269,7 @@ export default function UserProfilePresentation({
 
     try {
       console.log('Updating field:', { field, value, userId: user.userId });
-      const result = await updateSingleField(field, value, user, userAttributes);
+      const result = await updateSingleField(field, value, user, userAttributes, dictionary);
       console.log('Update result:', result);
       
       if (result.success) {
@@ -288,13 +289,13 @@ export default function UserProfilePresentation({
         }
       } else {
         // エラー時はエラーメッセージを表示
-        const errorMessage = result.message || `${field}の更新に失敗しました。`;
+        const errorMessage = result.message || dictionary.alert.fieldUpdateFail.replace('{field}', field);
         setFieldErrors({ ...fieldErrors, [field]: errorMessage });
         console.error('Update failed:', result);
       }
     } catch (error: any) {
       console.error('Update error:', error);
-      const errorMessage = error?.message || '更新中にエラーが発生しました。';
+      const errorMessage = error?.message || dictionary.alert.updateError;
       setFieldErrors({ ...fieldErrors, [field]: errorMessage });
     } finally {
       setIsUpdating(false);
@@ -321,7 +322,7 @@ export default function UserProfilePresentation({
             <span className="text-red-500 ml-1">*</span>
             {!canEdit && (
               <span className="ml-2 text-xs text-gray-500 font-normal">
-                (管理者のみ編集可能)
+                {dictionary.label.adminOnly}
               </span>
             )}
           </label>
@@ -373,14 +374,14 @@ export default function UserProfilePresentation({
               <div className="flex flex-col gap-3">
                 <div className="p-3 bg-blue-50 rounded-md border border-blue-200">
                   <p className="text-sm text-blue-800">
-                    新しいメールアドレス「{emailVerificationState.newEmail}」に認証コードを送信しました。
+                    {dictionary.label.newEmailSent.replace('{email}', emailVerificationState.newEmail)}
                   </p>
                 </div>
                 <Input
                   type="text"
                   value={emailVerificationState.verificationCode}
                   onValueChange={(val) => setEmailVerificationState(prev => ({ ...prev, verificationCode: val }))}
-                  placeholder="認証コード（6桁）"
+                  placeholder={dictionary.label.verificationCodePlaceholder}
                   variant="bordered"
                   isDisabled={isUpdating}
                   maxLength={6}
@@ -393,7 +394,7 @@ export default function UserProfilePresentation({
                     isDisabled={isUpdating || emailVerificationState.verificationCode.length !== 6}
                     isLoading={isUpdating}
                   >
-                    認証して更新
+                    {dictionary.label.verifyAndUpdate}
                   </Button>
                   <Button
                     size="sm"
@@ -411,7 +412,7 @@ export default function UserProfilePresentation({
                     }}
                     isDisabled={isUpdating}
                   >
-                    キャンセル
+                    {dictionary.label.cancel}
                   </Button>
                 </div>
               </div>
@@ -507,11 +508,11 @@ export default function UserProfilePresentation({
               </svg>
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium text-blue-800">
-                  一般ユーザー権限
+                  {dictionary.label.generalUserPermission}
                 </p>
                 <p className="text-xs text-blue-700">
-                  編集可能: ユーザー名、言語設定<br />
-                  管理者のみ編集可能: メールアドレス、部署、役職
+                  {dictionary.label.editableFields}<br />
+                  {dictionary.label.adminOnlyFields}
                 </p>
               </div>
             </div>
@@ -526,10 +527,10 @@ export default function UserProfilePresentation({
               </svg>
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium text-green-800">
-                  管理者権限
+                  {dictionary.label.adminPermission}
                 </p>
                 <p className="text-xs text-green-700">
-                  すべてのフィールドを編集できます
+                  {dictionary.label.allFieldsEditable}
                 </p>
               </div>
             </div>
@@ -552,32 +553,32 @@ export default function UserProfilePresentation({
           {/* ロール表示（読み取り専用） */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-700">
-              ロール
+              {dictionary.label.role}
               <span className="ml-2 text-xs text-gray-500 font-normal">
-                (変更不可)
+                {dictionary.label.readOnly}
               </span>
             </label>
             <div className="p-3 bg-gray-50 rounded-md border">
               <div className="flex items-center justify-between">
                 <span className="text-gray-900">
-                  {userAttributes.role === 'admin' ? '管理者' : 'ユーザー'}
+                  {userAttributes.role === 'admin' ? dictionary.label.roleAdmin : dictionary.label.roleUser}
                 </span>
                 {userAttributes.role === 'admin' && (
                   <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                    最後の管理者の場合、ロール変更は制限されます
+                    {dictionary.label.lastAdminRestriction}
                   </span>
                 )}
               </div>
             </div>
             {userAttributes.role === 'admin' && (
               <p className="text-xs text-gray-500 mt-1">
-                ※ 組織に管理者が1人しかいない場合、ロールを一般ユーザーに変更することはできません。
+                {dictionary.label.lastAdminNote}
               </p>
             )}
           </div>
 
           {/* 言語設定フィールド */}
-          {renderField('locale', '言語設定', 'select', localeOptions)}
+          {renderField('locale', dictionary.label.locale, 'select', localeOptions)}
         </div>
       </Card>
     </div>

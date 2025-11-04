@@ -4,14 +4,14 @@ const ko: CommonLocale = {
   common: {
     navigation: {
       home: '홈',
-      about: '회사소개',
+      about: '회사 소개',
       pricing: '요금',
       contact: '문의',
       signIn: '로그인',
       signUp: '회원가입',
       signOut: '로그아웃',
       dashboard: '대시보드',
-      flow: '이용 방법',
+      flow: '사용 방법',
       announcement: '공지사항',
       services: '서비스',
       myPage: '마이페이지',
@@ -19,17 +19,33 @@ const ko: CommonLocale = {
     },
     footer: {
       title: 'siftbeam',
-      description: '데이터의 힘을 해방하여 비즈니스의 미래를 여는 지능형 예측 분석 플랫폼.',
+      description:
+        '데이터의 힘을 해방하고 비즈니스의 미래를 개척하는 지능형 예측 분석 플랫폼.',
       links: {
         terms: '이용약관',
-        privacy: '개인정보처리방침',
-        legalDisclosures: '법적 고지사항',
+        privacy: '개인정보 처리방침',
+        legalDisclosures: '전자상거래법에 따른 표기',
       },
-      copyright: 'Connect Tech Inc.',
+      copyright: '주식회사 커넥트테크',
+    },
+    fileUploader: {
+      dragAndDrop: '파일을 드래그 & 드롭',
+      or: '또는',
+      selectFile: '파일 선택',
+      maxFilesAndSize: '최대 {maxFiles}개, {maxFileSize}MB 이하의 파일',
+      supportedFormats: '지원 형식: 이미지, 동영상, 오디오, 문서 파일',
+      pendingFiles: '업로드 대기 중 ({count}개)',
+      uploadStart: '업로드 시작',
+      uploading: '업로드 중...',
+      uploadedFiles: '업로드 완료 ({count}개)',
+      uploadComplete: '업로드 완료',
+      uploadError: '업로드 오류',
+      uploadFailed: '업로드에 실패했습니다',
+      maxFilesExceeded: '최대 {maxFiles}개까지 업로드할 수 있습니다.',
+      fileSizeExceeded: '파일 크기는 {maxFileSize}MB 이하여야 합니다.\n용량 초과 파일: {files}',
+      oversizedFiles: '용량 초과 파일',
     },
   },
 };
 
 export default ko;
-
-

@@ -1,6 +1,6 @@
 import UsageLimitPresentation from "./UsageLimitPresentation";
 import { requireUserProfile } from "@/app/lib/utils/require-auth";
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { usageLimitDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import { getCustomerUsageLimits } from "@/app/lib/actions/usage-limits-api";
 
 interface UsageLimitContainerProps {
@@ -11,22 +11,21 @@ export default async function UsageLimitContainer({ locale }: UsageLimitContaine
   try {
     const [userProfile, dictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(usageLimitDictionaries, locale, 'en'))
     ]);
 
     if (!userProfile.sub || !userProfile.customerId) {
-      const errorMessage = 'ログインが必要です。';
       return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50 p-6">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-danger-600 mb-4">
-              エラーが発生しました
+              {dictionary.label.errorOccurred}
             </h2>
             <p className="text-gray-700 mb-4">
-              {errorMessage}
+              {dictionary.alert.loginRequired}
             </p>
             <p className="text-sm text-gray-500">
-              問題が解決しない場合は、サポートにお問い合わせください。
+              {dictionary.label.contactSupport}
             </p>
           </div>
         </div>
@@ -50,13 +49,13 @@ export default async function UsageLimitContainer({ locale }: UsageLimitContaine
         <div className="flex items-center justify-center min-h-screen bg-gray-50 p-6">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-danger-600 mb-4">
-              エラーが発生しました
+              {dictionary.label.errorOccurred}
             </h2>
             <p className="text-gray-700 mb-4">
               {usageLimitsResult.message}
             </p>
             <p className="text-sm text-gray-500">
-              問題が解決しない場合は、サポートにお問い合わせください。
+              {dictionary.label.contactSupport}
             </p>
           </div>
         </div>
@@ -74,17 +73,21 @@ export default async function UsageLimitContainer({ locale }: UsageLimitContaine
 
   } catch (error: any) {
     console.error('Error in UsageLimitContainer:', error);
+    
+    // エラー時にdictionaryを取得
+    const dictionary = pickDictionary(usageLimitDictionaries, locale, 'en');
+    
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 p-6">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-danger-600 mb-4">
-            エラーが発生しました
+            {dictionary.label.errorOccurred}
           </h2>
           <p className="text-gray-700 mb-4">
-            {error.message || '不明なエラーが発生しました。'}
+            {error.message || dictionary.alert.unknownError}
           </p>
           <p className="text-sm text-gray-500">
-            問題が解決しない場合は、サポートにお問い合わせください。
+            {dictionary.label.contactSupport}
           </p>
         </div>
       </div>

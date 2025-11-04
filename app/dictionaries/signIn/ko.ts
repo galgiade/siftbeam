@@ -1,4 +1,6 @@
-export default {
+import type { SignInLocale } from './signIn.d.ts';
+
+const ko: SignInLocale = {
   label: {
     back: "뒤로",
     submit: "제출",
@@ -10,6 +12,8 @@ export default {
     passwordLabel: "비밀번호",
     passwordPlaceholder: "비밀번호를 입력하세요",
     passwordDescription: "대문자/소문자/숫자/기호를 포함하여 최소 8자",
+    showPassword: "비밀번호 표시",
+    hidePassword: "비밀번호 숨기기",
     signIn: "로그인",
     signingIn: "로그인 중...",
     signUp: "회원가입",
@@ -26,9 +30,15 @@ export default {
     resendingCode: "재전송 중...",
     codeExpired: "인증 코드가 만료되었습니다",
     enterVerificationCode: "인증 코드를 입력하세요",
+    twoFactorAuthTitle: "2단계 인증",
+    twoFactorAuthDescription: "{email}로 전송된 인증 코드를 입력하세요",
     expirationTime: "만료 시간",
     attemptCount: "시도 횟수",
-    verificationSuccess: "✅ 인증 성공. 리디렉션 중..."
+    verificationSuccess: "✅ 인증 성공. 리디렉션 중...",
+
+    // 기타
+    orDivider: "또는",
+    copyright: "© 2024 All rights reserved."
   },
   alert: {
     emailRequired: "이메일 주소를 입력하세요",
@@ -61,6 +71,6 @@ export default {
       tooManyRequests: "요청이 너무 많습니다. 잠시 후 다시 시도하세요"
     }
   }
-} as const;
+};
 
-
+export default ko;

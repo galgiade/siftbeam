@@ -4,7 +4,8 @@ import { useState, useActionState, useEffect, startTransition, useCallback } fro
 import { Button, Card, Input, Textarea, Select, SelectItem } from "@heroui/react"
 import { createNewOrderRequest } from "@/app/lib/actions/neworder-api"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { NewOrderLocale } from '@/app/dictionaries/newOrder/newOrder.d.ts';
+import type { CommonLocale } from '@/app/dictionaries/common/common.d';
 import { useRouter } from "next/navigation"
 import { FaRocket } from "react-icons/fa6"
 import FileUploader from "@/app/_components/FileUploader"
@@ -12,7 +13,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 interface CreateNewOrderRequestPresentationProps {
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: NewOrderLocale;
+  commonDictionary: CommonLocale;
 }
 
 // 新規オーダーリクエスト作成フォームのデータ型
@@ -25,25 +27,26 @@ interface CreateNewOrderRequestFormData {
   fileKeys: string[];
 }
 
-// データタイプの選択肢
-const dataTypeOptions = [
-  { key: 'structured', label: '構造化データ（CSV、データベース等）' },
-  { key: 'unstructured', label: '非構造化データ（テキスト、画像等）' },
-  { key: 'mixed', label: '混合データ（構造化+非構造化）' },
-  { key: 'other', label: 'その他' },
+// データタイプの選択肢を取得する関数
+const getDataTypeOptions = (dictionary: NewOrderLocale) => [
+  { key: 'structured', label: dictionary.label.dataTypeStructuredOption },
+  { key: 'unstructured', label: dictionary.label.dataTypeUnstructuredOption },
+  { key: 'mixed', label: dictionary.label.dataTypeMixedOption },
+  { key: 'other', label: dictionary.label.dataTypeOtherOption },
 ];
 
-// モデルタイプの選択肢
-const modelTypeOptions = [
-  { key: 'classification', label: '分類・判定（良品/不良品、カテゴリ分け等）' },
-  { key: 'regression', label: '予測・推定（売上予測、需要予測等）' },
-  { key: 'clustering', label: 'グループ分け・パターン発見（顧客分類、異常検知等）' },
-  { key: 'other', label: 'その他・相談したい' },
+// モデルタイプの選択肢を取得する関数
+const getModelTypeOptions = (dictionary: NewOrderLocale) => [
+  { key: 'classification', label: dictionary.label.modelTypeClassificationOption },
+  { key: 'regression', label: dictionary.label.modelTypeRegressionOption },
+  { key: 'clustering', label: dictionary.label.modelTypeClusteringOption },
+  { key: 'other', label: dictionary.label.modelTypeOtherOption },
 ];
 
 export default function CreateNewOrderRequestPresentation({ 
   userAttributes, 
-  dictionary 
+  dictionary,
+  commonDictionary
 }: CreateNewOrderRequestPresentationProps) {
   const router = useRouter();
   
@@ -98,7 +101,7 @@ export default function CreateNewOrderRequestPresentation({
           'neworder-requestId': newOrderRequestIdStr ? JSON.parse(newOrderRequestIdStr) : undefined,
           customerId: userAttributes.customerId,
           userId: userAttributes.sub,
-          userName: userAttributes.preferred_username || 'ユーザー',
+          userName: userAttributes.preferred_username || dictionary.label.customer,
           dataType: formData.get('dataType') as 'structured' | 'unstructured' | 'mixed' | 'other',
           modelType: formData.get('modelType') as 'classification' | 'regression' | 'clustering' | 'other',
           subject: formData.get('subject') as string,
@@ -125,16 +128,16 @@ export default function CreateNewOrderRequestPresentation({
         console.error('Unexpected result format:', result);
         return {
           success: false,
-          message: '予期しない応答形式です。',
-          errors: { general: ['API応答の形式が正しくありません。'] },
+          message: dictionary.alert.unexpectedResponseFormat,
+          errors: { general: [dictionary.alert.unexpectedResponseFormat] },
           data: undefined
         };
       } catch (error: any) {
         console.error('Error in form action:', error);
         return {
           success: false,
-          message: 'フォーム送信中にエラーが発生しました。',
-          errors: { general: [error?.message || '不明なエラー'] },
+          message: dictionary.alert.formSubmissionError,
+          errors: { general: [error?.message || dictionary.alert.unknownError] },
           data: undefined
         };
       }
@@ -192,19 +195,19 @@ export default function CreateNewOrderRequestPresentation({
     const errors: Record<string, string> = {};
 
     if (!formData.subject.trim()) {
-      errors.subject = '件名は必須です。';
+      errors.subject = dictionary.alert.subjectRequired;
     }
 
     if (!formData.description.trim()) {
-      errors.description = 'プロジェクトの詳細は必須です。';
+      errors.description = dictionary.alert.descriptionRequired;
     }
 
     if (!formData.dataType) {
-      errors.dataType = 'データタイプを選択してください。';
+      errors.dataType = dictionary.alert.dataTypeRequired;
     }
 
     if (!formData.modelType) {
-      errors.modelType = '分析タイプを選択してください。';
+      errors.modelType = dictionary.alert.modelTypeRequired;
     }
 
     setClientErrors(errors);
@@ -249,15 +252,15 @@ export default function CreateNewOrderRequestPresentation({
         <Card className="p-8 shadow-lg">
           <div className="flex items-center gap-3 mb-8">
             <FaRocket className="text-blue-600" size={32} />
-            <h1 className="text-3xl font-bold">新規オーダーリクエストを作成</h1>
+            <h1 className="text-3xl font-bold">{dictionary.label.createNewOrderRequest}</h1>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* データタイプ */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                データタイプ
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.dataTypeLabel}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Select
                 name="dataType"
@@ -267,7 +270,7 @@ export default function CreateNewOrderRequestPresentation({
                   handleFieldChange('dataType', selectedKey);
                 }}
                 variant="bordered"
-                placeholder="データタイプを選択"
+                placeholder={dictionary.label.selectDataType}
                 isInvalid={!!(clientErrors.dataType || getErrorMessage('dataType'))}
                 errorMessage={clientErrors.dataType || getErrorMessage('dataType')}
                 classNames={{
@@ -275,7 +278,7 @@ export default function CreateNewOrderRequestPresentation({
                   popoverContent: "bg-white shadow-lg border border-gray-200"
                 }}
               >
-                {dataTypeOptions.map(option => (
+                {getDataTypeOptions(dictionary).map(option => (
                   <SelectItem key={option.key} className="bg-white hover:bg-gray-100">
                     {option.label}
                   </SelectItem>
@@ -286,11 +289,11 @@ export default function CreateNewOrderRequestPresentation({
             {/* モデルタイプ */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                どのような分析をご希望ですか？
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.analysisTypeQuestion}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <p className="text-xs text-gray-600 mb-1">
-                実現したい内容に最も近いものをお選びください
+                {dictionary.label.analysisTypeDescription}
               </p>
               <Select
                 name="modelType"
@@ -300,7 +303,7 @@ export default function CreateNewOrderRequestPresentation({
                   handleFieldChange('modelType', selectedKey);
                 }}
                 variant="bordered"
-                placeholder="分析タイプを選択してください"
+                placeholder={dictionary.label.selectAnalysisType}
                 isInvalid={!!(clientErrors.modelType || getErrorMessage('modelType'))}
                 errorMessage={clientErrors.modelType || getErrorMessage('modelType')}
                 classNames={{
@@ -308,7 +311,7 @@ export default function CreateNewOrderRequestPresentation({
                   popoverContent: "bg-white shadow-lg border border-gray-200"
                 }}
               >
-                {modelTypeOptions.map(option => (
+                {getModelTypeOptions(dictionary).map(option => (
                   <SelectItem key={option.key} className="bg-white hover:bg-gray-100">
                     {option.label}
                   </SelectItem>
@@ -319,14 +322,14 @@ export default function CreateNewOrderRequestPresentation({
             {/* 件名 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                件名
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.subjectLabel}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Input
                 name="subject"
                 value={formData.subject}
                 onValueChange={(value) => handleFieldChange('subject', value)}
-                placeholder="プロジェクトの件名を入力"
+                placeholder={dictionary.label.subjectPlaceholder}
                 variant="bordered"
                 isInvalid={!!(clientErrors.subject || getErrorMessage('subject'))}
                 errorMessage={clientErrors.subject || getErrorMessage('subject')}
@@ -336,14 +339,14 @@ export default function CreateNewOrderRequestPresentation({
             {/* プロジェクトの詳細 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                プロジェクトの詳細
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.projectDetailsLabel}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Textarea
                 name="description"
                 value={formData.description}
                 onValueChange={(value) => handleFieldChange('description', value)}
-                placeholder="プロジェクトの詳細を具体的に記述してください。目的、データの概要、期待する成果などを含めてください。"
+                placeholder={dictionary.label.projectDetailsPlaceholder}
                 variant="bordered"
                 minRows={5}
                 isInvalid={!!(clientErrors.description || getErrorMessage('description'))}
@@ -354,11 +357,11 @@ export default function CreateNewOrderRequestPresentation({
             {/* ファイル添付 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                ファイル添付
-                <span className="text-gray-500 ml-2 text-xs">(任意)</span>
+                {dictionary.label.fileAttachment}
+                <span className="text-gray-500 ml-2 text-xs">{dictionary.label.optionalLabel}</span>
               </label>
               <p className="text-xs text-gray-600 mb-2">
-                データサンプル、仕様書、参考資料などをアップロードできます
+                {dictionary.label.fileAttachmentDescription}
               </p>
               {formData.newOrderRequestId && (
                 <FileUploader
@@ -370,16 +373,17 @@ export default function CreateNewOrderRequestPresentation({
                   maxFiles={10}
                   maxFileSize={50}
                   disabled={isPending}
+                  commonDictionary={commonDictionary}
                 />
               )}
               {!formData.newOrderRequestId && (
                 <div className="p-4 bg-gray-100 rounded-lg text-center text-gray-500">
-                  ファイルアップロード準備中...
+                  {dictionary.label.fileUploadPreparing}
                 </div>
               )}
               {formData.fileKeys.length > 0 && (
                 <p className="text-xs text-gray-600">
-                  {formData.fileKeys.length}個のファイルが選択されています
+                  {formData.fileKeys.length}{dictionary.label.filesSelected}
                 </p>
               )}
             </div>
@@ -397,7 +401,7 @@ export default function CreateNewOrderRequestPresentation({
                 {/* 詳細エラー表示 */}
                 {state.errors && Object.keys(state.errors).length > 0 && (
                   <div className="mt-2 space-y-2">
-                    <p className="text-red-600 text-xs font-medium">詳細エラー:</p>
+                    <p className="text-red-600 text-xs font-medium">{dictionary.label.detailedErrors}</p>
                     {Object.entries(state.errors).map(([field, fieldErrors]) => (
                       <div key={field} className="text-xs text-red-600">
                         <span className="font-medium">{field}:</span>
@@ -411,7 +415,7 @@ export default function CreateNewOrderRequestPresentation({
                 
                 {/* デバッグ情報 */}
                 <details className="mt-2">
-                  <summary className="text-xs text-red-500 cursor-pointer">デバッグ情報を表示</summary>
+                  <summary className="text-xs text-red-500 cursor-pointer">{dictionary.label.showDebugInfo}</summary>
                   <pre className="mt-2 text-xs text-red-600 bg-red-100 p-2 rounded overflow-auto">
                     {JSON.stringify(state, null, 2)}
                   </pre>
@@ -427,7 +431,7 @@ export default function CreateNewOrderRequestPresentation({
                 </svg>
                 <div>
                   <p className="text-green-700 text-sm font-normal leading-relaxed">{state.message}</p>
-                  <p className="text-green-600 text-xs mt-1">リダイレクト中...</p>
+                  <p className="text-green-600 text-xs mt-1">{dictionary.label.redirecting}</p>
                 </div>
               </div>
             )}
@@ -436,7 +440,7 @@ export default function CreateNewOrderRequestPresentation({
             {process.env.NODE_ENV === 'development' && isMounted && (
               <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
                 <details>
-                  <summary className="cursor-pointer font-medium">デバッグ情報</summary>
+                  <summary className="cursor-pointer font-medium">{dictionary.label.debugInfo}</summary>
                   <pre className="mt-2 overflow-auto">
                     {JSON.stringify({
                       isPending,
@@ -463,7 +467,7 @@ export default function CreateNewOrderRequestPresentation({
                 onPress={() => router.back()}
                 className="flex-1"
               >
-                キャンセル
+                {dictionary.label.cancelButton}
               </Button>
               <Button
                 type="submit"
@@ -473,7 +477,7 @@ export default function CreateNewOrderRequestPresentation({
                 isDisabled={isPending}
                 startContent={!isPending ? <FaRocket size={16} /> : undefined}
               >
-                {isPending ? '新規オーダーリクエスト作成中...' : '新規オーダーリクエストを作成'}
+                {isPending ? dictionary.label.creatingOrder : dictionary.label.createOrderButton}
               </Button>
             </div>
           </form>

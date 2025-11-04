@@ -1,7 +1,7 @@
 import ApiKeyManagementPresentation from './ApiKeyManagementPresentation'
 import ApiKeyErrorDisplay from './ApiKeyErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { apiKeyDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import { getAPIKeysByCustomerIdAction } from '@/app/lib/actions/api-key-actions';
 
 interface ApiKeyManagementContainerProps {
@@ -17,15 +17,14 @@ export default async function ApiKeyManagementContainer({ locale }: ApiKeyManage
     // 並列実行で高速化
     const [userProfile, dictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(apiKeyDictionaries, locale, 'en'))
     ]);
     
     // 管理者権限チェック
     if (userProfile.role !== 'admin') {
-      const errorMessage = 'このページにアクセスする権限がありません。管理者のみアクセス可能です。';
       return (
         <ApiKeyErrorDisplay 
-          error={errorMessage}
+          error={dictionary.error.accessDenied}
           dictionary={dictionary} 
         />
       );
@@ -55,10 +54,10 @@ export default async function ApiKeyManagementContainer({ locale }: ApiKeyManage
       
       console.error('Failed to get API keys from API:', errorDetails);
       
-      const errorMessage = apiKeysResult.message || 'APIキー一覧の取得に失敗しました。';
-      let detailedError = `エラー: ${errorMessage}\n`;
-      detailedError += `カスタマーID: ${userProfile.customerId}\n`;
-      detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+      const errorMessage = apiKeysResult.message || dictionary.error.fetchFailed;
+      let detailedError = `${dictionary.error.errorLabel} ${errorMessage}\n`;
+      detailedError += `${dictionary.error.customerIdLabel} ${userProfile.customerId}\n`;
+      detailedError += `${dictionary.error.timestampLabel} ${errorDetails.timestamp}\n`;
       
       return (
         <ApiKeyErrorDisplay 
@@ -79,9 +78,9 @@ export default async function ApiKeyManagementContainer({ locale }: ApiKeyManage
     );
   } catch (error: any) {
     const errorDetails = {
-      message: error?.message || '不明なエラー',
+      message: error?.message || '',
       name: error?.name || 'UnknownError',
-      stack: error?.stack || 'スタックトレースなし',
+      stack: error?.stack || '',
       locale,
       timestamp: new Date().toISOString()
     };
@@ -89,16 +88,18 @@ export default async function ApiKeyManagementContainer({ locale }: ApiKeyManage
     console.error('Error in ApiKeyManagementContainer:', errorDetails);
     
     // 辞書を取得してエラー表示
-    const dictionary = pickDictionary(userDictionaries, locale, 'en');
-    const errorMessage = error?.message || '予期しないエラーが発生しました。';
+    const dictionary = pickDictionary(apiKeyDictionaries, locale, 'en');
+    const errorMessage = error?.message || dictionary.error.unknownError;
     
-    let detailedError = `認証エラー: ${errorMessage}\n`;
-    detailedError += `エラータイプ: ${errorDetails.name}\n`;
-    detailedError += `ロケール: ${locale}\n`;
-    detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+    let detailedError = `${dictionary.error.authError} ${errorMessage}\n`;
+    detailedError += `${dictionary.error.errorTypeLabel} ${errorDetails.name}\n`;
+    detailedError += `${dictionary.error.localeLabel} ${locale}\n`;
+    detailedError += `${dictionary.error.timestampLabel} ${errorDetails.timestamp}\n`;
     
-    if (errorDetails.stack !== 'スタックトレースなし') {
-      detailedError += `\nスタックトレース:\n${errorDetails.stack}`;
+    if (errorDetails.stack) {
+      detailedError += `\n${dictionary.error.stackTraceLabel}\n${errorDetails.stack}`;
+    } else {
+      detailedError += `\n${dictionary.error.noStackTrace}`;
     }
     
     return (

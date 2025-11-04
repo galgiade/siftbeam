@@ -4,13 +4,13 @@ import { useState, useActionState, useEffect, startTransition } from "react"
 import { Button, Card, Input, Textarea, Chip } from "@heroui/react"
 import { createPolicy } from "@/app/lib/actions/policy-api"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { PolicyManagementLocale } from '@/app/dictionaries/policy-management/policy-management.d.ts';
 import { useRouter } from "next/navigation"
 import { FaPlus } from "react-icons/fa6"
 
 interface CreatePolicyManagementPresentationProps {
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: PolicyManagementLocale;
 }
 
 // ポリシー作成フォームのデータ型
@@ -20,30 +20,17 @@ interface CreatePolicyFormData {
   acceptedFileTypes: string[];
 }
 
-// 一般的なファイル形式の選択肢
-const commonFileTypes = [
-  { key: 'image/jpeg', label: 'JPEG画像' },
-  { key: 'image/png', label: 'PNG画像' },
-  { key: 'image/gif', label: 'GIF画像' },
-  { key: 'image/webp', label: 'WebP画像' },
-  { key: 'application/pdf', label: 'PDFファイル' },
-  { key: 'application/msword', label: 'Wordファイル (.doc)' },
-  { key: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', label: 'Wordファイル (.docx)' },
-  { key: 'application/vnd.ms-excel', label: 'Excelファイル (.xls)' },
-  { key: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', label: 'Excelファイル (.xlsx)' },
-  { key: 'text/plain', label: 'テキストファイル' },
-  { key: 'text/csv', label: 'CSVファイル' },
-  { key: 'application/json', label: 'JSONファイル' },
-  { key: 'application/zip', label: 'ZIPファイル' },
-  { key: 'video/mp4', label: 'MP4動画' },
-  { key: 'audio/mpeg', label: 'MP3音声' },
-];
-
 export default function CreatePolicyManagementPresentation({ 
   userAttributes, 
   dictionary 
 }: CreatePolicyManagementPresentationProps) {
   const router = useRouter();
+  
+  // 辞書からファイルタイプリストを生成
+  const commonFileTypes = Object.entries(dictionary.label.fileTypes).map(([key, label]) => ({
+    key,
+    label
+  }));
   
   // フォームデータの状態管理
   const [formData, setFormData] = useState<CreatePolicyFormData>({
@@ -77,8 +64,8 @@ export default function CreatePolicyManagementPresentation({
         console.error('Error in form action:', error);
         return {
           success: false,
-          message: 'フォーム送信中にエラーが発生しました。',
-          errors: { general: [error?.message || '不明なエラー'] },
+          message: dictionary.alert.formSubmissionError,
+          errors: { general: [error?.message || dictionary.alert.unknownError] },
           data: undefined
         };
       }
@@ -143,15 +130,15 @@ export default function CreatePolicyManagementPresentation({
     const errors: Record<string, string> = {};
 
     if (!formData.policyName.trim()) {
-      errors.policyName = 'ポリシー名は必須です。';
+      errors.policyName = dictionary.alert.policyNameRequired;
     }
 
     if (!formData.description.trim()) {
-      errors.description = '説明は必須です。';
+      errors.description = dictionary.alert.descriptionRequired;
     }
 
     if (formData.acceptedFileTypes.length === 0) {
-      errors.acceptedFileTypes = '許可するファイル形式を少なくとも1つ選択してください。';
+      errors.acceptedFileTypes = dictionary.alert.fileTypeSelectionRequired;
     }
 
     setClientErrors(errors);
@@ -193,20 +180,20 @@ export default function CreatePolicyManagementPresentation({
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-2xl mx-auto">
         <Card className="p-8 shadow-lg">
-          <h1 className="text-3xl font-bold mb-8 text-center">新しいポリシーを作成</h1>
+          <h1 className="text-3xl font-bold mb-8 text-center">{dictionary.label.createNewPolicy}</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* ポリシー名 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                ポリシー名
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.policyName}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredField}</span>
               </label>
               <Input
                 name="policyName"
                 value={formData.policyName}
                 onValueChange={(value) => handleFieldChange('policyName', value)}
-                placeholder="ポリシー名を入力"
+                placeholder={dictionary.label.policyNamePlaceholder}
                 variant="bordered"
                 isInvalid={!!(clientErrors.policyName || getErrorMessage('policyName'))}
                 errorMessage={clientErrors.policyName || getErrorMessage('policyName')}
@@ -216,14 +203,14 @@ export default function CreatePolicyManagementPresentation({
             {/* 説明 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                説明
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.description}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredField}</span>
               </label>
               <Textarea
                 name="description"
                 value={formData.description}
                 onValueChange={(value) => handleFieldChange('description', value)}
-                placeholder="ポリシーの説明を入力"
+                placeholder={dictionary.label.descriptionPlaceholder}
                 variant="bordered"
                 minRows={3}
                 isInvalid={!!(clientErrors.description || getErrorMessage('description'))}
@@ -234,8 +221,8 @@ export default function CreatePolicyManagementPresentation({
             {/* 許可するファイル形式 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                許可するファイル形式
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.allowedFileTypesLabel}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredField}</span>
               </label>
               
               {/* 選択されたファイル形式 */}
@@ -252,7 +239,7 @@ export default function CreatePolicyManagementPresentation({
                     </Chip>
                   ))
                 ) : (
-                  <span className="text-gray-500 text-sm">ファイル形式を選択してください</span>
+                  <span className="text-gray-500 text-sm">{dictionary.label.selectFileTypesPlaceholder}</span>
                 )}
               </div>
               
@@ -294,7 +281,7 @@ export default function CreatePolicyManagementPresentation({
                 {/* 詳細エラー表示 */}
                 {state.errors && Object.keys(state.errors).length > 0 && (
                   <div className="mt-2 space-y-2">
-                    <p className="text-red-600 text-xs font-medium">詳細エラー:</p>
+                    <p className="text-red-600 text-xs font-medium">{dictionary.label.detailedError}:</p>
                     {Object.entries(state.errors).map(([field, fieldErrors]) => (
                       <div key={field} className="text-xs text-red-600">
                         <span className="font-medium">{field}:</span>
@@ -308,7 +295,7 @@ export default function CreatePolicyManagementPresentation({
                 
                 {/* デバッグ情報 */}
                 <details className="mt-2">
-                  <summary className="text-xs text-red-500 cursor-pointer">デバッグ情報を表示</summary>
+                  <summary className="text-xs text-red-500 cursor-pointer">{dictionary.label.debugInfo}</summary>
                   <pre className="mt-2 text-xs text-red-600 bg-red-100 p-2 rounded overflow-auto">
                     {JSON.stringify(state, null, 2)}
                   </pre>
@@ -334,7 +321,7 @@ export default function CreatePolicyManagementPresentation({
                 onPress={() => router.back()}
                 className="flex-1"
               >
-                キャンセル
+                {dictionary.label.cancel}
               </Button>
               <Button
                 type="submit"
@@ -343,7 +330,7 @@ export default function CreatePolicyManagementPresentation({
                 isLoading={isPending}
                 isDisabled={isPending}
               >
-                ポリシーを作成
+                {dictionary.label.createPolicy}
               </Button>
             </div>
           </form>

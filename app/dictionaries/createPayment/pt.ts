@@ -1,4 +1,6 @@
-export default {
+import type { CreatePaymentLocale } from './createPayment.d.ts';
+
+const pt: CreatePaymentLocale = {
   label: {
     back: "Voltar",
     submit: "Enviar",
@@ -22,6 +24,7 @@ export default {
     linkCompatibleStores: "Pague rapidamente em lojas compatíveis com Link, incluindo Soundbox padrão.",
     cardInfoEncrypted: "As informações do cartão são criptografadas e armazenadas com segurança.",
     billingBasedOnUsage: "A cobrança real ocorrerá mais tarde com base no uso.",
+    dataRetentionNotice: "Os dados processados serão armazenados gratuitamente por 1 ano e depois excluídos automaticamente",
     authenticationFlowDescription: "Por motivos de segurança, a autenticação do cartão pode ser necessária.",
     authenticationFlowSteps: "Se a autenticação for necessária, a tela de autenticação do seu banco será exibida. Por favor, complete a autenticação.",
     agreeNoticePrefix: "Ao completar o registro, você concorda com os ",
@@ -44,6 +47,6 @@ export default {
     authenticationCancelled: "A autenticação do cartão foi cancelada.",
     authenticationIncomplete: "A autenticação do cartão não está completa. Por favor, complete a autenticação."
   }
-} as const;
+};
 
-
+export default pt;

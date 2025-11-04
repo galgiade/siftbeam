@@ -1,8 +1,13 @@
+import type { UserProfileLocale } from './user.d.ts';
+
 // 当面は英語を転用（将来の完全翻訳に備えてファイルを分離）
-export const de = {
+const de: UserProfileLocale = {
   alert: {
     updateSuccess: "Benutzerinformationen erfolgreich aktualisiert.",
     updateFail: "Fehler beim Aktualisieren der Benutzerinformationen.",
+    updateError: "Bei der Aktualisierung ist ein Fehler aufgetreten.",
+    fieldUpdateSuccess: "{field} wurde erfolgreich aktualisiert.",
+    fieldUpdateFail: "Aktualisierung von {field} fehlgeschlagen.",
     emailSent: "Ein Bestätigungscode wurde an Ihre neue E-Mail-Adresse gesendet.",
     emailUpdateSuccess: "E-Mail-Adresse erfolgreich aktualisiert.",
     emailUpdateFail: "Fehler beim Aktualisieren der E-Mail-Adresse.",
@@ -11,32 +16,42 @@ export const de = {
     confirmFail: "Der Bestätigungscode ist falsch oder die Datenbankaktualisierung ist fehlgeschlagen.",
     invalidConfirmationCode: "Der Bestätigungscode ist falsch. Bitte geben Sie den korrekten 6-stelligen Code ein.",
     expiredConfirmationCode: "Der Bestätigungscode ist abgelaufen. Bitte fordern Sie einen neuen Code an.",
-    userAlreadyExists: "Diese E-Mail-Adresse ist bereits registriert. Bitte verwenden Sie eine andere E-Mail-Adresse.",
-    usernameExists: "Dieser Benutzername wird bereits verwendet. Bitte verwenden Sie einen anderen Benutzernamen.",
     noEmailChange: "Keine Änderung der E-Mail-Adresse.",
     invalidEmailFormat: "Ungültiges E-Mail-Format. Bitte geben Sie eine gültige E-Mail-Adresse ein.",
-    emailChangeCancelled: "E-Mail-Adressenänderung wurde abgebrochen.",
-    emailChangeCancelFailed: "Fehler beim Abbrechen der E-Mail-Adressenänderung.",
-    emailChangeReset: "Unbestätigte E-Mail-Adressenänderung wurde zurückgesetzt.",
     noChange: "Keine Änderungen am Benutzernamen.",
-    resendLimitExceeded: "Das Resend-Limit wurde überschritten. Bitte versuchen Sie es später erneut.",
-    resendFailed: "Fehler beim erneuten Senden des Bestätigungscodes. Bitte versuchen Sie es erneut.",
     invalidConfirmationCodeFormat: "Bitte geben Sie einen 6-stelligen Bestätigungscode ein.",
-    confirmationAttemptLimitExceeded: "Das Bestätigungsversuchslimit wurde überschritten. Bitte versuchen Sie es später erneut.",
-    authenticationFailed: "Authentifizierung fehlgeschlagen. Bitte melden Sie sich erneut an und versuchen Sie es.",
-    invalidUsernameFormat: "Ungültiges Benutzernamenformat. Bitte geben Sie einen gültigen Benutzernamen ein.",
-    usernameChangeLimitExceeded: "Das Benutzernamenänderungslimit wurde überschritten. Bitte versuchen Sie es später erneut.",
-    atLeastOneFieldRequired: "Mindestens ein Feld muss aktualisiert werden",
     verificationCodeNotFound: "Bestätigungscode nicht gefunden oder abgelaufen",
     remainingAttempts: "Verbleibende Versuche",
-    verificationCodeStoreFailed: "Fehler beim Speichern des Bestätigungscodes. Bitte überprüfen Sie die IAM-Berechtigungen."
+    verificationCodeStoreFailed: "Fehler beim Speichern des Bestätigungscodes. Bitte überprüfen Sie die IAM-Berechtigungen.",
+    codeStoreFailed: "Code konnte nicht gespeichert werden.",
+    adminOnlyEdit: "Nur Administratoren können dieses Feld bearbeiten.",
+    validEmailRequired: "Bitte geben Sie eine gültige E-Mail-Adresse ein."
   },
   label: {
     title: "Benutzerinformationen",
     userName: "Benutzername",
     department: "Abteilung",
     position: "Position",
-    email: "E-Mail-Adresse"
+    email: "E-Mail-Adresse",
+    locale: "Sprache",
+    role: "Rolle",
+    edit: "Bearbeiten",
+    save: "Speichern",
+    cancel: "Abbrechen",
+    adminOnly: "(Nur Admin)",
+    readOnly: "(Nicht änderbar)",
+    editableFields: "Bearbeitbar: Benutzername, Sprache",
+    adminOnlyFields: "Nur Admin: E-Mail, Abteilung, Position",
+    allFieldsEditable: "Alle Felder sind bearbeitbar",
+    newEmailSent: "Bestätigungscode an neue E-Mail \"{email}\" gesendet.",
+    roleAdmin: "Administrator",
+    roleUser: "Benutzer",
+    lastAdminRestriction: "Rollenänderung ist eingeschränkt, wenn Sie der letzte Administrator sind",
+    lastAdminNote: "※ Wenn es nur einen Administrator in der Organisation gibt, kann die Rolle nicht in einen regulären Benutzer geändert werden.",
+    generalUserPermission: "Allgemeine Benutzerberechtigung",
+    adminPermission: "Administratorberechtigung",
+    verifyAndUpdate: "Verifizieren und Aktualisieren",
+    verificationCodePlaceholder: "Bestätigungscode (6 Ziffern)"
   },
   modal: {
     modalTitle: "E-Mail-Bestätigung",

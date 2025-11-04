@@ -36,7 +36,8 @@ type EditableField = 'name' | 'email' | 'phone' | 'country' | 'postal_code' | 's
 async function updateSingleCustomerField(
   customerId: string,
   fieldName: EditableField,
-  value: string
+  value: string,
+  dictionary: any
 ): Promise<{ success: boolean; message: string; errors?: Record<string, string>; data?: any }> {
   try {
     console.log('updateSingleCustomerField called with:', { customerId, fieldName, value });
@@ -66,13 +67,13 @@ async function updateSingleCustomerField(
     if (result.success) {
       return {
         success: true,
-        message: result.message || `${fieldName}が正常に更新されました。`,
+        message: result.message || dictionary.alert.fieldUpdateSuccess.replace('{fieldName}', fieldName),
         data: result.data, // Stripeから返された最新データを含める
       };
     } else {
       return {
         success: false,
-        message: result.message || `${fieldName}の更新に失敗しました。`,
+        message: result.message || dictionary.alert.fieldUpdateFail.replace('{fieldName}', fieldName),
         errors: result.errors ? Object.fromEntries(
           Object.entries(result.errors).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value])
         ) : {},
@@ -82,8 +83,8 @@ async function updateSingleCustomerField(
     console.error('Error in updateSingleCustomerField:', error);
     return {
       success: false,
-      message: error?.message || '更新処理でエラーが発生しました。',
-      errors: { [fieldName]: error?.message || '更新処理でエラーが発生しました。' }
+      message: error?.message || dictionary.alert.updateError,
+      errors: { [fieldName]: error?.message || dictionary.alert.updateError }
     };
   }
 }
@@ -183,44 +184,44 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
     if (!value || !value.trim()) {
       // フィールドごとのカスタムエラーメッセージ
       const fieldLabels: Record<EditableField, string> = {
-        name: '会社名',
-        email: 'メールアドレス',
-        phone: '電話番号',
-        country: '国',
-        postal_code: '郵便番号',
-        state: '都道府県',
-        city: '市区町村',
-        line1: '住所1',
-        line2: '住所2'
+        name: dictionary.label.name,
+        email: dictionary.label.email,
+        phone: dictionary.label.phone,
+        country: dictionary.label.country,
+        postal_code: dictionary.label.postal_code,
+        state: dictionary.label.state,
+        city: dictionary.label.city,
+        line1: dictionary.label.line1,
+        line2: dictionary.label.line2
       };
-      return `${fieldLabels[field]}は必須です。`;
+      return dictionary.alert.fieldRequired.replace('{fieldLabel}', fieldLabels[field]);
     }
     
     if (field === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) {
-        return '有効なメールアドレスを入力してください。';
+        return dictionary.alert.invalidEmailFormat;
       }
     }
     
     if (field === 'phone') {
       const phoneRegex = /^[0-9\-\+\(\)\s]+$/;
       if (!phoneRegex.test(value)) {
-        return '有効な電話番号を入力してください。';
+        return dictionary.alert.invalidPhoneFormat;
       }
     }
     
     if (field === 'postal_code') {
       const postalCodeRegex = /^[0-9\-\s]+$/;
       if (!postalCodeRegex.test(value)) {
-        return '有効な郵便番号を入力してください。';
+        return dictionary.alert.invalidPostalCodeFormat;
       }
     }
     
     if (field === 'country') {
       // 国コードの形式チェック（2文字の大文字アルファベット）
       if (!value.match(/^[A-Z]{2}$/)) {
-        return '有効な国を選択してください。';
+        return dictionary.alert.invalidCountryFormat;
       }
     }
     
@@ -242,7 +243,7 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
 
     try {
       console.log('Updating field:', { field, value, customerId: customer.id });
-      const result = await updateSingleCustomerField(customer.id, field, value);
+      const result = await updateSingleCustomerField(customer.id, field, value, dictionary);
       console.log('Update result:', result);
       
       if (result.success) {
@@ -271,13 +272,13 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
         }
       } else {
         // エラー時はエラーメッセージを表示
-        const errorMessage = result.message || `${field}の更新に失敗しました。`;
+        const errorMessage = result.message || dictionary.alert.fieldUpdateFail.replace('{fieldName}', field);
         setFieldErrors({ ...fieldErrors, [field]: errorMessage });
         console.error('Update failed:', result);
       }
     } catch (error: any) {
       console.error('Update error:', error);
-      const errorMessage = error?.message || '更新中にエラーが発生しました。';
+      const errorMessage = error?.message || dictionary.alert.updateError;
       setFieldErrors({ ...fieldErrors, [field]: errorMessage });
     } finally {
       setIsUpdating(false);
@@ -347,7 +348,7 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
           <div className="flex flex-col gap-2">
             {field === 'country' ? (
               <Autocomplete
-                placeholder={`${label}を選択してください`}
+                placeholder={dictionary.label.selectPlaceholder.replace('{label}', label)}
                 selectedKey={tempValues[field]}
                 onSelectionChange={(key) => {
                   // nullやundefinedの場合は何もしない
@@ -355,7 +356,7 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
                     handleCountryChange(String(key));
                   } else {
                     // nullが設定されようとした場合はエラーを表示
-                    setFieldErrors({ ...fieldErrors, country: '国は必須です。' });
+                    setFieldErrors({ ...fieldErrors, country: dictionary.alert.countryRequired });
                   }
                 }}
                 isDisabled={isUpdating}
@@ -383,7 +384,7 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
               <PhoneInput
                 name="phone"
                 label={label}
-                placeholder="例: 90-3706-7654"
+                placeholder={dictionary.placeholder.phoneExample}
                 value={tempValues[field]}
                 onChange={(value) => {
                   setTempValues({ ...tempValues, [field]: value });
@@ -410,7 +411,7 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
                 }}
                 isDisabled={isUpdating}
                 variant="bordered"
-                placeholder={`${label}を選択してください`}
+                placeholder={dictionary.label.selectPlaceholder.replace('{label}', label)}
                 isInvalid={!!error}
                 classNames={{
                   listbox: "bg-white shadow-lg border border-gray-200",
@@ -452,10 +453,10 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
           <div className="p-3 bg-gray-50 rounded-md border">
             <span className="text-gray-900">
               {field === 'country' 
-                ? countryList.find(country => country.code === value)?.name || value || '未設定'
+                ? countryList.find(country => country.code === value)?.name || value || dictionary.label.notSet
                 : type === 'select' && selectOptions
                 ? selectOptions?.find(opt => opt.key === value)?.label || value
-                : value || '未設定'
+                : value || dictionary.label.notSet
               }
             </span>
           </div>
@@ -478,10 +479,10 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
               </svg>
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium text-blue-800">
-                  一般ユーザー権限
+                  {dictionary.label.generalUserPermission}
                 </p>
                 <p className="text-xs text-blue-700">
-                  {dictionary.alert.adminOnlyEditMessage || '管理者のみが会社情報を編集できます。変更が必要な場合は管理者にお問い合わせください。'}
+                  {dictionary.alert.adminOnlyEditMessage}
                 </p>
               </div>
             </div>
@@ -496,10 +497,10 @@ export default function UpdateCompanyInfoPresentation({ customer, userAttributes
               </svg>
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium text-green-800">
-                  管理者権限
+                  {dictionary.label.adminPermission}
                 </p>
                 <p className="text-xs text-green-700">
-                  会社情報のすべてのフィールドを編集できます
+                  {dictionary.label.adminPermissionDescription}
                 </p>
               </div>
             </div>

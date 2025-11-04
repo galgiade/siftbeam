@@ -1,4 +1,6 @@
-export default {
+import type { CompanyProfileLocale } from './company.d.ts';
+
+const pt: CompanyProfileLocale = {
   alert: {
     updateSuccess: "As informações da empresa foram atualizadas.",
     updateFail: "Falha na atualização.",
@@ -7,13 +9,24 @@ export default {
     fetchCustomerFailed: "Falha ao obter informações do cliente",
     customerNotFound: "Informações do cliente não encontradas",
     customerDeleted: "Esta conta de cliente foi excluída",
-    adminOnlyEditMessage: "A edição das informações da empresa é permitida apenas para administradores. Você não tem permissão para editar.",
+    adminOnlyEditMessage: "Apenas administradores podem editar as informações da empresa. Entre em contato com um administrador se precisar fazer alterações.",
     invalidEmail: "Por favor, insira um endereço de email válido",
     invalidPhone: "Por favor, insira um número de telefone válido",
     invalidPostalCode: "Por favor, insira um código postal válido",
     nameTooLong: "O nome da empresa deve ter 100 caracteres ou menos",
     addressTooLong: "O endereço deve ter 200 caracteres ou menos",
-    validationError: "Há problemas com a entrada. Por favor, verifique."
+    validationError: "Há problemas com a entrada. Por favor, verifique.",
+    fieldUpdateSuccess: "{fieldName} foi atualizado com sucesso.",
+    fieldUpdateFail: "Falha ao atualizar {fieldName}.",
+    updateError: "Ocorreu um erro durante o processo de atualização.",
+    fieldRequired: "{fieldLabel} é obrigatório.",
+    invalidEmailFormat: "Por favor, insira um endereço de email válido.",
+    invalidPhoneFormat: "Por favor, insira um número de telefone válido.",
+    invalidPostalCodeFormat: "Por favor, insira um código postal válido.",
+    invalidCountryFormat: "Por favor, selecione um país válido.",
+    countryRequired: "O país é obrigatório.",
+    errorTitle: "Erro",
+    fetchError: "Ocorreu um erro ao obter as informações da empresa."
   },
   label: {
     title: "Informações da empresa",
@@ -26,7 +39,12 @@ export default {
     line1: "Endereço",
     name: "Nome da empresa",
     phone: "Telefone",
-    email: "E-mail de faturamento"
+    email: "E-mail de faturamento",
+    notSet: "Não definido",
+    generalUserPermission: "Permissão de Usuário Geral",
+    adminPermission: "Permissão de Administrador",
+    adminPermissionDescription: "Você pode editar todos os campos das informações da empresa",
+    selectPlaceholder: "Selecionar {label}"
   },
   placeholder: {
     postal_code: "ex. 01234-567",
@@ -36,11 +54,12 @@ export default {
     line1: "ex. Av. Paulista, 123",
     name: "ex. Empresa Exemplo Ltda.",
     phone: "ex. +55-11-1234-5678",
-    email: "ex. contato@exemplo.com.br"
+    email: "ex. contato@exemplo.com.br",
+    phoneExample: "ex. 90-3706-7654"
   },
   button: {
     cancel: "Cancelar"
   }
-} as const;
+};
 
-
+export default pt;

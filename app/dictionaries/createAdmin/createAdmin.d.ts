@@ -1,9 +1,8 @@
 export interface CreateAdminLocale {
   label: {
-    accountCreation: string;
-    companyInfo: string;
-    adminSetup: string;
-    paymentSetup: string;
+    back: string;
+    submit: string;
+    loading: string;
     createAdminTitle: string;
     userNameLabel: string;
     userNamePlaceholder: string;
@@ -13,6 +12,7 @@ export interface CreateAdminLocale {
     positionLabel: string;
     positionPlaceholder: string;
     languageLabel: string;
+    languagePlaceholder: string;
     japanese: string;
     english: string;
     spanish: string;
@@ -22,7 +22,20 @@ export interface CreateAdminLocale {
     portuguese: string;
     indonesian: string;
     chinese: string;
-    creating: string;
     createAdmin: string;
+    creating: string;
+    accountCreation: string;
+    companyInfo: string;
+    adminSetup: string;
+    paymentSetup: string;
+  };
+  alert: {
+    userNameRequired: string;
+    userNameMinLength: string;
+    departmentRequired: string;
+    positionRequired: string;
+    invalidAuthInfo: string;
+    adminCreationFailed: string;
+    networkError: string;
   };
 }

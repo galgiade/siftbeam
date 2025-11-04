@@ -1,16 +1,16 @@
 'use client'
 
 import { useState, useActionState, useEffect, startTransition } from "react"
-import { Button, Card, Input, Textarea, Select, SelectItem, Chip, Autocomplete, AutocompleteItem, Checkbox } from "@heroui/react"
+import { Button, Card, Input, Textarea, Chip, Autocomplete, AutocompleteItem, Checkbox } from "@heroui/react"
 import { createGroup, assignUsersToGroup, assignPoliciesToGroup } from "@/app/lib/actions/group-api"
 import { UserAttributesDTO, User, Policy } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { GroupManagementLocale } from '@/app/dictionaries/group-management/group-management.d.ts';
 import { useRouter } from "next/navigation"
 import { FaUser, FaFile } from "react-icons/fa6"
 
 interface CreateGroupManagementPresentationProps {
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: GroupManagementLocale;
   locale: string;
   users: User[];
   policies: Policy[];
@@ -20,12 +20,6 @@ interface CreateGroupManagementPresentationProps {
 interface CreateGroupFormData {
   groupName: string;
   description: string;
-}
-
-// 拡張されたグループ作成データ型（リレーション含む）
-interface ExtendedCreateGroupFormData extends CreateGroupFormData {
-  selectedUserIds: string[];
-  selectedPolicyIds: string[];
 }
 
 export default function CreateGroupManagementPresentation({ 
@@ -93,8 +87,8 @@ export default function CreateGroupManagementPresentation({
             console.error('Failed to assign users to group:', assignUsersResult);
             return {
               success: false,
-              message: `グループは作成されましたが、ユーザーの関連付けに失敗しました: ${assignUsersResult.message}`,
-              errors: assignUsersResult.errors || { general: ['ユーザーの関連付けに失敗しました。'] },
+              message: `${dictionary.alert.groupCreatedButUsersFailed} ${assignUsersResult.message}`,
+              errors: assignUsersResult.errors || { general: [dictionary.alert.userAttachFail] },
               data: createdGroup
             };
           }
@@ -114,8 +108,8 @@ export default function CreateGroupManagementPresentation({
             console.error('Failed to assign policies to group:', assignPoliciesResult);
             return {
               success: false,
-              message: `グループは作成されましたが、ポリシーの関連付けに失敗しました: ${assignPoliciesResult.message}`,
-              errors: assignPoliciesResult.errors || { general: ['ポリシーの関連付けに失敗しました。'] },
+              message: `${dictionary.alert.groupCreatedButPoliciesFailed} ${assignPoliciesResult.message}`,
+              errors: assignPoliciesResult.errors || { general: [dictionary.alert.policyAttachFail] },
               data: createdGroup
             };
           }
@@ -124,7 +118,7 @@ export default function CreateGroupManagementPresentation({
         // 全て成功
         return {
           success: true,
-          message: 'グループが正常に作成され、選択されたユーザーとポリシーが関連付けられました。',
+          message: dictionary.alert.groupCreatedWithUsersAndPolicies,
           data: createdGroup
         };
         
@@ -132,8 +126,8 @@ export default function CreateGroupManagementPresentation({
         console.error('Error in form action:', error);
         return {
           success: false,
-          message: 'フォーム送信中にエラーが発生しました。',
-          errors: { general: [error?.message || '不明なエラー'] },
+          message: dictionary.alert.formSubmissionError,
+          errors: { general: [error?.message || dictionary.alert.unknownError] },
           data: undefined
         };
       }
@@ -182,7 +176,7 @@ export default function CreateGroupManagementPresentation({
 
   // ユーザー・ポリシーのフィルタリング
   const filteredUsers = users.filter(user => {
-    const userName = user.userName || user.email || '名前未設定';
+    const userName = user.userName || user.email || dictionary.label.nameNotSet;
     return userName.toLowerCase().includes(userSearchTerm.toLowerCase());
   });
 
@@ -205,15 +199,15 @@ export default function CreateGroupManagementPresentation({
     const errors: Record<string, string> = {};
 
     if (!formData.groupName.trim()) {
-      errors.groupName = 'グループ名は必須です。';
+      errors.groupName = dictionary.alert.requiredGroupName;
     }
 
     if (selectedUserIds.length === 0) {
-      errors.users = '最低1つ以上のユーザーを選択してください。';
+      errors.users = dictionary.alert.selectAtLeastOneUser;
     }
 
     if (selectedPolicyIds.length === 0) {
-      errors.policies = '最低1つ以上のポリシーを選択してください。';
+      errors.policies = dictionary.alert.selectAtLeastOnePolicy;
     }
 
     setClientErrors(errors);
@@ -252,20 +246,20 @@ export default function CreateGroupManagementPresentation({
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-2xl mx-auto">
         <Card className="p-8 shadow-lg">
-          <h1 className="text-3xl font-bold mb-8 text-center">新しいグループを作成</h1>
+          <h1 className="text-3xl font-bold mb-8 text-center">{dictionary.label.createNewGroup}</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* グループ名 */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                グループ名
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.groupName}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Input
                 name="groupName"
                 value={formData.groupName}
                 onValueChange={(value) => handleFieldChange('groupName', value)}
-                placeholder="グループ名を入力"
+                placeholder={dictionary.label.groupNamePlaceholder}
                 variant="bordered"
                 isInvalid={!!(clientErrors.groupName || getErrorMessage('groupName'))}
                 errorMessage={clientErrors.groupName || getErrorMessage('groupName')}
@@ -275,13 +269,13 @@ export default function CreateGroupManagementPresentation({
             {/* 説明（オプション） */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
-                説明
+                {dictionary.label.descriptionLabel}
               </label>
               <Textarea
                 name="description"
                 value={formData.description}
                 onValueChange={(value) => handleFieldChange('description', value)}
-                placeholder="グループの説明を入力（任意）"
+                placeholder={dictionary.label.descriptionPlaceholder}
                 variant="bordered"
                 minRows={4}
                 isInvalid={!!(clientErrors.description || getErrorMessage('description'))}
@@ -293,11 +287,11 @@ export default function CreateGroupManagementPresentation({
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
                 <FaUser className="inline mr-2" />
-                グループに追加するユーザー
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.addUsersToGroup}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Autocomplete
-                placeholder="ユーザーを検索・選択してください"
+                placeholder={dictionary.label.searchUsersPlaceholder}
                 variant="bordered"
                 allowsCustomValue={false}
                 inputValue={userSearchTerm}
@@ -327,7 +321,7 @@ export default function CreateGroupManagementPresentation({
                   <AutocompleteItem 
                     key={user.userId} 
                     className="bg-white hover:bg-gray-100"
-                    textValue={user.userName || user.email || '名前未設定'}
+                    textValue={user.userName || user.email || dictionary.label.nameNotSet}
                   >
                     <div className="flex items-center gap-2 w-full">
                       <Checkbox
@@ -348,7 +342,7 @@ export default function CreateGroupManagementPresentation({
                         size="sm"
                       />
                       <span className="flex-1">
-                        {user.userName || user.email || '名前未設定'}
+                        {user.userName || user.email || dictionary.label.nameNotSet}
                       </span>
                     </div>
                   </AutocompleteItem>
@@ -366,7 +360,7 @@ export default function CreateGroupManagementPresentation({
                         color="primary"
                         onClose={() => setSelectedUserIds(prev => prev.filter(id => id !== userId))}
                       >
-                        {user?.userName || user?.email || '不明なユーザー'}
+                        {user?.userName || user?.email || dictionary.label.unknownUser}
                       </Chip>
                     );
                   })}
@@ -378,11 +372,11 @@ export default function CreateGroupManagementPresentation({
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">
                 <FaFile className="inline mr-2" />
-                グループに追加するポリシー
-                <span className="text-red-500 ml-1">*</span>
+                {dictionary.label.addPoliciesToGroup}
+                <span className="text-red-500 ml-1">{dictionary.label.requiredMark}</span>
               </label>
               <Autocomplete
-                placeholder="ポリシーを検索・選択してください"
+                placeholder={dictionary.label.searchPoliciesPlaceholder}
                 variant="bordered"
                 allowsCustomValue={false}
                 inputValue={policySearchTerm}
@@ -451,7 +445,7 @@ export default function CreateGroupManagementPresentation({
                         color="secondary"
                         onClose={() => setSelectedPolicyIds(prev => prev.filter(id => id !== policyId))}
                       >
-                        {policy?.policyName || '不明なポリシー'}
+                        {policy?.policyName || dictionary.label.unknownPolicy}
                       </Chip>
                     );
                   })}
@@ -472,7 +466,7 @@ export default function CreateGroupManagementPresentation({
                 {/* 詳細エラー表示 */}
                 {state.errors && Object.keys(state.errors).length > 0 && (
                   <div className="mt-2 space-y-2">
-                    <p className="text-red-600 text-xs font-medium">詳細エラー:</p>
+                    <p className="text-red-600 text-xs font-medium">{dictionary.label.detailedErrors}</p>
                     {Object.entries(state.errors).map(([field, fieldErrors]) => (
                       <div key={field} className="text-xs text-red-600">
                         <span className="font-medium">{field}:</span>
@@ -486,7 +480,7 @@ export default function CreateGroupManagementPresentation({
                 
                 {/* デバッグ情報 */}
                 <details className="mt-2">
-                  <summary className="text-xs text-red-500 cursor-pointer">デバッグ情報を表示</summary>
+                  <summary className="text-xs text-red-500 cursor-pointer">{dictionary.label.showDebugInfo}</summary>
                   <pre className="mt-2 text-xs text-red-600 bg-red-100 p-2 rounded overflow-auto">
                     {JSON.stringify(state, null, 2)}
                   </pre>
@@ -512,7 +506,7 @@ export default function CreateGroupManagementPresentation({
                 onPress={() => router.back()}
                 className="flex-1"
               >
-                キャンセル
+                {dictionary.label.cancelButton}
               </Button>
               <Button
                 type="submit"
@@ -521,7 +515,7 @@ export default function CreateGroupManagementPresentation({
                 isLoading={isPending}
                 isDisabled={isPending}
               >
-                グループを作成
+                {dictionary.label.createGroupButton}
               </Button>
             </div>
           </form>

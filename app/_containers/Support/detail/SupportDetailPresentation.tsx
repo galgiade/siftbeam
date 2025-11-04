@@ -5,7 +5,8 @@ import { Button, Card, Textarea } from "@heroui/react"
 import { SupportRequest, SupportReply } from "@/app/lib/types/TypeAPIs"
 import { createSupportReply } from "@/app/lib/actions/support-api"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { SupportCenterLocale } from '@/app/dictionaries/supportCenter/supportCenter.d.ts';
+import type { CommonLocale } from '@/app/dictionaries/common/common.d.ts';
 import { FaLifeRing, FaPaperPlane, FaArrowLeft, FaClock, FaCircleCheck, FaCircleExclamation, FaUser, FaHeadset, FaFile, FaImage, FaVideo, FaMusic } from "react-icons/fa6"
 import Link from "next/link"
 import FileUploader from "@/app/_components/FileUploader"
@@ -15,60 +16,70 @@ interface SupportDetailPresentationProps {
   supportRequest: SupportRequest;
   replies: SupportReply[];
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: SupportCenterLocale;
+  commonDictionary: CommonLocale;
 }
 
-// 問題タイプのラベル
-const issueTypeLabels = {
-  'technical': '技術的な問題',
-  'billing': '請求・支払い',
-  'feature': '機能追加',
-  'bug': 'バグ報告',
-  'other': 'その他'
-} as const;
+// 問題タイプのラベルを取得する関数
+const getIssueTypeLabel = (issueType: string, dictionary: SupportCenterLocale): string => {
+  const labels: Record<string, string> = {
+    'technical': dictionary.label.issueTypeTechnical,
+    'billing': dictionary.label.issueTypeBilling,
+    'feature': dictionary.label.issueTypeFeature,
+    'bug': dictionary.label.issueTypeBug,
+    'other': dictionary.label.issueTypeOther
+  };
+  return labels[issueType] || issueType;
+};
 
-// ステータスのラベルとアイコン
-const statusConfig = {
-  'open': { 
-    label: '未対応', 
-    color: 'danger' as const, 
-    icon: FaCircleExclamation,
-    bgColor: 'bg-red-50',
-    textColor: 'text-red-700',
-    borderColor: 'border-red-200'
-  },
-  'in_progress': { 
-    label: '対応中', 
-    color: 'warning' as const, 
-    icon: FaClock,
-    bgColor: 'bg-yellow-50',
-    textColor: 'text-yellow-700',
-    borderColor: 'border-yellow-200'
-  },
-  'resolved': { 
-    label: '解決済み', 
-    color: 'success' as const, 
-    icon: FaCircleCheck,
-    bgColor: 'bg-green-50',
-    textColor: 'text-green-700',
-    borderColor: 'border-green-200'
-  },
-  'closed': { 
-    label: 'クローズ', 
-    color: 'default' as const, 
-    icon: FaCircleCheck,
-    bgColor: 'bg-gray-50',
-    textColor: 'text-gray-700',
-    borderColor: 'border-gray-200'
-  }
-} as const;
+// ステータスのラベルとアイコンを取得する関数
+const getStatusConfig = (status: string, dictionary: SupportCenterLocale) => {
+  const configs: Record<string, any> = {
+    'open': { 
+      label: dictionary.label.statusOpen, 
+      color: 'danger' as const, 
+      icon: FaCircleExclamation,
+      bgColor: 'bg-red-50',
+      textColor: 'text-red-700',
+      borderColor: 'border-red-200'
+    },
+    'in_progress': { 
+      label: dictionary.label.statusInProgress, 
+      color: 'warning' as const, 
+      icon: FaClock,
+      bgColor: 'bg-yellow-50',
+      textColor: 'text-yellow-700',
+      borderColor: 'border-yellow-200'
+    },
+    'resolved': { 
+      label: dictionary.label.statusResolved, 
+      color: 'success' as const, 
+      icon: FaCircleCheck,
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-700',
+      borderColor: 'border-green-200'
+    },
+    'closed': { 
+      label: dictionary.label.statusClosed, 
+      color: 'default' as const, 
+      icon: FaCircleCheck,
+      bgColor: 'bg-gray-50',
+      textColor: 'text-gray-700',
+      borderColor: 'border-gray-200'
+    }
+  };
+  return configs[status] || configs['open'];
+};
 
-// 送信者タイプのアイコン
-const senderTypeConfig = {
-  'customer': { icon: FaUser, label: 'お客様', color: 'text-blue-600' },
-  'support': { icon: FaHeadset, label: 'サポート', color: 'text-green-600' },
-  'admin': { icon: FaHeadset, label: '管理者', color: 'text-purple-600' }
-} as const;
+// 送信者タイプのアイコンを取得する関数
+const getSenderTypeConfig = (senderType: string, dictionary: SupportCenterLocale) => {
+  const configs: Record<string, any> = {
+    'customer': { icon: FaUser, label: dictionary.label.customer, color: 'text-blue-600' },
+    'support': { icon: FaHeadset, label: dictionary.label.staff, color: 'text-green-600' },
+    'admin': { icon: FaHeadset, label: dictionary.label.staff, color: 'text-purple-600' }
+  };
+  return configs[senderType] || configs['customer'];
+};
 
 // ファイルキーからファイル名を抽出する関数
 const extractFileName = (fileKey: string): string => {
@@ -106,7 +117,8 @@ export default function SupportDetailPresentation({
   supportRequest, 
   replies: initialReplies,
   userAttributes, 
-  dictionary 
+  dictionary,
+  commonDictionary
 }: SupportDetailPresentationProps) {
   
   // 返信一覧の状態管理
@@ -136,7 +148,7 @@ export default function SupportDetailPresentation({
           'support-replyId': replyId, // 事前生成されたUUID
           'support-requestId': supportRequest['support-requestId'],
           userId: userAttributes.sub,
-          userName: userAttributes.preferred_username || 'ユーザー',
+          userName: userAttributes.preferred_username || dictionary.label.customer,
           senderType: 'customer' as const,
           message: formData.get('message') as string,
           fileKeys: JSON.parse(formData.get('replyFileKeys') as string || '[]'),
@@ -155,7 +167,7 @@ export default function SupportDetailPresentation({
       } catch (error: any) {
         return {
           success: false,
-          message: error?.message || '返信送信中にエラーが発生しました。',
+          message: error?.message || dictionary.alert.replyError,
         };
       }
     },
@@ -175,7 +187,7 @@ export default function SupportDetailPresentation({
 
   // ステータスチップコンポーネント
   const StatusChip = ({ status }: { status: SupportRequest['status'] }) => {
-    const config = statusConfig[status];
+    const config = getStatusConfig(status, dictionary);
     const Icon = config.icon;
     
     return (
@@ -188,7 +200,7 @@ export default function SupportDetailPresentation({
 
   // 返信者アイコンコンポーネント
   const SenderIcon = ({ senderType }: { senderType: SupportReply['senderType'] }) => {
-    const config = senderTypeConfig[senderType];
+    const config = getSenderTypeConfig(senderType, dictionary);
     const Icon = config.icon;
     
     return (
@@ -204,7 +216,7 @@ export default function SupportDetailPresentation({
     const errors: Record<string, string> = {};
 
     if (!replyMessage.trim()) {
-      errors.message = 'メッセージを入力してください。';
+      errors.message = dictionary.alert.messageRequired;
       console.log('Validation error set:', errors.message);
     }
 
@@ -257,11 +269,11 @@ export default function SupportDetailPresentation({
             href={`/${userAttributes.locale}/account/support`}
             startContent={<FaArrowLeft size={16} />}
           >
-            一覧に戻る
+            {dictionary.label.backToList}
           </Button>
           <div className="flex items-center gap-3">
             <FaLifeRing className="text-blue-600" size={24} />
-            <h1 className="text-2xl font-bold">サポートリクエスト詳細</h1>
+            <h1 className="text-2xl font-bold">{dictionary.label.supportRequestDetail}</h1>
           </div>
         </div>
 
@@ -277,18 +289,18 @@ export default function SupportDetailPresentation({
               </div>
               
               <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                <span>問題タイプ: {issueTypeLabels[supportRequest.issueType]}</span>
-                <span>作成者: {supportRequest.userName}</span>
-                <span>作成日: {formatDate(supportRequest.createdAt)}</span>
+                <span>{dictionary.label.issueTypeLabel} {getIssueTypeLabel(supportRequest.issueType, dictionary)}</span>
+                <span>{dictionary.label.creator} {supportRequest.userName}</span>
+                <span>{dictionary.label.createdAt} {formatDate(supportRequest.createdAt)}</span>
                 {supportRequest.updatedAt !== supportRequest.createdAt && (
-                  <span>更新日: {formatDate(supportRequest.updatedAt)}</span>
+                  <span>{dictionary.label.updatedAt} {formatDate(supportRequest.updatedAt)}</span>
                 )}
               </div>
             </div>
           </div>
           
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">問題の詳細</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">{dictionary.label.problemDetailsTitle}</h3>
             <div className="p-4 bg-gray-50 rounded-lg border">
               <p className="text-gray-900 whitespace-pre-wrap">{supportRequest.description}</p>
             </div>
@@ -296,7 +308,7 @@ export default function SupportDetailPresentation({
           
           {supportRequest.fileKeys.length > 0 && (
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">添付ファイル ({supportRequest.fileKeys.length}件)</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">{dictionary.label.attachedFiles} ({supportRequest.fileKeys.length}{dictionary.label.filesCount})</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {supportRequest.fileKeys.map((fileKey, index) => {
                   const fileName = extractFileName(fileKey);
@@ -310,7 +322,7 @@ export default function SupportDetailPresentation({
                           {fileName}
                         </p>
                         <p className="text-xs text-gray-500">
-                          リクエスト作成時
+                          {dictionary.label.requestCreationTime}
                         </p>
                       </div>
                     </div>
@@ -321,19 +333,19 @@ export default function SupportDetailPresentation({
           )}
           
           <div className="text-xs text-gray-500 border-t pt-3">
-            リクエストID: {supportRequest['support-requestId']}
+            {dictionary.label.requestId} {supportRequest['support-requestId']}
           </div>
         </Card>
 
         {/* 返信一覧 */}
         <Card className="p-6 mb-6 shadow-lg">
           <h3 className="text-lg font-bold mb-4">
-            返信履歴 ({replies.length}件)
+            {dictionary.label.replyHistory} ({replies.length}{dictionary.label.filesCount})
           </h3>
           
           {replies.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <p>まだ返信がありません</p>
+              <p>{dictionary.label.noReplies}</p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -344,7 +356,7 @@ export default function SupportDetailPresentation({
                     <div className="flex items-center gap-2 mb-2">
                       <span className="font-medium text-gray-900">{reply.userName}</span>
                       <span className="text-xs text-gray-500">
-                        {senderTypeConfig[reply.senderType].label}
+                        {getSenderTypeConfig(reply.senderType, dictionary).label}
                       </span>
                       <span className="text-xs text-gray-500">
                         {formatDate(reply.createdAt)}
@@ -362,7 +374,7 @@ export default function SupportDetailPresentation({
                     {reply.fileKeys.length > 0 && (
                       <div className="space-y-2">
                         <h4 className="text-xs font-medium text-gray-600">
-                          添付ファイル ({reply.fileKeys.length}件)
+                          {dictionary.label.attachedFiles} ({reply.fileKeys.length}{dictionary.label.filesCount})
                         </h4>
                         <div className="grid grid-cols-1 gap-2">
                           {reply.fileKeys.map((fileKey, index) => {
@@ -393,7 +405,7 @@ export default function SupportDetailPresentation({
         {/* 返信フォーム */}
         {supportRequest.status !== 'closed' && (
           <Card className="p-6 shadow-lg">
-            <h3 className="text-lg font-bold mb-4">返信を送信</h3>
+            <h3 className="text-lg font-bold mb-4">{dictionary.label.sendReply}</h3>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -408,7 +420,7 @@ export default function SupportDetailPresentation({
                         setReplyError('');
                       }
                     }}
-                    placeholder="返信メッセージを入力してください..."
+                    placeholder={dictionary.label.replyPlaceholder}
                     variant="bordered"
                     minRows={4}
                     isRequired
@@ -424,8 +436,8 @@ export default function SupportDetailPresentation({
               {/* ファイル添付 */}
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  ファイル添付
-                  <span className="text-gray-500 ml-2 text-xs">(任意)</span>
+                  {dictionary.label.fileAttachment}
+                  <span className="text-gray-500 ml-2 text-xs">{dictionary.label.optionalLabel}</span>
                 </label>
                 <FileUploader
                   customerId={userAttributes.customerId}
@@ -437,10 +449,11 @@ export default function SupportDetailPresentation({
                   maxFiles={5}
                   maxFileSize={10}
                   disabled={isPending}
+                  commonDictionary={commonDictionary}
                 />
                 {replyFileKeys.length > 0 && (
                   <p className="text-xs text-gray-600 mt-2">
-                    {replyFileKeys.length}個のファイルが選択されています
+                    {replyFileKeys.length}{dictionary.label.filesSelected}
                   </p>
                 )}
               </div>
@@ -455,7 +468,7 @@ export default function SupportDetailPresentation({
               {/* 成功メッセージ */}
               {state.success && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-green-700 text-sm">返信が送信されました。</p>
+                  <p className="text-green-700 text-sm">{dictionary.label.replySent}</p>
                 </div>
               )}
               
@@ -468,7 +481,7 @@ export default function SupportDetailPresentation({
                   isDisabled={isPending}
                   onPress={() => handleSubmit()}
                 >
-                  {isPending ? '送信中...' : '返信を送信'}
+                  {isPending ? dictionary.label.sending : dictionary.label.sendReplyButton}
                 </Button>
               </div>
             </form>
@@ -479,8 +492,8 @@ export default function SupportDetailPresentation({
           <Card className="p-6 shadow-lg">
             <div className="text-center py-8 text-gray-500">
               <FaCircleCheck size={48} className="mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium mb-2">このサポートリクエストはクローズされています</p>
-              <p className="text-sm">新しい問題がある場合は、新しいサポートリクエストを作成してください。</p>
+              <p className="text-lg font-medium mb-2">{dictionary.label.requestClosed}</p>
+              <p className="text-sm">{dictionary.label.requestClosedMessage}</p>
             </div>
           </Card>
         )}

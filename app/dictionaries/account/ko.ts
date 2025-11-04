@@ -1,4 +1,6 @@
-export default {
+import type { AccountLocale } from './AccountLocale.d.ts';
+
+const ko: AccountLocale = {
   user: "사용자",
   company: "회사",
   userManagement: "사용자 관리",
@@ -21,6 +23,6 @@ export default {
   userProfile: "사용자 프로필",
   paymentSettings: "결제 설정",
   groupManagement: "그룹 관리"
-} as const;
+};
 
-
+export default ko;

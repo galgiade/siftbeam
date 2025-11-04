@@ -15,6 +15,8 @@ export type SignInLocale = {
     passwordLabel: string;
     passwordPlaceholder: string;
     passwordDescription: string;
+    showPassword: string;
+    hidePassword: string;
     
     // ボタン
     signIn: string;
@@ -26,6 +28,8 @@ export type SignInLocale = {
     noAccount: string;
     
     // 2段階認証
+    twoFactorAuthTitle: string;
+    twoFactorAuthDescription: string;
     verificationCodeLabel: string;
     verificationCodePlaceholder: string;
     verificationCodeDescription: string;
@@ -38,6 +42,10 @@ export type SignInLocale = {
     expirationTime: string;
     attemptCount: string;
     verificationSuccess: string;
+    
+    // その他
+    orDivider: string;
+    copyright: string;
   };
   alert: {
     // バリデーション

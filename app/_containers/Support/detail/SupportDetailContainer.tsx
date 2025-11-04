@@ -1,7 +1,7 @@
 import SupportDetailPresentation from './SupportDetailPresentation'
 import SupportErrorDisplay from '../SupportErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { supportCenterDictionaries, commonDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import { getSupportRequestById, querySupportReplies } from '@/app/lib/actions/support-api';
 
 interface SupportDetailContainerProps {
@@ -16,17 +16,17 @@ interface SupportDetailContainerProps {
 export default async function SupportDetailContainer({ locale, supportRequestId }: SupportDetailContainerProps) {
   try {
     // 並列実行で高速化
-    const [userProfile, dictionary] = await Promise.all([
+    const [userProfile, dictionary, commonDictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(supportCenterDictionaries, locale, 'en')),
+      Promise.resolve(pickDictionary(commonDictionaries, locale, 'en'))
     ]);
     
     // 認証済みユーザーであることを確認（管理者権限は不要）
     if (!userProfile.sub) {
-      const errorMessage = 'ログインが必要です。';
       return (
         <SupportErrorDisplay 
-          error={errorMessage}
+          error={dictionary.alert.loginRequired}
           dictionary={dictionary} 
         />
       );
@@ -53,7 +53,7 @@ export default async function SupportDetailContainer({ locale, supportRequestId 
     
     // サポートリクエストが見つからない場合
     if (!supportRequestResult.success || !supportRequestResult.data) {
-      const errorMessage = supportRequestResult.message || 'サポートリクエストが見つかりません。';
+      const errorMessage = supportRequestResult.message || dictionary.label.requestNotFound;
       return (
         <SupportErrorDisplay 
           error={errorMessage}
@@ -64,10 +64,9 @@ export default async function SupportDetailContainer({ locale, supportRequestId 
     
     // 権限チェック: 自分のカスタマーIDのリクエストのみアクセス可能
     if (supportRequestResult.data.customerId !== userProfile.customerId) {
-      const errorMessage = 'このサポートリクエストにアクセスする権限がありません。';
       return (
         <SupportErrorDisplay 
-          error={errorMessage}
+          error={dictionary.label.accessDenied}
           dictionary={dictionary} 
         />
       );
@@ -81,7 +80,8 @@ export default async function SupportDetailContainer({ locale, supportRequestId 
         supportRequest={supportRequestResult.data}
         replies={replies}
         userAttributes={userAttributesDTO} 
-        dictionary={dictionary} 
+        dictionary={dictionary}
+        commonDictionary={commonDictionary}
       />
     );
   } catch (error: any) {
@@ -93,19 +93,19 @@ export default async function SupportDetailContainer({ locale, supportRequestId 
       timestamp: new Date().toISOString()
     };
     
-    console.error('Error in CreatePolicyManagementContainer:', errorDetails);
+    console.error('Error in SupportDetailContainer:', errorDetails);
     
     // 辞書を取得してエラー表示
-    const dictionary = pickDictionary(userDictionaries, locale, 'en');
-    const errorMessage = error?.message || '予期しないエラーが発生しました。';
+    const dictionary = pickDictionary(supportCenterDictionaries, locale, 'en');
+    const errorMessage = error?.message || dictionary.alert.unknownError;
     
-    let detailedError = `認証エラー: ${errorMessage}\n`;
-    detailedError += `エラータイプ: ${errorDetails.name}\n`;
-    detailedError += `ロケール: ${locale}\n`;
-    detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+    let detailedError = `${dictionary.alert.authError} ${errorMessage}\n`;
+    detailedError += `${dictionary.alert.errorType} ${errorDetails.name}\n`;
+    detailedError += `${dictionary.alert.localeLabel} ${locale}\n`;
+    detailedError += `${dictionary.alert.timestampLabel} ${errorDetails.timestamp}\n`;
     
-    if (errorDetails.stack !== 'スタックトレースなし') {
-      detailedError += `\nスタックトレース:\n${errorDetails.stack}`;
+    if (errorDetails.stack !== dictionary.alert.noStackTrace) {
+      detailedError += `\n${dictionary.alert.stackTrace}\n${errorDetails.stack}`;
     }
     
     return (

@@ -51,7 +51,7 @@ export default async function UpdateCompanyInfoContainer() {
       return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-xl font-bold text-red-600 mb-2">エラー</h2>
+            <h2 className="text-xl font-bold text-red-600 mb-2">{dictionary.alert.errorTitle}</h2>
             <p>{customerResult.message || dictionary.alert.fetchCustomerFailed}</p>
           </div>
         </div>
@@ -92,8 +92,8 @@ export default async function UpdateCompanyInfoContainer() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-bold text-red-600 mb-2">エラー</h2>
-          <p>会社情報の取得中にエラーが発生しました。</p>
+          <h2 className="text-xl font-bold text-red-600 mb-2">{dictionary.alert.errorTitle}</h2>
+          <p>{dictionary.alert.fetchError}</p>
           <p className="text-sm text-gray-600 mt-2">{error?.message}</p>
         </div>
       </div>

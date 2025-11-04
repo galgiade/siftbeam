@@ -10,6 +10,7 @@ import { UsageLimit } from '@/app/lib/actions/usage-limits-api';
 import { formatFileSize } from '@/app/lib/utils/s3-utils';
 import ServiceFileUploader from './ServiceFileUploader';
 import ProcessingHistoryList from './ProcessingHistoryList';
+import type { ServiceLocale } from '@/app/dictionaries/service/ServiceLocale.d.ts';
 
 interface ServicePresentationProps {
   userAttributes: {
@@ -26,7 +27,7 @@ interface ServicePresentationProps {
     notifyLimits: UsageLimit[];
     restrictLimits: UsageLimit[];
   };
-  dictionary: any;
+  dictionary: ServiceLocale;
   locale: string;
 }
 
@@ -252,15 +253,15 @@ export default function ServicePresentation({
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <h1 className="text-3xl font-bold text-gray-900">
-                サービス
+                {dictionary.page.title}
               </h1>
             </div>
             <p className="text-gray-600 text-lg">
-              ポリシーを選択してファイルをアップロードし、処理を実行できます。
+              {dictionary.page.description}
             </p>
           </div>
           <div className="text-center py-8">
-            <p className="text-gray-500">読み込み中...</p>
+            <p className="text-gray-500">{dictionary.page.loading}</p>
           </div>
         </div>
       </div>
@@ -274,11 +275,11 @@ export default function ServicePresentation({
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <h1 className="text-3xl font-bold text-gray-900">
-              サービス
+              {dictionary.page.title}
             </h1>
           </div>
           <p className="text-gray-600 text-lg">
-            ポリシーを選択してファイルをアップロードし、処理を実行できます。処理後のデータは1年間無料で保管されます。
+            {dictionary.page.description}
           </p>
         </div>
 
@@ -289,35 +290,35 @@ export default function ServicePresentation({
             <CardHeader>
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <FaExclamationTriangle className="text-warning" />
-                通知制限
+                {dictionary.limits.notifyLimit.title}
               </h3>
             </CardHeader>
             <CardBody className="space-y-3">
               {nextNotifyLimit || anyNotifyLimit ? (
                 <>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">制限値:</span>
+                    <span className="text-sm text-gray-600">{dictionary.limits.notifyLimit.limitValue}</span>
                     <span className="font-medium">
                       {(() => {
                         const limit = nextNotifyLimit || anyNotifyLimit;
-                        if (!limit) return '設定なし';
+                        if (!limit) return dictionary.limits.notifyLimit.notSet;
                         
                         if (limit.usageLimitValue && limit.usageUnit) {
-                          return `${limit.usageLimitValue} ${limit.usageUnit}/月`;
+                          return `${limit.usageLimitValue} ${limit.usageUnit}${dictionary.limits.perMonth}`;
                         } else if (limit.amountLimitValue) {
                           const converted = convertAmountToDataLimit(limit.amountLimitValue);
-                          return `${converted.value} ${converted.unit}/月 ($${limit.amountLimitValue})`;
+                          return `${converted.value} ${converted.unit}${dictionary.limits.perMonth} ($${limit.amountLimitValue})`;
                         }
-                        return '設定なし';
+                        return dictionary.limits.notifyLimit.notSet;
                       })()}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">超過時のアクション:</span>
-                    <Chip size="sm" color="warning" variant="flat">通知</Chip>
+                    <span className="text-sm text-gray-600">{dictionary.limits.notifyLimit.exceedAction}</span>
+                    <Chip size="sm" color="warning" variant="flat">{dictionary.limits.notifyAction}</Chip>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">現在の利用量:</span>
+                    <span className="text-sm text-gray-600">{dictionary.limits.notifyLimit.currentUsage}</span>
                     <span className="font-medium">
                       {(() => {
                         const limit = nextNotifyLimit || anyNotifyLimit;
@@ -335,16 +336,16 @@ export default function ServicePresentation({
                   </div>
                   {!nextNotifyLimit && anyNotifyLimit && anyNotifyLimit.amountLimitValue && (
                     <div className="text-xs text-blue-600 mt-2">
-                      ※ 金額制限をデータ量に換算して表示しています（処理料金: $0.00001/Byte、1年間保管込み）
+                      {dictionary.limits.notifyLimit.amountConversionNote}
                     </div>
                   )}
                 </>
               ) : (
                 <div className="text-center py-4 text-gray-500">
-                  <p>通知制限が設定されていません</p>
-                  <p className="text-sm">現在の利用量: {formatFileSize(currentUsageBytes)}</p>
+                  <p>{dictionary.limits.notifyLimit.notSet}</p>
+                  <p className="text-sm">{dictionary.limits.notifyLimit.currentUsageLabel} {formatFileSize(currentUsageBytes)}</p>
                   <p className="text-xs mt-2">
-                    設定済み通知制限: {usageLimits.notifyLimits.length}件
+                    {dictionary.limits.notifyLimit.settingsCount.replace('{count}', usageLimits.notifyLimits.length.toString())}
                   </p>
                   {usageLimits.notifyLimits.length > 0 && (
                     <div className="text-xs mt-1">
@@ -352,15 +353,17 @@ export default function ServicePresentation({
                         <div key={index} className="mb-1">
                           {limit.usageLimitValue && limit.usageUnit ? (
                             <>
-                              データ量制限: {limit.usageLimitValue} {limit.usageUnit} 
-                              ({formatFileSize(limit.usageLimitValue * UNIT_TO_BYTES[limit.usageUnit])})
+                              {dictionary.limits.notifyLimit.dataLimit
+                                .replace('{value}', limit.usageLimitValue.toString())
+                                .replace('{unit}', limit.usageUnit)
+                                .replace('{bytes}', formatFileSize(limit.usageLimitValue * UNIT_TO_BYTES[limit.usageUnit]))}
                             </>
                           ) : limit.amountLimitValue ? (
                             <>
-                              金額制限: ${limit.amountLimitValue}
+                              {dictionary.limits.notifyLimit.amountLimit.replace('{amount}', limit.amountLimitValue.toString())}
                             </>
                           ) : (
-                            '制限値が設定されていません'
+                            dictionary.limits.notifyLimit.noLimitValue
                           )}
                         </div>
                       ))}
@@ -376,35 +379,35 @@ export default function ServicePresentation({
             <CardHeader>
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <FaExclamationTriangle className="text-danger" />
-                利用停止制限
+                {dictionary.limits.restrictLimit.title}
               </h3>
             </CardHeader>
             <CardBody className="space-y-3">
               {nextRestrictLimit || anyRestrictLimit ? (
                 <>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">制限値:</span>
+                    <span className="text-sm text-gray-600">{dictionary.limits.restrictLimit.limitValue}</span>
                     <span className="font-medium">
                       {(() => {
                         const limit = nextRestrictLimit || anyRestrictLimit;
-                        if (!limit) return '設定なし';
+                        if (!limit) return dictionary.limits.restrictLimit.notSet;
                         
                         if (limit.usageLimitValue && limit.usageUnit) {
-                          return `${limit.usageLimitValue} ${limit.usageUnit}/月`;
+                          return `${limit.usageLimitValue} ${limit.usageUnit}${dictionary.limits.perMonth}`;
                         } else if (limit.amountLimitValue) {
                           const converted = convertAmountToDataLimit(limit.amountLimitValue);
-                          return `${converted.value} ${converted.unit}/月 ($${limit.amountLimitValue})`;
+                          return `${converted.value} ${converted.unit}${dictionary.limits.perMonth} ($${limit.amountLimitValue})`;
                         }
-                        return '設定なし';
+                        return dictionary.limits.restrictLimit.notSet;
                       })()}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">超過時のアクション:</span>
-                    <Chip size="sm" color="danger" variant="flat">利用停止</Chip>
+                    <span className="text-sm text-gray-600">{dictionary.limits.restrictLimit.exceedAction}</span>
+                    <Chip size="sm" color="danger" variant="flat">{dictionary.limits.restrictAction}</Chip>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">現在の利用量:</span>
+                    <span className="text-sm text-gray-600">{dictionary.limits.restrictLimit.currentUsage}</span>
                     <span className="font-medium">
                       {(() => {
                         const limit = nextRestrictLimit || anyRestrictLimit;
@@ -422,16 +425,16 @@ export default function ServicePresentation({
                   </div>
                   {!nextRestrictLimit && anyRestrictLimit && anyRestrictLimit.amountLimitValue && (
                     <div className="text-xs text-blue-600 mt-2">
-                      ※ 金額制限をデータ量に換算して表示しています（処理料金: $0.00001/Byte、1年間保管込み）
+                      {dictionary.limits.restrictLimit.amountConversionNote}
                     </div>
                   )}
                 </>
               ) : (
                 <div className="text-center py-4 text-gray-500">
-                  <p>利用停止制限が設定されていません</p>
-                  <p className="text-sm">現在の利用量: {formatFileSize(currentUsageBytes)}</p>
+                  <p>{dictionary.limits.restrictLimit.notSet}</p>
+                  <p className="text-sm">{dictionary.limits.restrictLimit.currentUsageLabel} {formatFileSize(currentUsageBytes)}</p>
                   <p className="text-xs mt-2">
-                    設定済み利用停止制限: {usageLimits.restrictLimits.length}件
+                    {dictionary.limits.restrictLimit.settingsCount.replace('{count}', usageLimits.restrictLimits.length.toString())}
                   </p>
                   {usageLimits.restrictLimits.length > 0 && (
                     <div className="text-xs mt-1">
@@ -439,15 +442,17 @@ export default function ServicePresentation({
                         <div key={index} className="mb-1">
                           {limit.usageLimitValue && limit.usageUnit ? (
                             <>
-                              データ量制限: {limit.usageLimitValue} {limit.usageUnit} 
-                              ({formatFileSize(limit.usageLimitValue * UNIT_TO_BYTES[limit.usageUnit])})
+                              {dictionary.limits.restrictLimit.dataLimit
+                                .replace('{value}', limit.usageLimitValue.toString())
+                                .replace('{unit}', limit.usageUnit)
+                                .replace('{bytes}', formatFileSize(limit.usageLimitValue * UNIT_TO_BYTES[limit.usageUnit]))}
                             </>
                           ) : limit.amountLimitValue ? (
                             <>
-                              金額制限: ${limit.amountLimitValue}
+                              {dictionary.limits.restrictLimit.amountLimit.replace('{amount}', limit.amountLimitValue.toString())}
                             </>
                           ) : (
-                            '制限値が設定されていません'
+                            dictionary.limits.restrictLimit.noLimitValue
                           )}
                         </div>
                       ))}
@@ -464,17 +469,17 @@ export default function ServicePresentation({
           <CardHeader>
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <FaCog className="text-primary" />
-              ポリシー選択
+              {dictionary.policySelection.title}
             </h3>
           </CardHeader>
           <CardBody>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                処理ポリシーを選択してください
+                {dictionary.policySelection.label}
               </label>
               {policies.length > 0 ? (
                 <Select
-                  placeholder="ポリシーを選択してください"
+                  placeholder={dictionary.policySelection.placeholder}
                   selectedKeys={selectedPolicyId ? [selectedPolicyId] : []}
                   onSelectionChange={(keys) => {
                     const selectedKey = Array.from(keys)[0] as string;
@@ -489,9 +494,9 @@ export default function ServicePresentation({
                     popoverContent: "bg-white border border-gray-200 shadow-lg"
                   }}
                   renderValue={(items) => {
-                    if (items.length === 0) return "ポリシーを選択してください";
+                    if (items.length === 0) return dictionary.policySelection.placeholder;
                     const selectedPolicy = policies.find(p => p.policyId === selectedPolicyId);
-                    return selectedPolicy ? selectedPolicy.policyName : "ポリシーを選択してください";
+                    return selectedPolicy ? selectedPolicy.policyName : dictionary.policySelection.placeholder;
                   }}
                 >
                   {policies.map((policy) => (
@@ -511,7 +516,7 @@ export default function ServicePresentation({
                     </svg>
                     <div className="flex flex-col gap-1">
                       <p className="text-sm font-medium text-yellow-800">
-                        使用できるポリシーがありません
+                        {dictionary.policySelection.noPolicies}
                       </p>
                     </div>
                   </div>
@@ -526,7 +531,7 @@ export default function ServicePresentation({
           <CardHeader>
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <FaDownload className="text-primary" />
-              ファイルアップロード
+              {dictionary.fileUpload.title}
             </h3>
           </CardHeader>
           <CardBody>
@@ -548,10 +553,10 @@ export default function ServicePresentation({
                 <FaCog className="text-4xl text-gray-400 mx-auto mb-4" />
                 {policies.length === 0 ? (
                   <div>
-                    <p className="text-lg font-medium mb-2">使用できるポリシーがありません</p>
+                    <p className="text-lg font-medium mb-2">{dictionary.fileUpload.noPoliciesAvailable}</p>
                   </div>
                 ) : (
-                  <p>まずポリシーを選択してください</p>
+                  <p>{dictionary.fileUpload.selectPolicyFirst}</p>
                 )}
               </div>
             )}

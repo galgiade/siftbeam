@@ -1,4 +1,6 @@
-export default {
+import type { PolicyManagementLocale } from './policy-management.d.ts';
+
+const ko: PolicyManagementLocale = {
   label: {
     policyList: "정책 목록",
     policyNotRegistered: "등록된 정책이 없습니다",
@@ -21,8 +23,73 @@ export default {
       "application/msword": "워드 파일(.doc)",
       "text/plain": "텍스트 파일",
       "application/json": "JSON 파일",
-      "application/zip": "ZIP 압축"
-    }
+      "application/zip": "ZIP 압축",
+      "video/mp4": "MP4 비디오",
+      "audio/mpeg": "MP3 오디오"
+    },
+    policyManagement: "정책 관리",
+    errorOccurred: "오류가 발생했습니다",
+    contactAdmin: "문제가 지속되면 시스템 관리자에게 문의하세요.",
+    reloadPage: "페이지 새로고침",
+    goBack: "돌아가기",
+    createNewPolicy: "새 정책 만들기",
+    requiredField: "*",
+    allowedFileTypesLabel: "허용 파일 형식",
+    selectFileTypesPlaceholder: "파일 형식을 선택하세요",
+    cancel: "취소",
+    createPolicy: "정책 만들기",
+    detailedError: "상세 오류",
+    debugInfo: "디버그 정보 표시",
+    policyCount: "{count}개",
+    searchPlaceholder: "정책명, 설명으로 검색...",
+    noPoliciesFound: "정책을 찾을 수 없습니다",
+    fileTypeCount: "{count}종류의 파일 형식",
+    editingPolicy: "{policyName} 편집",
+    selectPolicy: "정책을 선택하세요",
+    selectPolicyPrompt: "왼쪽 목록에서 정책을 선택하여 편집을 시작하세요",
+    readOnly: "(변경 불가)",
+    notSet: "미설정",
+    policyInfo: "정책 정보",
+    createdAt: "생성일",
+    updatedAt: "수정일",
+    policyId: "정책 ID",
+    fileTypeRestriction: "※ 허용 파일 형식은 변경할 수 없습니다.",
+    performanceAnalysisTitle: "{policyName}의 성능 분석 결과",
+    analysisCount: "{count}개의 분석 결과",
+    error: "오류",
+    success: "성공",
+    aiPerformanceAnalysis: "AI 성능 분석 결과",
+    noAnalysisResults: "분석 결과가 없습니다",
+    noAnalysisYet: "이 정책을 사용한 AI 분석이 아직 실행되지 않았습니다.",
+    startAnalysisPrompt: "위의 양식에서 새 분석을 시작하세요.",
+    analysisDate: "분석 일시",
+    modelUsed: "사용 모델",
+    status: "상태",
+    top1Accuracy: "Top-1 정확도",
+    defectDetectionRate: "결함 검출률",
+    f1Score: "F1 점수",
+    latencyP95: "지연시간(P95)",
+    errorRate: "오류율",
+    report: "보고서",
+    usageStatus: "사용 상태",
+    viewReport: "보고서 보기",
+    inUse: "사용 중",
+    select: "선택",
+    deletePolicy: "정책 삭제",
+    confirmDelete: "\"{policyName}\"을(를) 삭제하시겠습니까?",
+    cannotUndo: "이 작업은 취소할 수 없습니다.",
+    delete: "삭제",
+    statusPending: "대기 중",
+    statusRunning: "실행 중",
+    statusCompleted: "완료",
+    statusFailed: "실패",
+    statusCancelled: "취소됨",
+    analysisStarted: "정책 분석이 시작되었습니다",
+    analysisStartFailed: "정책 분석 시작에 실패했습니다",
+    analysisStartError: "정책 분석 시작 중 오류가 발생했습니다",
+    analysisSwitched: "분석 모델이 전환되었습니다",
+    analysisSwitchFailed: "분석 모델 전환에 실패했습니다",
+    analysisSwitchError: "분석 모델 전환 중 오류가 발생했습니다"
   },
   alert: {
     required: "필수 입력 항목입니다",
@@ -32,7 +99,29 @@ export default {
     adminOnlyCreateMessage: "정책 생성은 관리자만 가능합니다. 관리자에게 문의하세요.",
     updateSuccess: "정책이 성공적으로 업데이트되었습니다",
     updateFailed: "정책 업데이트에 실패했습니다",
-    validationError: "입력 내용을 확인해 주세요"
+    validationError: "입력 내용을 확인해 주세요",
+    fieldUpdateSuccess: "{fieldName}이(가) 성공적으로 업데이트되었습니다.",
+    fieldUpdateFail: "{fieldName} 업데이트에 실패했습니다.",
+    updateError: "업데이트 프로세스 중 오류가 발생했습니다.",
+    fieldRequired: "{fieldLabel}은(는) 필수 입력 항목입니다.",
+    policyNotSelected: "선택된 정책이 없습니다.",
+    selectPolicyAndModel: "정책과 모델을 선택하세요",
+    accessDenied: "이 페이지에 액세스할 권한이 없습니다. 관리자만 액세스할 수 있습니다.",
+    fetchPoliciesFailed: "정책 목록을 가져오는 데 실패했습니다.",
+    errorLabel: "오류",
+    customerIdLabel: "고객 ID",
+    timestampLabel: "타임스탬프",
+    detailedErrorLabel: "상세 오류",
+    authError: "인증 오류",
+    errorType: "오류 유형",
+    localeLabel: "로케일",
+    stackTrace: "스택 추적",
+    unknownError: "알 수 없는 오류",
+    noStackTrace: "스택 추적 없음",
+    policyNameRequired: "정책명은 필수 입력 항목입니다.",
+    descriptionRequired: "설명은 필수 입력 항목입니다.",
+    fileTypeSelectionRequired: "최소 하나 이상의 허용 파일 형식을 선택하세요.",
+    formSubmissionError: "양식 제출 중 오류가 발생했습니다."
   },
   analysis: {
     title: "분석",
@@ -55,6 +144,6 @@ export default {
       view: "보기"
     }
   }
-} as const;
+};
 
-
+export default ko;

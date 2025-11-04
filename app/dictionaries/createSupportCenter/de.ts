@@ -1,4 +1,6 @@
-export default {
+import type { SupportCenterLocale } from './createSupportCenter.d.ts';
+
+const de: SupportCenterLocale = {
   label: {
     pageTitle: "Support-Center",
     supportRequestList: "Supportanfragen",
@@ -48,7 +50,6 @@ export default {
     messageRequired: "Bitte eine Nachricht eingeben",
     supportRequestError: "Fehler beim Abrufen der Supportanfrage:"
   }
-} as const;
+};
 
-
-
+export default de;

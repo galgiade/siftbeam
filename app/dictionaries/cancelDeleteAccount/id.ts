@@ -1,4 +1,6 @@
-export default {
+import type { CancelDeleteAccountLocale } from './cancelDeleteAccount.d.ts';
+
+const id: CancelDeleteAccountLocale = {
   label: {
     back: "Kembali",
     submit: "Kirim",
@@ -21,6 +23,6 @@ export default {
     cancelSuccess: "Pembatalan permintaan penghapusan selesai.",
     cancelError: "Terjadi kesalahan. Silakan coba lagi."
   }
-} as const;
+};
 
-
+export default id;

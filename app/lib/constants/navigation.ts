@@ -55,7 +55,7 @@ export const ACCOUNT_NAVIGATION_ITEMS = [
     isAction: false
   },
   {
-    href: '/account/delete-account',
+    href: '/account/account-deletion',
     key: 'deleteAccount',
     isAction: false
   },

@@ -1,4 +1,6 @@
-export default {
+import type { CreatePaymentLocale } from './createPayment.d.ts';
+
+const id: CreatePaymentLocale = {
   label: {
     back: "Kembali",
     submit: "Kirim",
@@ -22,6 +24,7 @@ export default {
     linkCompatibleStores: "Bayar dengan cepat di toko yang kompatibel dengan Link, termasuk Soundbox default.",
     cardInfoEncrypted: "Informasi kartu dienkripsi dan disimpan dengan aman.",
     billingBasedOnUsage: "Penagihan aktual akan dilakukan nanti berdasarkan penggunaan.",
+    dataRetentionNotice: "Data yang diproses akan disimpan gratis selama 1 tahun dan kemudian dihapus secara otomatis",
     authenticationFlowDescription: "Untuk alasan keamanan, autentikasi kartu mungkin diperlukan.",
     authenticationFlowSteps: "Jika autentikasi diperlukan, layar autentikasi bank Anda akan ditampilkan. Silakan selesaikan autentikasi.",
     agreeNoticePrefix: "Dengan menyelesaikan pendaftaran, Anda menyetujui ",
@@ -44,6 +47,6 @@ export default {
     authenticationCancelled: "Autentikasi kartu dibatalkan.",
     authenticationIncomplete: "Autentikasi kartu belum selesai. Silakan selesaikan autentikasi."
   }
-} as const;
+};
 
-
+export default id;

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardBody, Select, SelectItem, Chip, Spinner } from '@heroui/react';
 import { FaCog, FaFileAlt, FaCheckCircle } from 'react-icons/fa';
+import type { ServiceLocale } from '@/app/dictionaries/service/ServiceLocale.d.ts';
 
 interface Policy {
   id: string;
@@ -15,7 +16,7 @@ interface PolicySelectorProps {
   customerId: string;
   userId: string;
   onPolicySelected: (policyId: string, policyName: string) => void;
-  dictionary: any;
+  dictionary: ServiceLocale;
 }
 
 /**
@@ -73,14 +74,14 @@ export default function PolicySelector({
         setError('');
       } catch (err: any) {
         console.error('Policy fetch error:', err);
-        setError('ポリシーの取得に失敗しました。');
+        setError(dictionary.error.policiesFetchFailed);
       } finally {
         setLoading(false);
       }
     };
 
     fetchPolicies();
-  }, [customerId, userId]);
+  }, [customerId, userId, dictionary]);
 
   const handlePolicyChange = (policyId: string) => {
     const policy = policies.find(p => p.id === policyId);
@@ -108,7 +109,7 @@ export default function PolicySelector({
       <Card>
         <CardBody className="text-center p-8">
           <Spinner size="lg" />
-          <p className="mt-4 text-gray-600">ポリシーを読み込み中...</p>
+          <p className="mt-4 text-gray-600">{dictionary.page.loading}</p>
         </CardBody>
       </Card>
     );

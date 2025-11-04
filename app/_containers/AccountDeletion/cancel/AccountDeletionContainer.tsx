@@ -1,23 +1,41 @@
 import { checkDeletionStatusAction } from "@/app/lib/actions/account-deletion-actions";
 import AccountDeletionCancelPresentation from "./AccountDeletionPresentation";
 import { requireUserProfile } from "@/app/lib/utils/require-auth";
-import { redirect } from 'next/navigation';
+import { accountDeletionDictionaries } from "@/app/dictionaries/mappings";
 
 export default async function AccountDeletionCancelContainer({ locale }: { locale: string }) {
+  const dictionary = accountDeletionDictionaries[locale as keyof typeof accountDeletionDictionaries] || accountDeletionDictionaries['ja'];
+  
   // ユーザーの属性を取得
   const userAttributes = await requireUserProfile();
   
-  // 管理者権限チェック - 管理者以外はメインページにリダイレクト
+  // 管理者権限チェック - 管理者以外はエラーを表示
   if (userAttributes.role !== 'admin') {
-    redirect(`/${locale}/account/account-deletion`);
+    return (
+      <AccountDeletionCancelPresentation 
+        userAttributes={userAttributes}
+        deletionStatus={{ success: false, isDeleted: false }}
+        locale={locale}
+        dictionary={dictionary}
+        accessError="adminOnly"
+      />
+    );
   }
   
   // 削除ステータスを確認
   const deletionStatus = await checkDeletionStatusAction();
   
-  // 削除申請されていない場合はメインページにリダイレクト
+  // 削除申請されていない場合はエラーを表示
   if (!deletionStatus.isDeleted) {
-    redirect(`/${locale}/account/account-deletion`);
+    return (
+      <AccountDeletionCancelPresentation 
+        userAttributes={userAttributes}
+        deletionStatus={deletionStatus}
+        locale={locale}
+        dictionary={dictionary}
+        accessError="notDeleted"
+      />
+    );
   }
   
   return (
@@ -25,6 +43,7 @@ export default async function AccountDeletionCancelContainer({ locale }: { local
       userAttributes={userAttributes}
       deletionStatus={deletionStatus}
       locale={locale}
+      dictionary={dictionary}
     />
   );
 }

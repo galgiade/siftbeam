@@ -1,7 +1,7 @@
 import UserManagementPresentation from './UserManagementPresentation'
 import UserErrorDisplay from './UserErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { userManagementDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import { queryUsers } from '@/app/lib/actions/user-api';
 
 interface UserManagementContainerProps {
@@ -20,7 +20,7 @@ export default async function UserManagementContainer({ locale }: UserManagement
     
     const [userProfile, dictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(userManagementDictionaries, locale, 'en'))
     ]);
     
     console.log('CognitoのuserProfile.locale:', userProfile.locale);
@@ -30,10 +30,9 @@ export default async function UserManagementContainer({ locale }: UserManagement
     
     // 管理者権限チェック
     if (userProfile.role !== 'admin') {
-      const errorMessage = 'このページにアクセスする権限がありません。管理者のみアクセス可能です。';
       return (
         <UserErrorDisplay 
-          error={errorMessage}
+          error={dictionary.alert.accessDenied}
           dictionary={dictionary} 
         />
       );
@@ -67,13 +66,13 @@ export default async function UserManagementContainer({ locale }: UserManagement
       
       console.error('Failed to get users from API:', errorDetails);
       
-      const errorMessage = usersResult.message || 'ユーザー一覧の取得に失敗しました。';
-      let detailedError = `エラー: ${errorMessage}\n`;
-      detailedError += `カスタマーID: ${userProfile.customerId}\n`;
-      detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+      const errorMessage = usersResult.message || dictionary.alert.fetchUsersFailed;
+      let detailedError = `${dictionary.label.errorLabel}: ${errorMessage}\n`;
+      detailedError += `${dictionary.label.customerIdLabel}: ${userProfile.customerId}\n`;
+      detailedError += `${dictionary.label.timestampLabel}: ${errorDetails.timestamp}\n`;
       
       if (usersResult.errors) {
-        detailedError += `\n詳細エラー:\n${JSON.stringify(usersResult.errors, null, 2)}`;
+        detailedError += `\n${dictionary.label.detailedErrorLabel}:\n${JSON.stringify(usersResult.errors, null, 2)}`;
       }
       
       return (
@@ -105,16 +104,16 @@ export default async function UserManagementContainer({ locale }: UserManagement
     console.error('Error in UserProfileContainer:', errorDetails);
     
     // 辞書を取得してエラー表示
-    const dictionary = pickDictionary(userDictionaries, locale, 'en');
-    const errorMessage = error?.message || '予期しないエラーが発生しました。';
+    const dictionary = pickDictionary(userManagementDictionaries, locale, 'en');
+    const errorMessage = error?.message || dictionary.label.unknownError;
     
-    let detailedError = `認証エラー: ${errorMessage}\n`;
-    detailedError += `エラータイプ: ${errorDetails.name}\n`;
-    detailedError += `ロケール: ${locale}\n`;
-    detailedError += `タイムスタンプ: ${errorDetails.timestamp}\n`;
+    let detailedError = `${dictionary.label.authError}: ${errorMessage}\n`;
+    detailedError += `${dictionary.label.errorType}: ${errorDetails.name}\n`;
+    detailedError += `${dictionary.label.localeLabel}: ${locale}\n`;
+    detailedError += `${dictionary.label.timestampLabel}: ${errorDetails.timestamp}\n`;
     
-    if (errorDetails.stack !== 'スタックトレースなし') {
-      detailedError += `\nスタックトレース:\n${errorDetails.stack}`;
+    if (errorDetails.stack !== dictionary.label.noStackTrace) {
+      detailedError += `\n${dictionary.label.stackTrace}:\n${errorDetails.stack}`;
     }
     
     return (

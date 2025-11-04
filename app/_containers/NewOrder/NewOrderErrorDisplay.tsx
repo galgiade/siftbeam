@@ -2,11 +2,11 @@
 
 import { Card } from "@heroui/react"
 import { FaTriangleExclamation } from "react-icons/fa6"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { NewOrderLocale } from '@/app/dictionaries/newOrder/newOrder.d.ts';
 
 interface NewOrderErrorDisplayProps {
   error: string;
-  dictionary: UserProfileLocale;
+  dictionary: NewOrderLocale;
 }
 
 export default function NewOrderErrorDisplay({ error, dictionary }: NewOrderErrorDisplayProps) {
@@ -21,10 +21,10 @@ export default function NewOrderErrorDisplay({ error, dictionary }: NewOrderErro
             
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-gray-900">
-                新規オーダーエラー
+                {dictionary.label.newOrderError}
               </h1>
               <p className="text-gray-600">
-                新規オーダーの処理中にエラーが発生しました。
+                {dictionary.label.errorOccurred}
               </p>
             </div>
             
@@ -35,7 +35,7 @@ export default function NewOrderErrorDisplay({ error, dictionary }: NewOrderErro
             </div>
             
             <div className="text-sm text-gray-500">
-              <p>問題が解決しない場合は、サポートまでお問い合わせください。</p>
+              <p>{dictionary.label.contactSupport}</p>
             </div>
           </div>
         </Card>

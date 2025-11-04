@@ -10,7 +10,7 @@ import koApi from '@/app/dictionaries/api/ko'
 import esApi from '@/app/dictionaries/api/es'
 import ptApi from '@/app/dictionaries/api/pt'
 import idApi from '@/app/dictionaries/api/id'
-import zhCNApi from '@/app/dictionaries/api/zh-CN'
+import zhApi from '@/app/dictionaries/api/zh'
 
 const apiDictionaries: Record<string, APILocale> = {
   ja: jaApi,
@@ -22,8 +22,8 @@ const apiDictionaries: Record<string, APILocale> = {
   es: esApi,
   pt: ptApi,
   id: idApi,
-  zh: zhCNApi,
-  'zh-CN': zhCNApi,
+  zh: zhApi,
+  'zh-CN': zhApi,
 }
 
 export async function generateMetadata(

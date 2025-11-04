@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader, Button, Input, Select, SelectItem, Chip } f
 import { FaExclamationTriangle, FaCog, FaSave, FaTimes, FaArrowLeft } from 'react-icons/fa';
 import { createUsageLimit } from '@/app/lib/actions/usage-limits-api';
 import { useRouter } from 'next/navigation';
+import type { UsageLimitLocale } from '@/app/dictionaries/usageLimit/usage-limit.d';
 
 interface UsageLimitPresentationProps {
   userAttributes: {
@@ -15,7 +16,7 @@ interface UsageLimitPresentationProps {
     locale: string;
     paymentMethodId?: string;
   };
-  dictionary: any;
+  dictionary: UsageLimitLocale;
   locale: string;
 }
 
@@ -80,10 +81,10 @@ export default function UsageLimitPresentation({
   const getConversionText = (): string => {
     if (formData.limitType === 'usage' && formData.usageLimitValue && formData.usageUnit) {
       const amount = calculateAmountFromUsage(formData.usageLimitValue, formData.usageUnit);
-      return `≈ $${amount.toFixed(6)} (処理料金のみ)`;
+      return `${dictionary.label.conversionApproximate} $${amount.toFixed(6)} (${dictionary.label.processingFeeOnly})`;
     } else if (formData.limitType === 'amount' && formData.amountLimitValue) {
       const usage = calculateUsageFromAmount(formData.amountLimitValue, formData.usageUnit || 'MB');
-      return `≈ ${usage.toFixed(2)} ${formData.usageUnit || 'MB'} (処理料金のみ)`;
+      return `${dictionary.label.conversionApproximate} ${usage.toFixed(2)} ${formData.usageUnit || 'MB'} (${dictionary.label.processingFeeOnly})`;
     }
     return '';
   };
@@ -94,32 +95,32 @@ export default function UsageLimitPresentation({
 
     // 超過時のアクションのチェック（初期値があるので基本的にはエラーにならない）
     if (!formData.exceedAction) {
-      newErrors.exceedAction = '超過時のアクションを選択してください。';
+      newErrors.exceedAction = dictionary.alert.selectExceedAction;
     }
 
     // 制限タイプのチェック（初期値があるので基本的にはエラーにならない）
     if (!formData.limitType) {
-      newErrors.limitType = '制限タイプを選択してください。';
+      newErrors.limitType = dictionary.alert.selectLimitType;
     }
 
     // 制限値のチェック（選択したタイプに応じて）
     if (formData.limitType === 'usage') {
       if (!formData.usageLimitValue || formData.usageLimitValue <= 0) {
-        newErrors.usageLimitValue = 'データ量制限値は0より大きい値を入力してください。';
+        newErrors.usageLimitValue = dictionary.alert.dataLimitValueRequired;
       } else if (formData.usageLimitValue > 1000000) {
-        newErrors.usageLimitValue = 'データ量制限値は1,000,000以下で入力してください。';
+        newErrors.usageLimitValue = dictionary.alert.dataLimitValueMax;
       }
     } else if (formData.limitType === 'amount') {
       if (!formData.amountLimitValue || formData.amountLimitValue <= 0) {
-        newErrors.amountLimitValue = '金額制限値は0より大きい値を入力してください。';
+        newErrors.amountLimitValue = dictionary.alert.amountLimitValueRequired;
       } else if (formData.amountLimitValue > 100000) {
-        newErrors.amountLimitValue = '金額制限値は100,000以下で入力してください。';
+        newErrors.amountLimitValue = dictionary.alert.amountLimitValueMax;
       }
     }
 
     // メールアドレスのチェック
     if (formData.emails.length === 0) {
-      newErrors.emails = '通知先メールアドレスを1つ以上入力してください。';
+      newErrors.emails = dictionary.alert.minOneEmailRequired;
     }
 
     setErrors(newErrors);
@@ -134,13 +135,13 @@ export default function UsageLimitPresentation({
     // より厳密なメールアドレス形式チェック
     const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
     if (!emailRegex.test(email)) {
-      setErrors(prev => ({ ...prev, emailInput: '有効なメールアドレスを入力してください。' }));
+      setErrors(prev => ({ ...prev, emailInput: dictionary.alert.invalidEmail }));
       return;
     }
 
     // 重複チェック（大文字小文字を区別しない）
     if (formData.emails.some(existingEmail => existingEmail.toLowerCase() === email.toLowerCase())) {
-      setErrors(prev => ({ ...prev, emailInput: 'このメールアドレスは既に追加されています。' }));
+      setErrors(prev => ({ ...prev, emailInput: dictionary.alert.emailAlreadyAdded }));
       return;
     }
 
@@ -181,17 +182,19 @@ export default function UsageLimitPresentation({
       });
 
       if (result.success) {
-        const actionText = formData.exceedAction === 'notify' ? '通知制限' : '利用停止制限';
+        const successMessage = formData.exceedAction === 'notify' 
+          ? dictionary.alert.notifyLimitCreated 
+          : dictionary.alert.restrictLimitCreated;
         // より良いUXのためにtoastやモーダルを使用することを推奨
-        alert(`${actionText}が正常に作成されました。`);
+        alert(successMessage);
         router.push(`/${locale}/account/limit-usage`); // 制限管理ページに戻る
       } else {
         console.error('Usage limit creation failed:', result.message);
-        alert(`エラー: ${result.message}`);
+        alert(`${dictionary.alert.errorPrefix} ${result.message}`);
       }
     } catch (error: any) {
       console.error('Unexpected error during usage limit creation:', error);
-      alert(`予期しないエラーが発生しました: ${error.message}`);
+      alert(`${dictionary.alert.unexpectedError} ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -218,11 +221,11 @@ export default function UsageLimitPresentation({
             </Button>
             <FaExclamationTriangle className="text-3xl text-primary" />
             <h1 className="text-3xl font-bold text-gray-900">
-              使用量制限作成
+              {dictionary.label.createUsageLimitTitle}
             </h1>
           </div>
           <p className="text-gray-600 text-lg ml-12">
-            データ処理量や金額の制限を設定し、超過時のアクションを選択できます。
+            {dictionary.label.createUsageLimitDescription}
           </p>
         </div>
 
@@ -231,15 +234,15 @@ export default function UsageLimitPresentation({
           <CardHeader>
             <div className="flex items-center gap-2">
               <FaCog className="text-primary" />
-              <h2 className="text-xl font-semibold">使用量制限設定</h2>
+              <h2 className="text-xl font-semibold">{dictionary.label.usageLimitSettings}</h2>
             </div>
           </CardHeader>
           <CardBody className="space-y-6">
             {/* 超過時のアクション選択 */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">超過時のアクション</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{dictionary.label.exceedActionTitle}</h3>
               <Select
-                placeholder="アクションを選択"
+                placeholder={dictionary.label.selectAction}
                 selectedKeys={formData.exceedAction ? [formData.exceedAction] : []}
                 onSelectionChange={(keys) => {
                   const selectedKey = Array.from(keys)[0] as string;
@@ -252,14 +255,14 @@ export default function UsageLimitPresentation({
                 variant="bordered"
                 className="max-w-md"
               >
-                <SelectItem key="notify" className="bg-white">通知のみ</SelectItem>
-                <SelectItem key="restrict" className="bg-white">利用停止</SelectItem>
+                <SelectItem key="notify" className="bg-white">{dictionary.label.notifyOnlyOption}</SelectItem>
+                <SelectItem key="restrict" className="bg-white">{dictionary.label.restrictOption}</SelectItem>
               </Select>
               {formData.exceedAction && (
                 <p className="text-sm text-gray-500 mt-2">
                   {formData.exceedAction === 'notify' 
-                    ? '制限を超過した際に通知メールが送信されます。サービスは継続して利用できます。'
-                    : '制限を超過した際にサービスの利用が停止されます。通知メールも送信されます。'
+                    ? dictionary.label.notifyOnlyDescription
+                    : dictionary.label.restrictDescription
                   }
                 </p>
               )}
@@ -267,9 +270,9 @@ export default function UsageLimitPresentation({
 
             {/* 制限タイプ選択 */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">制限タイプ</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{dictionary.label.limitTypeTitle}</h3>
               <Select
-                placeholder="制限タイプを選択"
+                placeholder={dictionary.label.selectLimitType}
                 selectedKeys={formData.limitType ? [formData.limitType] : []}
                 onSelectionChange={(keys) => {
                   const selectedKey = Array.from(keys)[0] as string;
@@ -288,14 +291,14 @@ export default function UsageLimitPresentation({
                 variant="bordered"
                 className="max-w-md"
               >
-                <SelectItem key="usage" className="bg-white">データ量制限</SelectItem>
-                <SelectItem key="amount" className="bg-white">金額制限</SelectItem>
+                <SelectItem key="usage" className="bg-white">{dictionary.label.dataLimitOption}</SelectItem>
+                <SelectItem key="amount" className="bg-white">{dictionary.label.amountLimitOption}</SelectItem>
               </Select>
               {formData.limitType && (
                 <p className="text-sm text-gray-500 mt-2">
                   {formData.limitType === 'usage' 
-                    ? 'データ処理量（MB/GB/TB）で制限を設定します。'
-                    : '処理費用（USD）で制限を設定します。'
+                    ? dictionary.label.dataLimitDescription
+                    : dictionary.label.amountLimitDescription
                   }
                 </p>
               )}
@@ -304,11 +307,11 @@ export default function UsageLimitPresentation({
             {/* 制限値設定（選択されたタイプのみ表示） */}
             {formData.limitType === 'usage' && (
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">データ量制限値</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{dictionary.label.dataLimitTitle}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     type="number"
-                    placeholder="制限値を入力（例: 100）"
+                    placeholder={dictionary.label.enterLimitValue}
                     value={formData.usageLimitValue?.toString() || ''}
                     onValueChange={(value) => {
                       const numValue = value ? Number(value) : undefined;
@@ -327,7 +330,7 @@ export default function UsageLimitPresentation({
                     min="0"
                   />
                   <Select
-                    placeholder="単位"
+                    placeholder={dictionary.label.unit}
                     selectedKeys={formData.usageUnit ? [formData.usageUnit] : []}
                     onSelectionChange={(keys) => {
                       const selectedKey = Array.from(keys)[0] as string;
@@ -336,14 +339,14 @@ export default function UsageLimitPresentation({
                     disallowEmptySelection
                     variant="bordered"
                   >
-                    <SelectItem key="MB" className="bg-white">MB</SelectItem>
-                    <SelectItem key="GB" className="bg-white">GB</SelectItem>
-                    <SelectItem key="TB" className="bg-white">TB</SelectItem>
+                    <SelectItem key="MB" className="bg-white">{dictionary.label.unitMB}</SelectItem>
+                    <SelectItem key="GB" className="bg-white">{dictionary.label.unitGB}</SelectItem>
+                    <SelectItem key="TB" className="bg-white">{dictionary.label.unitTB}</SelectItem>
                   </Select>
                 </div>
                 <div className="mt-2 space-y-1">
                   <p className="text-sm text-gray-500">
-                    月間のデータ処理量がこの値を超えた場合にアクションが実行されます。
+                    {dictionary.label.monthlyDataLimitDescription}
                   </p>
                   {getConversionText() && (
                     <p className="text-sm text-blue-600 font-medium">
@@ -356,10 +359,10 @@ export default function UsageLimitPresentation({
 
             {formData.limitType === 'amount' && (
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">金額制限値</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{dictionary.label.amountLimitTitle}</h3>
                 <Input
                   type="number"
-                  placeholder="制限値を入力（例: 50）"
+                  placeholder={dictionary.label.enterAmountValue}
                   startContent={
                     <div className="pointer-events-none flex items-center">
                       <span className="text-default-400 text-small">$</span>
@@ -385,11 +388,11 @@ export default function UsageLimitPresentation({
                 />
                 <div className="mt-2 space-y-1">
                   <p className="text-sm text-gray-500">
-                    月間の処理費用がこの金額を超えた場合にアクションが実行されます。
+                    {dictionary.label.monthlyAmountLimitDescription}
                   </p>
                   {formData.amountLimitValue && (
                     <p className="text-sm text-blue-600 font-medium">
-                      ≈ {calculateUsageFromAmount(formData.amountLimitValue, 'MB').toFixed(2)} MB (処理料金のみ)
+                      {dictionary.label.conversionApproximate} {calculateUsageFromAmount(formData.amountLimitValue, 'MB').toFixed(2)} MB ({dictionary.label.processingFeeOnly})
                     </p>
                   )}
                 </div>
@@ -398,11 +401,11 @@ export default function UsageLimitPresentation({
 
             {/* 通知先メールアドレス */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">通知先設定</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{dictionary.label.notificationSettingsTitle}</h3>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="メールアドレスを入力（例: example@company.com）"
+                    placeholder={dictionary.label.enterEmailPlaceholder}
                     value={emailInput}
                     onValueChange={(value) => {
                       setEmailInput(value);
@@ -423,7 +426,7 @@ export default function UsageLimitPresentation({
                     color="primary"
                     variant="flat"
                   >
-                    追加
+                    {dictionary.label.add}
                   </Button>
                 </div>
 
@@ -431,7 +434,7 @@ export default function UsageLimitPresentation({
                 {formData.emails.length > 0 && (
                   <div>
                     <p className="text-sm font-medium text-gray-700 mb-2">
-                      通知先メールアドレス ({formData.emails.length}件)
+                      {dictionary.label.notificationEmailCount.replace('{count}', formData.emails.length.toString())}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {formData.emails.map((email) => (
@@ -455,8 +458,8 @@ export default function UsageLimitPresentation({
 
                 <p className="text-sm text-gray-500">
                   {formData.exceedAction === 'notify' 
-                    ? '制限を超過した際に、ここで設定したメールアドレスに通知が送信されます。'
-                    : '制限を超過した際に、サービスが停止され、ここで設定したメールアドレスに通知が送信されます。'
+                    ? dictionary.label.notifyOnlyEmailDescription
+                    : dictionary.label.restrictEmailDescription
                   }
                 </p>
               </div>
@@ -471,7 +474,7 @@ export default function UsageLimitPresentation({
             onPress={handleBack}
             startContent={<FaTimes />}
           >
-            キャンセル
+            {dictionary.label.cancelButton}
           </Button>
           <Button 
             color="primary" 
@@ -479,7 +482,7 @@ export default function UsageLimitPresentation({
             isLoading={isLoading}
             startContent={!isLoading && <FaSave />}
           >
-            {formData.exceedAction === 'notify' ? '通知制限を作成' : '利用停止制限を作成'}
+            {formData.exceedAction === 'notify' ? dictionary.label.createNotifyLimit : dictionary.label.createRestrictLimit}
           </Button>
         </div>
       </div>

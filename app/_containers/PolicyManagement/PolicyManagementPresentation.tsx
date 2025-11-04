@@ -7,7 +7,7 @@ import { updatePolicy, deletePolicy, startPolicyAnalysis } from "@/app/lib/actio
 import { PolicyAnalysisEntry, setActivePolicyAnalysisAction } from "@/app/lib/actions/policy-analysis-actions"
 import Link from "next/link"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { PolicyManagementLocale } from '@/app/dictionaries/policy-management/policy-management.d.ts';
 import { RiEdit2Fill } from "react-icons/ri"
 import { FaCheck, FaXmark, FaPlus, FaTrash, FaPlay, FaChartLine } from "react-icons/fa6"
 
@@ -19,37 +19,19 @@ interface PolicyWithAnalyses extends Policy {
 interface PolicyManagementPresentationProps {
   policies: PolicyWithAnalyses[];
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: PolicyManagementLocale;
   availableModels: { key: string; label: string; description: string }[];
 }
 
 // 編集可能なフィールドの型定義
 type EditableField = 'policyName' | 'description';
 
-// 一般的なファイル形式の選択肢
-const commonFileTypes = [
-  { key: 'image/jpeg', label: 'JPEG画像' },
-  { key: 'image/png', label: 'PNG画像' },
-  { key: 'image/gif', label: 'GIF画像' },
-  { key: 'image/webp', label: 'WebP画像' },
-  { key: 'application/pdf', label: 'PDFファイル' },
-  { key: 'application/msword', label: 'Wordファイル (.doc)' },
-  { key: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', label: 'Wordファイル (.docx)' },
-  { key: 'application/vnd.ms-excel', label: 'Excelファイル (.xls)' },
-  { key: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', label: 'Excelファイル (.xlsx)' },
-  { key: 'text/plain', label: 'テキストファイル' },
-  { key: 'text/csv', label: 'CSVファイル' },
-  { key: 'application/json', label: 'JSONファイル' },
-  { key: 'application/zip', label: 'ZIPファイル' },
-  { key: 'video/mp4', label: 'MP4動画' },
-  { key: 'audio/mpeg', label: 'MP3音声' },
-];
-
 // 個別フィールド更新関数
 async function updateSingleFieldForPolicy(
   fieldName: EditableField,
   value: string | string[],
-  targetPolicy: Policy
+  targetPolicy: Policy,
+  dictionary: PolicyManagementLocale
 ): Promise<{ success: boolean; message: string; errors?: Record<string, string>; updatedPolicy?: Policy }> {
   try {
     console.log('updateSingleFieldForPolicy called with:', { fieldName, value, policyId: targetPolicy.policyId });
@@ -66,13 +48,13 @@ async function updateSingleFieldForPolicy(
     if (result.success) {
       return {
         success: true,
-        message: result.message || `${fieldName}が正常に更新されました。`,
+        message: result.message || dictionary.alert.fieldUpdateSuccess.replace('{fieldName}', fieldName),
         updatedPolicy: result.data
       };
     } else {
       return {
         success: false,
-        message: result.message || `${fieldName}の更新に失敗しました。`,
+        message: result.message || dictionary.alert.fieldUpdateFail.replace('{fieldName}', fieldName),
         errors: result.errors ? Object.fromEntries(
           Object.entries(result.errors).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value])
         ) : {},
@@ -82,8 +64,8 @@ async function updateSingleFieldForPolicy(
     console.error('Error in updateSingleFieldForPolicy:', error);
     return {
       success: false,
-      message: error?.message || '更新処理でエラーが発生しました。',
-      errors: { [fieldName]: error?.message || '更新処理でエラーが発生しました。' }
+      message: error?.message || dictionary.alert.updateError,
+      errors: { [fieldName]: error?.message || dictionary.alert.updateError }
     };
   }
 }
@@ -96,6 +78,12 @@ export default function PolicyManagementPresentation({
 }: PolicyManagementPresentationProps) {
   // ポリシー一覧の状態管理
   const [policies, setPolicies] = useState<PolicyWithAnalyses[]>(initialPolicies);
+  
+  // 辞書からファイルタイプリストを生成
+  const commonFileTypes = Object.entries(dictionary.label.fileTypes).map(([key, label]) => ({
+    key,
+    label
+  }));
   
   // ポリシー選択とフィルタリング状態
   const [selectedPolicy, setSelectedPolicy] = useState<PolicyWithAnalyses | null>(null);
@@ -170,7 +158,8 @@ export default function PolicyManagementPresentation({
   // バリデーション
   const validateField = (field: EditableField, value: string): string | null => {
     if (!value || !value.trim()) {
-      return `${field === 'policyName' ? 'ポリシー名' : '説明'}は必須です。`;
+      const fieldLabel = field === 'policyName' ? dictionary.label.policyName : dictionary.label.description;
+      return dictionary.alert.fieldRequired.replace('{fieldLabel}', fieldLabel);
     }
     return null;
   };
@@ -178,7 +167,7 @@ export default function PolicyManagementPresentation({
   // 更新実行
   const saveField = async (field: EditableField) => {
     if (!selectedPolicy) {
-      setFieldErrors({ ...fieldErrors, [field]: 'ポリシーが選択されていません。' });
+      setFieldErrors({ ...fieldErrors, [field]: dictionary.alert.policyNotSelected });
       return;
     }
 
@@ -195,7 +184,7 @@ export default function PolicyManagementPresentation({
 
     try {
       console.log('Updating field:', { field, value, policyId: selectedPolicy.policyId });
-      const result = await updateSingleFieldForPolicy(field, value, selectedPolicy);
+      const result = await updateSingleFieldForPolicy(field, value, selectedPolicy, dictionary);
       console.log('Update result:', result);
       
       if (result.success && result.updatedPolicy) {
@@ -222,13 +211,13 @@ export default function PolicyManagementPresentation({
         console.log('Field updated successfully:', field);
       } else {
         // エラー時はエラーメッセージを表示
-        const errorMessage = result.message || `${field}の更新に失敗しました。`;
+        const errorMessage = result.message || dictionary.alert.fieldUpdateFail.replace('{fieldName}', field);
         setFieldErrors({ ...fieldErrors, [field]: errorMessage });
         console.error('Update failed:', result);
       }
     } catch (error: any) {
       console.error('Update error:', error);
-      const errorMessage = error?.message || '更新中にエラーが発生しました。';
+      const errorMessage = error?.message || dictionary.alert.updateError;
       setFieldErrors({ ...fieldErrors, [field]: errorMessage });
     } finally {
       setIsUpdating(false);
@@ -279,7 +268,7 @@ export default function PolicyManagementPresentation({
   // PolicyAnalysis開始
   const handleStartAnalysis = async () => {
     if (!selectedPolicy || !selectedModel) {
-      setAnalysisError('ポリシーとモデルを選択してください');
+      setAnalysisError(dictionary.alert.selectPolicyAndModel);
       return;
     }
 
@@ -303,13 +292,13 @@ export default function PolicyManagementPresentation({
           p.policyId === selectedPolicy.policyId ? updatedPolicy : p
         ));
         
-        setAnalysisSuccess('ポリシー分析を開始しました');
+        setAnalysisSuccess(dictionary.label.analysisStarted);
         setSelectedModel('');
       } else {
-        setAnalysisError(result.message || 'ポリシー分析の開始に失敗しました');
+        setAnalysisError(result.message || dictionary.label.analysisStartFailed);
       }
     } catch (error: any) {
-      setAnalysisError('ポリシー分析の開始中にエラーが発生しました');
+      setAnalysisError(dictionary.label.analysisStartError);
       console.error('Start analysis error:', error);
     } finally {
       setIsStartingAnalysis(false);
@@ -319,11 +308,11 @@ export default function PolicyManagementPresentation({
   // 分析ステータスのチップ表示
   const renderAnalysisStatusChip = (status: string) => {
     const statusConfig = {
-      pending: { color: 'warning' as const, label: '待機中' },
-      running: { color: 'primary' as const, label: '実行中' },
-      completed: { color: 'success' as const, label: '完了' },
-      failed: { color: 'danger' as const, label: '失敗' },
-      cancelled: { color: 'default' as const, label: 'キャンセル' },
+      pending: { color: 'warning' as const, label: dictionary.label.statusPending },
+      running: { color: 'primary' as const, label: dictionary.label.statusRunning },
+      completed: { color: 'success' as const, label: dictionary.label.statusCompleted },
+      failed: { color: 'danger' as const, label: dictionary.label.statusFailed },
+      cancelled: { color: 'default' as const, label: dictionary.label.statusCancelled },
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
@@ -364,12 +353,12 @@ export default function PolicyManagementPresentation({
           p.policyId === selectedPolicy.policyId ? updatedPolicy : p
         ));
 
-        setAnalysisSuccess('分析モデルを切り替えました');
+        setAnalysisSuccess(dictionary.label.analysisSwitched);
       } else {
-        setAnalysisError(result.message || '分析モデルの切り替えに失敗しました');
+        setAnalysisError(result.message || dictionary.label.analysisSwitchFailed);
       }
     } catch (error: any) {
-      setAnalysisError('分析モデルの切り替え中にエラーが発生しました');
+      setAnalysisError(dictionary.label.analysisSwitchError);
       console.error('Switch analysis error:', error);
     } finally {
       setSwitchingAnalysisId(null);
@@ -488,7 +477,7 @@ export default function PolicyManagementPresentation({
         ) : (
           <div className="p-3 bg-gray-50 rounded-md border">
             <span className="text-gray-900">
-              {value || '未設定'}
+              {value || dictionary.label.notSet}
             </span>
           </div>
         )}
@@ -504,7 +493,7 @@ export default function PolicyManagementPresentation({
           <label className="text-sm font-medium text-gray-700">
             {label}
             <span className="ml-2 text-xs text-gray-500 font-normal">
-              (変更不可)
+              {dictionary.label.readOnly}
             </span>
           </label>
         </div>
@@ -517,12 +506,12 @@ export default function PolicyManagementPresentation({
                 </Chip>
               ))
             ) : (
-              <span className="text-gray-500">未設定</span>
+              <span className="text-gray-500">{dictionary.label.notSet}</span>
             )}
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-1">
-          ※ 許可するファイル形式は変更できません。
+          {dictionary.label.fileTypeRestriction}
         </p>
       </div>
     );
@@ -532,7 +521,7 @@ export default function PolicyManagementPresentation({
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">ポリシー管理</h1>
+          <h1 className="text-3xl font-bold">{dictionary.label.policyManagement}</h1>
           <Button
             color="primary"
             as={Link}
@@ -540,27 +529,27 @@ export default function PolicyManagementPresentation({
             startContent={<FaPlus size={16} />}
             className="font-medium"
           >
-            新しいポリシーを作成
+            {dictionary.label.createNewPolicy}
           </Button>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* 左側: ポリシー一覧 */}
           <Card className="lg:col-span-1 p-6 shadow-lg">
-            <h2 className="text-xl font-bold mb-4">ポリシー一覧 ({filteredPolicies.length}件)</h2>
+            <h2 className="text-xl font-bold mb-4">{dictionary.label.policyList} ({dictionary.label.policyCount.replace('{count}', filteredPolicies.length.toString())})</h2>
             
             {/* 検索 */}
             <div className="mb-6">
               {isMounted ? (
                 <Input
-                  placeholder="ポリシー名、説明で検索..."
+                  placeholder={dictionary.label.searchPlaceholder}
                   value={searchTerm}
                   onValueChange={setSearchTerm}
                   variant="bordered"
                 />
               ) : (
                 <div className="h-10 bg-gray-100 rounded-lg border border-gray-300 flex items-center px-3">
-                  <span className="text-gray-500 text-sm">検索...</span>
+                  <span className="text-gray-500 text-sm">{dictionary.label.searchPlaceholder}</span>
                 </div>
               )}
             </div>
@@ -569,7 +558,7 @@ export default function PolicyManagementPresentation({
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {filteredPolicies.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  ポリシーが見つかりません
+                  {dictionary.label.noPoliciesFound}
                 </div>
               ) : (
                 filteredPolicies.map((policy) => (
@@ -587,7 +576,7 @@ export default function PolicyManagementPresentation({
                         <h3 className="font-medium text-gray-900">{policy.policyName}</h3>
                         <p className="text-sm text-gray-600 line-clamp-2">{policy.description}</p>
                         <p className="text-xs text-gray-500 mt-1">
-                          {policy.acceptedFileTypes.length}種類のファイル形式
+                          {dictionary.label.fileTypeCount.replace('{count}', policy.acceptedFileTypes.length.toString())}
                         </p>
                       </div>
                       <Button
@@ -611,34 +600,34 @@ export default function PolicyManagementPresentation({
           {/* 右側: ポリシー編集フォーム */}
           <Card className="lg:col-span-2 p-6 shadow-lg">
             <h2 className="text-xl font-bold mb-4">
-              {selectedPolicy ? `${selectedPolicy.policyName} の編集` : 'ポリシーを選択してください'}
+              {selectedPolicy ? dictionary.label.editingPolicy.replace('{policyName}', selectedPolicy.policyName) : dictionary.label.selectPolicy}
             </h2>
             
             {selectedPolicy ? (
               <div className="flex flex-col gap-6">
                 {/* ポリシー名フィールド */}
-                {renderField('policyName', 'ポリシー名')}
+                {renderField('policyName', dictionary.label.policyName)}
 
                 {/* 説明フィールド */}
-                {renderField('description', '説明', 'textarea')}
+                {renderField('description', dictionary.label.description, 'textarea')}
 
                 {/* 許可ファイル形式フィールド（読み取り専用） */}
-                {renderReadOnlyFileTypes('許可するファイル形式', selectedPolicy.acceptedFileTypes)}
+                {renderReadOnlyFileTypes(dictionary.label.allowedFileTypesLabel, selectedPolicy.acceptedFileTypes)}
                 
                 {/* ポリシー情報 */}
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">ポリシー情報</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">{dictionary.label.policyInfo}</h3>
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p>作成日: {new Date(selectedPolicy.createdAt).toLocaleDateString('ja-JP')}</p>
-                    <p>更新日: {new Date(selectedPolicy.updatedAt).toLocaleDateString('ja-JP')}</p>
-                    <p>ポリシーID: {selectedPolicy.policyId}</p>
+                    <p>{dictionary.label.createdAt}: {new Date(selectedPolicy.createdAt).toLocaleDateString('ja-JP')}</p>
+                    <p>{dictionary.label.updatedAt}: {new Date(selectedPolicy.updatedAt).toLocaleDateString('ja-JP')}</p>
+                    <p>{dictionary.label.policyId}: {selectedPolicy.policyId}</p>
                   </div>
                 </div>
 
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <p>左側のリストからポリシーを選択して編集を開始してください</p>
+                <p>{dictionary.label.selectPolicyPrompt}</p>
               </div>
             )}
           </Card>
@@ -651,52 +640,52 @@ export default function PolicyManagementPresentation({
               <div className="flex items-center gap-2">
                 <FaChartLine className="text-blue-600" />
                 <h2 className="text-xl font-bold">
-                  {selectedPolicy.policyName} の性能分析結果
+                  {dictionary.label.performanceAnalysisTitle.replace('{policyName}', selectedPolicy.policyName)}
                 </h2>
               </div>
               <Chip color="primary" variant="flat">
-                {selectedPolicy.analyses.length}件の分析結果
+                {dictionary.label.analysisCount.replace('{count}', selectedPolicy.analyses.length.toString())}
               </Chip>
             </CardHeader>
             <Divider />
             <CardBody>
               {/* 通知 */}
               {analysisError && (
-                <Alert color="danger" title="エラー" description={analysisError} className="mb-4" />
+                <Alert color="danger" title={dictionary.label.error} description={analysisError} className="mb-4" />
               )}
               {analysisSuccess && (
-                <Alert color="success" title="成功" description={analysisSuccess} className="mb-4" />
+                <Alert color="success" title={dictionary.label.success} description={analysisSuccess} className="mb-4" />
               )}
               {/* 分析結果テーブル（横長） */}
               <div>
                 <h3 className="font-medium text-gray-800 mb-4">
-                  AI性能分析結果
+                  {dictionary.label.aiPerformanceAnalysis}
                 </h3>
                 {selectedPolicy.analyses.length === 0 ? (
                   <div className="text-center py-12 text-gray-500">
                     <FaChartLine className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium">分析結果がありません</p>
-                    <p className="text-sm">このポリシーを使用したAI分析がまだ実行されていません。</p>
-                    <p className="text-sm">上記のフォームから新しい分析を開始してください。</p>
+                    <p className="text-lg font-medium">{dictionary.label.noAnalysisResults}</p>
+                    <p className="text-sm">{dictionary.label.noAnalysisYet}</p>
+                    <p className="text-sm">{dictionary.label.startAnalysisPrompt}</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <Table 
-                      aria-label="ポリシー分析結果" 
+                      aria-label={dictionary.label.aiPerformanceAnalysis}
                       selectionMode="none"
                       className="min-w-full"
                     >
                       <TableHeader>
-                        <TableColumn className="min-w-[140px]">分析日時</TableColumn>
-                        <TableColumn className="min-w-[160px]">使用モデル</TableColumn>
-                        <TableColumn className="min-w-[100px]">ステータス</TableColumn>
-                        <TableColumn className="min-w-[100px]">Top-1精度</TableColumn>
-                        <TableColumn className="min-w-[100px]">欠陥検出率</TableColumn>
-                        <TableColumn className="min-w-[100px]">F1スコア</TableColumn>
-                        <TableColumn className="min-w-[120px]">レイテンシ(P95)</TableColumn>
-                        <TableColumn className="min-w-[100px]">エラー率</TableColumn>
-                        <TableColumn className="min-w-[120px]">レポート</TableColumn>
-                        <TableColumn className="min-w-[120px]">使用状況</TableColumn>
+                        <TableColumn className="min-w-[140px]">{dictionary.label.analysisDate}</TableColumn>
+                        <TableColumn className="min-w-[160px]">{dictionary.label.modelUsed}</TableColumn>
+                        <TableColumn className="min-w-[100px]">{dictionary.label.status}</TableColumn>
+                        <TableColumn className="min-w-[100px]">{dictionary.label.top1Accuracy}</TableColumn>
+                        <TableColumn className="min-w-[100px]">{dictionary.label.defectDetectionRate}</TableColumn>
+                        <TableColumn className="min-w-[100px]">{dictionary.label.f1Score}</TableColumn>
+                        <TableColumn className="min-w-[120px]">{dictionary.label.latencyP95}</TableColumn>
+                        <TableColumn className="min-w-[100px]">{dictionary.label.errorRate}</TableColumn>
+                        <TableColumn className="min-w-[120px]">{dictionary.label.report}</TableColumn>
+                        <TableColumn className="min-w-[120px]">{dictionary.label.usageStatus}</TableColumn>
                       </TableHeader>
                       <TableBody>
                         {selectedPolicy.analyses.map((analysis) => (
@@ -764,7 +753,7 @@ export default function PolicyManagementPresentation({
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  レポート表示
+                                  {dictionary.label.viewReport}
                                 </Button>
                               ) : (
                                 <span className="text-gray-400 text-sm">-</span>
@@ -774,7 +763,7 @@ export default function PolicyManagementPresentation({
                               {analysis.status === 'completed' ? (
                                 analysis.isActive ? (
                                   <Chip color="success" variant="flat" size="sm">
-                                    使用中
+                                    {dictionary.label.inUse}
                                   </Chip>
                                 ) : (
                                   <Button
@@ -785,7 +774,7 @@ export default function PolicyManagementPresentation({
                                     isLoading={switchingAnalysisId === analysis.id}
                                     isDisabled={switchingAnalysisId !== null}
                                   >
-                                    選択
+                                    {dictionary.label.select}
                                   </Button>
                                 )
                               ) : (
@@ -808,13 +797,13 @@ export default function PolicyManagementPresentation({
       {/* 削除確認モーダル */}
       <Modal isOpen={isDeleteModalOpen} onClose={onDeleteModalClose}>
         <ModalContent>
-          <ModalHeader>ポリシーの削除</ModalHeader>
+          <ModalHeader>{dictionary.label.deletePolicy}</ModalHeader>
           <ModalBody>
             <p>
-              「{policyToDelete?.policyName}」を削除してもよろしいですか？
+              {dictionary.label.confirmDelete.replace('{policyName}', policyToDelete?.policyName || '')}
             </p>
             <p className="text-sm text-gray-600">
-              この操作は取り消すことができません。
+              {dictionary.label.cannotUndo}
             </p>
           </ModalBody>
           <ModalFooter>
@@ -823,7 +812,7 @@ export default function PolicyManagementPresentation({
               onPress={onDeleteModalClose}
               isDisabled={isDeleting}
             >
-              キャンセル
+              {dictionary.label.cancel}
             </Button>
             <Button
               color="danger"
@@ -831,7 +820,7 @@ export default function PolicyManagementPresentation({
               isLoading={isDeleting}
               isDisabled={isDeleting}
             >
-              削除
+              {dictionary.label.delete}
             </Button>
           </ModalFooter>
         </ModalContent>

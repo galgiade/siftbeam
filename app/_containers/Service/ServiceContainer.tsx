@@ -1,7 +1,7 @@
 import ServicePresentation from './ServicePresentation'
 import ServiceErrorDisplay from './ServiceErrorDisplay'
 import { requireUserProfile } from '@/app/lib/utils/require-auth'
-import { userDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
+import { serviceDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import { queryProcessingHistory } from '@/app/lib/actions/processing-history-api';
 import { getPoliciesForUser } from '@/app/lib/actions/policy-api';
 import { getCustomerUsageLimits } from '@/app/lib/actions/usage-limits-api';
@@ -19,15 +19,14 @@ export default async function ServiceContainer({ locale }: ServiceContainerProps
     // 並列実行で高速化
     const [userProfile, dictionary] = await Promise.all([
       requireUserProfile(locale),
-      Promise.resolve(pickDictionary(userDictionaries, locale, 'en'))
+      Promise.resolve(pickDictionary(serviceDictionaries, locale, 'en'))
     ]);
     
     // 認証済みユーザーであることを確認
     if (!userProfile.sub) {
-      const errorMessage = 'ログインが必要です。';
       return (
         <ServiceErrorDisplay 
-          error={errorMessage}
+          error={dictionary.error.loginRequired}
           dictionary={dictionary} 
         />
       );
@@ -64,7 +63,7 @@ export default async function ServiceContainer({ locale }: ServiceContainerProps
       console.error('Processing history fetch error:', processingHistoryResult.errors);
       return (
         <ServiceErrorDisplay 
-          error={processingHistoryResult.message || '処理履歴の取得に失敗しました。'}
+          error={processingHistoryResult.message || dictionary.error.processingHistoryFetchFailed}
           dictionary={dictionary} 
         />
       );
@@ -77,7 +76,7 @@ export default async function ServiceContainer({ locale }: ServiceContainerProps
       console.error('Policies fetch error:', policiesResult.errors);
       return (
         <ServiceErrorDisplay 
-          error={policiesResult.message || 'ポリシーの取得に失敗しました。'}
+          error={policiesResult.message || dictionary.error.policiesFetchFailed}
           dictionary={dictionary} 
         />
       );
@@ -88,7 +87,7 @@ export default async function ServiceContainer({ locale }: ServiceContainerProps
       console.error('Usage limits fetch error:', usageLimitsResult.errors);
       return (
         <ServiceErrorDisplay 
-          error={usageLimitsResult.message || '利用制限の取得に失敗しました。'}
+          error={usageLimitsResult.message || dictionary.error.usageLimitsFetchFailed}
           dictionary={dictionary} 
         />
       );
@@ -139,11 +138,11 @@ export default async function ServiceContainer({ locale }: ServiceContainerProps
     console.error('Service container error:', error);
     
     // フォールバック辞書を使用
-    const fallbackDictionary = pickDictionary(userDictionaries, 'en', 'en');
+    const fallbackDictionary = pickDictionary(serviceDictionaries, 'en', 'en');
     
     return (
       <ServiceErrorDisplay 
-        error={error?.message || 'サービスページの読み込みに失敗しました。'}
+        error={error?.message || fallbackDictionary.error.pageLoadFailed}
         dictionary={fallbackDictionary} 
       />
     );

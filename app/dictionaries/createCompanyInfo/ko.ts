@@ -1,8 +1,11 @@
-export default {
+import type { CreateCompanyInfoLocale } from './createCompanyInfo.d.ts';
+
+const ko: CreateCompanyInfoLocale = {
   label: {
     back: "뒤로",
     submit: "제출",
     next: "다음",
+    submitting: "제출 중...",
     loading: "로딩 중...",
     companyInfoTitle: "회사 정보",
     countryLabel: "국가",
@@ -41,6 +44,6 @@ export default {
     stripeCustomerCreationFailed: "Stripe 고객 생성에 실패했습니다",
     communicationError: "통신 중 오류가 발생했습니다"
   }
-} as const;
+};
 
-
+export default ko;

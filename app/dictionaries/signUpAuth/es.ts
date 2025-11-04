@@ -1,4 +1,6 @@
-export default {
+import type { SignUpAuthLocale } from './signUpAuth.d.ts';
+
+const es: SignUpAuthLocale = {
   label: {
     back: "Atrás",
     submit: "Enviar",
@@ -10,6 +12,8 @@ export default {
     passwordLabel: "Contraseña",
     passwordPlaceholder: "Introduce tu contraseña",
     passwordDescription: "Al menos 8 caracteres con mayúsculas, minúsculas, números y símbolos",
+    confirmPasswordLabel: "Confirmar contraseña",
+    confirmPasswordPlaceholder: "Vuelva a introducir la contraseña",
     verificationCodeLabel: "Código de verificación",
     verificationCodeDescription: "Introduce el código de 6 dígitos enviado a",
     register: "Registrarse",
@@ -21,7 +25,13 @@ export default {
     accountCreation: "Creación de cuenta",
     companyInfo: "Información de la empresa",
     adminSetup: "Configuración del administrador",
-    paymentSetup: "Configuración de pago"
+    paymentSetup: "Configuración de pago",
+    completed: "Completado",
+    welcomeMessage: "Cree una cuenta y comience a usar SiftBeam",
+    orDivider: "o",
+    alreadyHaveAccount: "¿Ya tienes una cuenta?",
+    signIn: "Iniciar sesión",
+    copyright: "© 2024 SiftBeam. Todos los derechos reservados."
   },
   alert: {
     emailRequired: "Introduce tu correo electrónico",
@@ -29,6 +39,7 @@ export default {
     emailAndPasswordRequired: "Introduce correo y contraseña",
     invalidEmailFormat: "Introduce un formato de correo válido",
     invalidPasswordFormat: "La contraseña debe tener al menos 8 caracteres con mayúsculas, minúsculas, números y símbolos",
+    passwordMismatch: "Las contraseñas no coinciden",
     verificationCodeRequired: "Introduce el código de verificación",
     verificationCodeLength: "Introduce un código de 6 dígitos",
     codeResent: "El código de verificación ha sido reenviado",
@@ -55,6 +66,6 @@ export default {
     confirm: "Confirmar",
     verifying: "Verificando..."
   }
-} as const;
+};
 
-
+export default es;

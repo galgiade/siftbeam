@@ -1,4 +1,6 @@
-export default {
+import type { CancelDeleteAccountLocale } from './cancelDeleteAccount.d.ts';
+
+const de: CancelDeleteAccountLocale = {
   label: {
     back: "Zurück",
     submit: "Senden",
@@ -21,7 +23,6 @@ export default {
     cancelSuccess: "Stornierung der Löschanfrage abgeschlossen.",
     cancelError: "Ein Fehler ist aufgetreten. Bitte erneut versuchen."
   }
-} as const;
+};
 
-
-
+export default de;

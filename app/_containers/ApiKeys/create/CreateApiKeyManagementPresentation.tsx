@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button, Card, CardBody, CardHeader, Input, Textarea, Alert, Spinner, Divider, Autocomplete, AutocompleteItem } from "@heroui/react"
 import { createAPIKeyAction } from "@/app/lib/actions/api-key-actions"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { APIKeyLocale } from '@/app/dictionaries/apiKey/apiKey.d.ts';
 import type { Policy } from '@/app/lib/actions/policy-api';
 import { KeyIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation'
 
 interface CreateApiKeyManagementPresentationProps {
   userAttributes: UserAttributesDTO;
-  dictionary: UserProfileLocale;
+  dictionary: APIKeyLocale;
   policies: Policy[];
 }
 
@@ -47,17 +47,17 @@ export default function CreateApiKeyManagementPresentation({
     const errors: Record<string, string> = {};
 
     if (!createForm.apiName.trim()) {
-      errors.apiName = 'API名は必須です';
+      errors.apiName = dictionary.create.validation.apiNameRequired;
     } else if (createForm.apiName.trim().length < 3) {
-      errors.apiName = 'API名は3文字以上で入力してください';
+      errors.apiName = dictionary.create.validation.apiNameMinLength;
     }
 
     if (!createForm.policyId.trim()) {
-      errors.policyId = 'ポリシーを選択してください';
+      errors.policyId = dictionary.create.validation.policyRequired;
     }
 
     if (createForm.description.trim().length > 500) {
-      errors.description = '説明は500文字以内で入力してください';
+      errors.description = dictionary.create.validation.descriptionMaxLength;
     }
 
     setValidationErrors(errors);
@@ -67,7 +67,7 @@ export default function CreateApiKeyManagementPresentation({
   // APIキー作成
   const handleCreateApiKey = async () => {
     if (!validateForm()) {
-      setError('入力内容に不備があります。エラーを確認してください。');
+      setError(dictionary.create.validation.formHasErrors);
       return;
     }
 
@@ -82,17 +82,17 @@ export default function CreateApiKeyManagementPresentation({
       });
 
       if (result.success && result.apiKey) {
-        setSuccess('APIキーが正常に作成されました');
+        setSuccess(dictionary.create.messages.createSuccess);
         
         // 3秒後にAPIキー管理ページにリダイレクト
         setTimeout(() => {
           router.push(`/${userAttributes.locale}/account/api-keys`);
         }, 3000);
       } else {
-        setError(result.message || 'APIキーの作成に失敗しました');
+        setError(result.message || dictionary.create.messages.createFailed);
       }
     } catch (error: any) {
-      setError('APIキーの作成中にエラーが発生しました');
+      setError(dictionary.create.messages.createError);
       console.error('Create API key error:', error);
     } finally {
       setLoading(false);
@@ -129,27 +129,27 @@ export default function CreateApiKeyManagementPresentation({
           className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
         >
           <ArrowLeftIcon className="w-5 h-5" />
-          <span>APIキー管理に戻る</span>
+          <span>{dictionary.create.backToList}</span>
         </Link>
       </div>
 
       <div className="flex items-center gap-3">
         <KeyIcon className="w-8 h-8 text-blue-600" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">新しいAPIキーを作成</h1>
-          <p className="text-sm text-gray-600">新しいAPIキーの情報を入力してください</p>
+          <h1 className="text-2xl font-bold text-gray-900">{dictionary.create.pageTitle}</h1>
+          <p className="text-sm text-gray-600">{dictionary.create.pageDescription}</p>
         </div>
       </div>
 
       {/* 通知 */}
       {error && (
-        <Alert color="danger" title="エラー" description={error} onClose={clearNotifications} />
+        <Alert color="danger" title={dictionary.create.errorTitle} description={error} onClose={clearNotifications} />
       )}
       {success && (
         <Alert 
           color="success" 
-          title="作成完了" 
-          description={`${success} 3秒後にAPIキー管理ページに移動します...`}
+          title={dictionary.create.successTitle} 
+          description={`${success} ${dictionary.create.successDescription}`}
           startContent={<CheckCircleIcon className="w-5 h-5" />}
         />
       )}
@@ -157,7 +157,7 @@ export default function CreateApiKeyManagementPresentation({
       {/* 作成フォーム */}
       <Card className="shadow-lg">
         <CardHeader>
-          <h2 className="text-lg font-semibold">APIキー情報</h2>
+          <h2 className="text-lg font-semibold">{dictionary.create.formTitle}</h2>
         </CardHeader>
         <Divider />
         <CardBody>
@@ -165,26 +165,26 @@ export default function CreateApiKeyManagementPresentation({
             {/* API名 */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
-                API名 <span className="text-red-500">*</span>
+                {dictionary.create.fields.apiName} <span className="text-red-500">{dictionary.create.required}</span>
               </label>
               <Input
-                placeholder="APIキーの名前を入力してください"
+                placeholder={dictionary.create.fields.apiNamePlaceholder}
                 value={createForm.apiName}
                 onChange={(e) => setCreateForm(prev => ({ ...prev, apiName: e.target.value }))}
                 isInvalid={!!validationErrors.apiName}
                 errorMessage={validationErrors.apiName}
                 variant="bordered"
               />
-              <p className="text-xs text-gray-500 mt-1">APIキーを識別するための名前です（3文字以上）</p>
+              <p className="text-xs text-gray-500 mt-1">{dictionary.create.fields.apiNameHelp}</p>
             </div>
 
             {/* 説明 */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
-                説明
+                {dictionary.create.fields.apiDescription}
               </label>
               <Textarea
-                placeholder="APIキーの用途や説明を入力してください（任意）"
+                placeholder={dictionary.create.fields.apiDescriptionPlaceholder}
                 value={createForm.description}
                 onChange={(e) => setCreateForm(prev => ({ ...prev, description: e.target.value }))}
                 isInvalid={!!validationErrors.description}
@@ -192,16 +192,16 @@ export default function CreateApiKeyManagementPresentation({
                 variant="bordered"
                 maxRows={4}
               />
-              <p className="text-xs text-gray-500 mt-1">APIキーの用途や詳細な説明（500文字以内）</p>
+              <p className="text-xs text-gray-500 mt-1">{dictionary.create.fields.apiDescriptionHelp}</p>
             </div>
 
             {/* ポリシー選択 */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
-                ポリシー <span className="text-red-500">*</span>
+                {dictionary.create.fields.policy} <span className="text-red-500">{dictionary.create.required}</span>
               </label>
               <Autocomplete
-                placeholder="ポリシーを選択してください"
+                placeholder={dictionary.create.fields.policyPlaceholder}
                 selectedKey={createForm.policyId}
                 onSelectionChange={(key) => setCreateForm(prev => ({ ...prev, policyId: key as string }))}
                 isInvalid={!!validationErrors.policyId}
@@ -225,7 +225,7 @@ export default function CreateApiKeyManagementPresentation({
                   </AutocompleteItem>
                 )}
               </Autocomplete>
-              <p className="text-xs text-gray-500 mt-1">このAPIキーに関連付けるポリシーを選択してください</p>
+              <p className="text-xs text-gray-500 mt-1">{dictionary.create.fields.policyHelp}</p>
             </div>
           </div>
         </CardBody>
@@ -237,18 +237,18 @@ export default function CreateApiKeyManagementPresentation({
           <div className="flex items-start gap-3">
             <KeyIcon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-semibold text-blue-800 mb-2">APIキー作成時の注意事項</h3>
+              <h3 className="font-semibold text-blue-800 mb-2">{dictionary.create.noticeTitle}</h3>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• APIキーは作成時にAWS API Gatewayで自動的に生成されます</li>
-                <li>• APIキーは作成後、有効状態で開始されます</li>
-                <li>• ポリシーは既存のポリシーから選択してください</li>
-                <li>• 以下のタグが自動的に付与されます：</li>
-                <li className="ml-4">- Project: siftbeam</li>
-                <li className="ml-4">- customerId: お客様のID</li>
-                <li className="ml-4">- environment: Production</li>
-                <li className="ml-4">- version: v1.0</li>
-                <li>• 作成後はAPIキー管理ページで編集・削除が可能です</li>
-                <li>• APIキーの使用状況は監査ログで追跡されます</li>
+                <li>• {dictionary.create.noticeItems.autoGenerated}</li>
+                <li>• {dictionary.create.noticeItems.activeOnCreation}</li>
+                <li>• {dictionary.create.noticeItems.selectExistingPolicy}</li>
+                <li>• {dictionary.create.noticeItems.autoTags}</li>
+                <li className="ml-4">- {dictionary.create.noticeItems.projectTag}</li>
+                <li className="ml-4">- {dictionary.create.noticeItems.customerIdTag}</li>
+                <li className="ml-4">- {dictionary.create.noticeItems.environmentTag}</li>
+                <li className="ml-4">- {dictionary.create.noticeItems.versionTag}</li>
+                <li>• {dictionary.create.noticeItems.editableAfterCreation}</li>
+                <li>• {dictionary.create.noticeItems.auditLogged}</li>
               </ul>
             </div>
           </div>
@@ -262,7 +262,7 @@ export default function CreateApiKeyManagementPresentation({
           onPress={handleReset}
           isDisabled={loading}
         >
-          リセット
+          {dictionary.create.reset}
         </Button>
         <Button
           color="primary"
@@ -271,7 +271,7 @@ export default function CreateApiKeyManagementPresentation({
           startContent={!loading ? <KeyIcon className="w-4 h-4" /> : undefined}
           size="lg"
         >
-          {loading ? 'APIキーを作成中...' : 'APIキーを作成'}
+          {loading ? dictionary.create.submitting : dictionary.create.submit}
         </Button>
       </div>
 
@@ -281,7 +281,7 @@ export default function CreateApiKeyManagementPresentation({
           <CardBody>
             <div className="flex items-center justify-center gap-3">
               <Spinner color="success" size="sm" />
-              <p className="text-green-700">APIキー管理ページに移動中...</p>
+              <p className="text-green-700">{dictionary.create.redirecting}</p>
             </div>
           </CardBody>
         </Card>

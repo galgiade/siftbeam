@@ -1,18 +1,18 @@
 'use client'
 
 import { Card } from "@heroui/react"
-import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
+import type { PolicyManagementLocale } from '@/app/dictionaries/policy-management/policy-management.d.ts';
 
 interface PolicyErrorDisplayProps {
   error: string;
-  dictionary: UserProfileLocale;
+  dictionary: PolicyManagementLocale;
 }
 
 export default function PolicyErrorDisplay({ error, dictionary }: PolicyErrorDisplayProps) {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">ポリシー管理</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">{dictionary.label.policyManagement}</h1>
         
         <Card className="p-8 shadow-lg">
           <div className="text-center">
@@ -23,7 +23,7 @@ export default function PolicyErrorDisplay({ error, dictionary }: PolicyErrorDis
             </div>
             
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              エラーが発生しました
+              {dictionary.label.errorOccurred}
             </h2>
             
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -33,7 +33,7 @@ export default function PolicyErrorDisplay({ error, dictionary }: PolicyErrorDis
             </div>
             
             <p className="text-gray-600 mb-6">
-              問題が解決しない場合は、システム管理者にお問い合わせください。
+              {dictionary.label.contactAdmin}
             </p>
             
             <div className="flex justify-center gap-4">
@@ -41,13 +41,13 @@ export default function PolicyErrorDisplay({ error, dictionary }: PolicyErrorDis
                 onClick={() => window.location.reload()}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                ページを再読み込み
+                {dictionary.label.reloadPage}
               </button>
               <button
                 onClick={() => window.history.back()}
                 className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
-                前のページに戻る
+                {dictionary.label.goBack}
               </button>
             </div>
           </div>

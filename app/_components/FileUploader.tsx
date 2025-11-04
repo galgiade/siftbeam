@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Button, Card, Chip, Progress } from '@heroui/react'
 import { uploadMultipleFiles, UploadFileResult } from '@/app/lib/actions/file-upload-api'
 import { FaCloudArrowUp, FaFile, FaImage, FaVideo, FaMusic, FaTrash, FaCheck, FaTriangleExclamation } from 'react-icons/fa6'
+import type { CommonLocale } from '@/app/dictionaries/common/common.d'
 
 interface FileUploaderProps {
   customerId: string;
@@ -16,6 +17,7 @@ interface FileUploaderProps {
   maxFileSize?: number; // MB
   acceptedFileTypes?: string[];
   disabled?: boolean;
+  commonDictionary: CommonLocale; // 共通辞書を追加
 }
 
 interface UploadingFile {
@@ -54,8 +56,10 @@ export default function FileUploader({
   maxFiles = 5,
   maxFileSize = 10, // MB
   acceptedFileTypes = ['*/*'],
-  disabled = false
+  disabled = false,
+  commonDictionary
 }: FileUploaderProps) {
+  const dict = commonDictionary.common.fileUploader;
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -79,14 +83,16 @@ export default function FileUploader({
     const totalFiles = currentFileCount + files.length;
     
     if (totalFiles > maxFiles) {
-      alert(`最大${maxFiles}個までのファイルをアップロードできます。`);
+      alert(dict.maxFilesExceeded.replace('{maxFiles}', maxFiles.toString()));
       return;
     }
 
     // ファイルサイズチェック
     const oversizedFiles = files.filter(file => file.size > maxFileSize * 1024 * 1024);
     if (oversizedFiles.length > 0) {
-      alert(`ファイルサイズは${maxFileSize}MB以下にしてください。\n大きすぎるファイル: ${oversizedFiles.map(f => f.name).join(', ')}`);
+      alert(dict.fileSizeExceeded
+        .replace('{maxFileSize}', maxFileSize.toString())
+        .replace('{files}', oversizedFiles.map(f => f.name).join(', ')));
       return;
     }
 
@@ -164,7 +170,7 @@ export default function FileUploader({
       setUploadingFiles(prev => 
         prev.map(f => 
           f.status === 'uploading' 
-            ? { ...f, status: 'error' as const, error: 'アップロードに失敗しました' }
+            ? { ...f, status: 'error' as const, error: dict.uploadFailed }
             : f
         )
       );
@@ -223,10 +229,10 @@ export default function FileUploader({
           />
           <div className="space-y-2">
             <p className={`text-lg font-medium ${disabled ? 'text-gray-400' : 'text-gray-700'}`}>
-              ファイルをドラッグ&ドロップ
+              {dict.dragAndDrop}
             </p>
             <p className={`text-sm ${disabled ? 'text-gray-400' : 'text-gray-500'}`}>
-              または
+              {dict.or}
             </p>
             <Button
               color="primary"
@@ -234,13 +240,13 @@ export default function FileUploader({
               onPress={() => fileInputRef.current?.click()}
               isDisabled={disabled}
             >
-              ファイルを選択
+              {dict.selectFile}
             </Button>
           </div>
           
           <div className={`mt-4 text-xs ${disabled ? 'text-gray-400' : 'text-gray-500'}`}>
-            <p>最大{maxFiles}個、{maxFileSize}MB以下のファイル</p>
-            <p>対応形式: 画像、動画、音声、文書ファイル</p>
+            <p>{dict.maxFilesAndSize.replace('{maxFiles}', maxFiles.toString()).replace('{maxFileSize}', maxFileSize.toString())}</p>
+            <p>{dict.supportedFormats}</p>
           </div>
         </div>
         
@@ -260,7 +266,7 @@ export default function FileUploader({
         <Card className="p-4">
           <div className="flex justify-between items-center mb-3">
             <h4 className="font-medium text-gray-700">
-              アップロード待ち ({pendingFiles.length}件)
+              {dict.pendingFiles.replace('{count}', pendingFiles.length.toString())}
             </h4>
             <Button
               color="primary"
@@ -269,7 +275,7 @@ export default function FileUploader({
               isLoading={isUploading}
               isDisabled={isUploading || disabled}
             >
-              {isUploading ? 'アップロード中...' : 'アップロード開始'}
+              {isUploading ? dict.uploading : dict.uploadStart}
             </Button>
           </div>
           
@@ -320,7 +326,7 @@ export default function FileUploader({
       {successfulFiles.length > 0 && (
         <Card className="p-4">
           <h4 className="font-medium text-gray-700 mb-3">
-            アップロード済み ({successfulFiles.length}件)
+            {dict.uploadedFiles.replace('{count}', successfulFiles.length.toString())}
           </h4>
           
           <div className="space-y-2">
@@ -335,7 +341,7 @@ export default function FileUploader({
                       {uploadingFile.file.name}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {formatFileSize(uploadingFile.file.size)} • アップロード完了
+                      {formatFileSize(uploadingFile.file.size)} • {dict.uploadComplete}
                     </p>
                   </div>
                   
@@ -363,7 +369,7 @@ export default function FileUploader({
         <Card className="p-4 border-red-200">
           <h4 className="font-medium text-red-700 mb-3 flex items-center gap-2">
             <FaTriangleExclamation size={16} />
-            アップロードエラー
+            {dict.uploadError}
           </h4>
           
           <div className="space-y-2">
@@ -380,7 +386,7 @@ export default function FileUploader({
                         {uploadingFile.file.name}
                       </p>
                       <p className="text-xs text-red-600">
-                        {uploadingFile.error || 'アップロードに失敗しました'}
+                        {uploadingFile.error || dict.uploadFailed}
                       </p>
                     </div>
                     

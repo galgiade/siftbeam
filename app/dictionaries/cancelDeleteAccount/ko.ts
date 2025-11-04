@@ -1,4 +1,6 @@
-export default {
+import type { CancelDeleteAccountLocale } from './cancelDeleteAccount.d.ts';
+
+const ko: CancelDeleteAccountLocale = {
   label: {
     back: "뒤로",
     submit: "제출",
@@ -21,6 +23,6 @@ export default {
     cancelSuccess: "삭제 요청 취소가 완료되었습니다.",
     cancelError: "오류가 발생했습니다. 다시 시도해주세요."
   }
-} as const;
+};
 
-
+export default ko;
