@@ -128,7 +128,8 @@ const ja: SupportCenterLocale = {
     descriptionRequired: "問題の詳細は必須です。",
     issueTypeRequired: "問題タイプを選択してください。",
     formSubmissionError: "フォーム送信中にエラーが発生しました。",
-    replyError: "返信送信中にエラーが発生しました。"
+    replyError: "返信送信中にエラーが発生しました。",
+    updateFailed: "ステータスの更新に失敗しました。"
   }
 };
 

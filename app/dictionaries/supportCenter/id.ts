@@ -134,7 +134,8 @@ const id: SupportCenterLocale = {
     descriptionRequired: "Detail masalah wajib diisi.",
     issueTypeRequired: "Pilih jenis masalah.",
     formSubmissionError: "Terjadi kesalahan saat mengirim formulir.",
-    replyError: "Terjadi kesalahan saat mengirim balasan."
+    replyError: "Terjadi kesalahan saat mengirim balasan.",
+    updateFailed: "Gagal memperbarui status."
   }
 };
 

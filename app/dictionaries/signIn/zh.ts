@@ -44,7 +44,7 @@ const zh: SignInLocale = {
     emailRequired: "请输入邮箱地址",
     passwordRequired: "请输入密码",
     emailFormatInvalid: "请输入有效的邮箱格式",
-    passwordFormatInvalid: "密码至少 8 个字符，且包含大写、小写、数字和符号",
+    passwordFormatInvalid: "密码至少 8 个字符，且包含大写、小写和数字",
     emailAndPasswordRequired: "请输入邮箱地址和密码",
     signInFailed: "登录失败",
     accountNotConfirmed: "账户未确认。请完成邮箱验证",

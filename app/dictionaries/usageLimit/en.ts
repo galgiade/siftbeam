@@ -118,6 +118,9 @@ const en: UsageLimitLocale = {
 
     // Error screen
     errorOccurred: "An error occurred",
+    errorDetails: "Error Details",
+    reloadPage: "Reload Page",
+    backToAccount: "Back to Account",
     contactSupport: "If the issue persists, please contact support."
   },
   alert: {
@@ -161,7 +164,9 @@ const en: UsageLimitLocale = {
 
     // Errors
     loginRequired: "Login is required.",
-    unknownError: "An unknown error occurred."
+    unknownError: "An unknown error occurred.",
+    accessDenied: "You do not have permission to access this page. Only administrators can access.",
+    fetchFailed: "Failed to fetch usage limit data."
   }
 };
 

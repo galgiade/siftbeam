@@ -111,6 +111,8 @@ const zh: APIKeyLocale = {
     checkAdminPermission: '请确认您具有管理员权限',
     contactAdmin: '如问题仍未解决，请联系系统管理员',
     accessDenied: '您无权访问此页面。仅限管理员。',
+    adminOnly: '此页面仅管理员可以访问。',
+    backToUserProfile: '返回用户资料',
     fetchFailed: '获取 API 密钥列表失败。',
     unknownError: '发生意外错误。',
     authError: '认证错误：',

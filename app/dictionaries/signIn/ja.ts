@@ -44,7 +44,7 @@ const ja: SignInLocale = {
     emailRequired: "メールアドレスを入力してください",
     passwordRequired: "パスワードを入力してください",
     emailFormatInvalid: "正しいメールアドレス形式で入力してください",
-    passwordFormatInvalid: "パスワードは8文字以上で、英大文字・小文字・数字・記号を含めてください",
+    passwordFormatInvalid: "パスワードは8文字以上で、英大文字・小文字・数字を含めてください",
     emailAndPasswordRequired: "メールアドレスとパスワードを入力してください",
     signInFailed: "サインインに失敗しました",
     accountNotConfirmed: "アカウントが確認されていません。メール認証を完了してください",

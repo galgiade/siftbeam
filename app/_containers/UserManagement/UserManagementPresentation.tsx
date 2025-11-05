@@ -565,6 +565,7 @@ export default function UserManagementPresentation({
                 variant="bordered"
                 placeholder={`${label}を選択してください`}
                 isInvalid={!!error}
+                disallowEmptySelection={true}
                 classNames={{
                   listbox: "bg-white shadow-lg border border-gray-200",
                   popoverContent: "bg-white shadow-lg border border-gray-200"
@@ -677,6 +678,7 @@ export default function UserManagementPresentation({
                   onSelectionChange={(keys) => handleRoleFilterChange(Array.from(keys)[0] as 'all' | 'admin' | 'user')}
                   variant="bordered"
                   placeholder={dictionary.label.filterByRole}
+                  disallowEmptySelection={true}
                   classNames={{
                     listbox: "bg-white shadow-lg border border-gray-200",
                     popoverContent: "bg-white shadow-lg border border-gray-200"

@@ -38,7 +38,7 @@ const es: SignUpAuthLocale = {
     passwordRequired: "Introduce tu contraseña",
     emailAndPasswordRequired: "Introduce correo y contraseña",
     invalidEmailFormat: "Introduce un formato de correo válido",
-    invalidPasswordFormat: "La contraseña debe tener al menos 8 caracteres con mayúsculas, minúsculas, números y símbolos",
+    invalidPasswordFormat: "La contraseña debe tener al menos 8 caracteres con mayúsculas, minúsculas y números",
     passwordMismatch: "Las contraseñas no coinciden",
     verificationCodeRequired: "Introduce el código de verificación",
     verificationCodeLength: "Introduce un código de 6 dígitos",

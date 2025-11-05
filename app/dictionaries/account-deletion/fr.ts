@@ -94,7 +94,8 @@ const fr: AccountDeletionLocale = {
     cancelDeletionButton: "Annuler la demande de suppression",
     restoringButton: "Restauration...",
     supportContact: "Pour toute question concernant cette action, contactez l'",
-    supportTeam: "équipe d'assistance"
+    supportTeam: "équipe d'assistance",
+    unknown: "Inconnu"
   },
   alert: {
     deleteFailed: "Échec de la suppression du compte",

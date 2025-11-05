@@ -111,6 +111,8 @@ const id: APIKeyLocale = {
     checkAdminPermission: 'Pastikan Anda memiliki hak admin',
     contactAdmin: 'Jika masalah berlanjut, hubungi administrator sistem Anda',
     accessDenied: 'Anda tidak memiliki izin untuk mengakses halaman ini. Hanya admin.',
+    adminOnly: 'Halaman ini hanya dapat diakses oleh administrator.',
+    backToUserProfile: 'Kembali ke Profil Pengguna',
     fetchFailed: 'Gagal mengambil daftar kunci API.',
     unknownError: 'Terjadi kesalahan tak terduga.',
     authError: 'Kesalahan autentikasi:',

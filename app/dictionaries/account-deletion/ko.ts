@@ -94,7 +94,8 @@ const ko: AccountDeletionLocale = {
     cancelDeletionButton: "삭제 요청 취소",
     restoringButton: "복구 중...",
     supportContact: "이 작업에 대해 궁금한 점이 있으면",
-    supportTeam: "지원 팀"
+    supportTeam: "지원 팀",
+    unknown: "알 수 없음"
   },
   alert: {
     deleteFailed: "계정 삭제에 실패했습니다",

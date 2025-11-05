@@ -94,7 +94,8 @@ const pt: AccountDeletionLocale = {
     cancelDeletionButton: "Cancelar solicitação de exclusão",
     restoringButton: "Restaurando...",
     supportContact: "Se tiver dúvidas sobre esta ação, entre em contato com a",
-    supportTeam: "equipe de suporte"
+    supportTeam: "equipe de suporte",
+    unknown: "Desconhecido"
   },
   alert: {
     deleteFailed: "Falha ao excluir a conta",

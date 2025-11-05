@@ -46,6 +46,7 @@ const ko: UserManagementLocale = {
     userNotFoundOrDeleted: "사용자를 찾을 수 없습니다 (이미 삭제되었거나 존재하지 않음)",
     deleteUnconfirmedUserFailed: "미확인 사용자 삭제에 실패했습니다",
     accessDenied: "이 페이지에 액세스할 권한이 없습니다. 관리자만 액세스할 수 있습니다.",
+    adminOnly: "이 페이지는 관리자만 액세스할 수 있습니다.",
     fetchUsersFailed: "사용자 목록을 가져오는 데 실패했습니다."
   },
   label: {
@@ -101,6 +102,7 @@ const ko: UserManagementLocale = {
     unknownError: "알 수 없는 오류",
     noStackTrace: "스택 추적 없음",
     retry: "다시 시도",
+    backToUserProfile: "사용자 프로필로 돌아가기",
     developerInfo: "개발자 정보:",
     checkDynamoDBConnection: "• DynamoDB 연결 또는 Cognito 설정을 확인하세요",
     checkEnvironmentVariables: "• 환경 변수: USER_TABLE_NAME, COGNITO_USER_POOL_ID",
@@ -120,7 +122,7 @@ const ko: UserManagementLocale = {
     positionPlaceholder: "직책 입력",
     rolePlaceholder2: "역할 선택",
     localePlaceholder: "언어 선택",
-    passwordPlaceholder: "비밀번호 입력 (8자 이상)",
+    passwordPlaceholder: "비밀번호 입력 (8자 이상, 대/소문자, 숫자)",
     requiredMark: "*",
     detailedErrors: "상세 오류:",
     showDebugInfo: "디버그 정보 표시",

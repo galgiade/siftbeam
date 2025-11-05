@@ -1,8 +1,11 @@
 'use client'
 
-import { Card, CardBody, CardHeader, Alert } from '@heroui/react'
+import { Button, Card, CardBody, CardHeader, Alert } from '@heroui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { APIKeyLocale } from '@/app/dictionaries/apiKey/apiKey.d'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import AccessDeniedError from '@/app/_components/common/error/AccessDeniedError'
 
 interface ApiKeyErrorDisplayProps {
   error: string;
@@ -13,6 +16,18 @@ interface ApiKeyErrorDisplayProps {
  * APIキー管理のエラー表示コンポーネント
  */
 export default function ApiKeyErrorDisplay({ error, dictionary }: ApiKeyErrorDisplayProps) {
+  const params = useParams();
+  const locale = params.locale as string || 'ja';
+  
+  // アクセス権限エラーかどうかを判定
+  const isAccessDenied = error === dictionary.error.accessDenied;
+
+  // アクセス権限エラーの場合
+  if (isAccessDenied) {
+    return <AccessDeniedError />;
+  }
+
+  // その他のエラーの場合
   return (
     <div className="max-w-4xl mx-auto p-6">
       <Card className="shadow-lg">

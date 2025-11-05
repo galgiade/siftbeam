@@ -134,7 +134,8 @@ const ko: SupportCenterLocale = {
     descriptionRequired: "문제 상세는 필수 입력입니다.",
     issueTypeRequired: "문제 유형을 선택하세요.",
     formSubmissionError: "양식 제출 중 오류가 발생했습니다.",
-    replyError: "답변 전송 중 오류가 발생했습니다."
+    replyError: "답변 전송 중 오류가 발생했습니다.",
+    updateFailed: "상태 업데이트에 실패했습니다."
   }
 };
 

@@ -57,7 +57,10 @@ const pt: PaymentMethodsLocale = {
     clearFilters: "Limpar",
     previousPage: "Anterior",
     nextPage: "Próximo",
-    pageNumber: "Página {page}"
+    pageNumber: "Página {page}",
+    errorDetails: "Detalhes do erro:",
+    reloadPage: "Recarregar página",
+    backToAccount: "Voltar para a conta"
   },
   alert: {
     setupIntentFailed: "Falha ao criar Setup Intent",
@@ -71,7 +74,9 @@ const pt: PaymentMethodsLocale = {
     paymentMethodCreationFailed: "Falha ao criar Payment Method",
     setupIntentNotCompleted: "O processamento do Setup Intent não foi concluído",
     clientSecretNotFound: "Não foi possível obter client_secret",
-    allCardInfoRequired: "Por favor, insira todas as informações do cartão."
+    allCardInfoRequired: "Por favor, insira todas as informações do cartão.",
+    accessDenied: "Você não tem permissão para acessar esta página. Acessível apenas para administradores.",
+    authError: "Ocorreu um erro de autenticação."
   },
   message: {
     noInvoices: "Nenhuma fatura disponível.",

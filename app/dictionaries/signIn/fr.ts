@@ -44,7 +44,7 @@ const fr: SignInLocale = {
     emailRequired: "Veuillez saisir votre adresse e-mail",
     passwordRequired: "Veuillez saisir votre mot de passe",
     emailFormatInvalid: "Veuillez saisir une adresse e-mail valide",
-    passwordFormatInvalid: "Le mot de passe doit contenir au moins 8 caractères avec majuscules, minuscules, chiffres et symboles",
+    passwordFormatInvalid: "Le mot de passe doit contenir au moins 8 caractères avec majuscules, minuscules et chiffres",
     emailAndPasswordRequired: "Veuillez saisir votre adresse e-mail et votre mot de passe",
     signInFailed: "Échec de la connexion",
     accountNotConfirmed: "Compte non confirmé. Veuillez terminer la vérification par e-mail",

@@ -20,6 +20,7 @@ export type GroupManagementLocale = {
     errorDetails: string;
     reloadPage: string;
     backToAccount: string;
+    backToUserProfile: string;
     contactAdmin: string;
     groupNotSelected: string;
     updatedSuccessfully: string;
@@ -91,6 +92,7 @@ export type GroupManagementLocale = {
     policyUpdateSuccess: string;
     noChanges: string;
     accessDenied: string;
+    adminOnly: string;
     fetchGroupsFailed: string;
     authError: string;
     unknownError: string;

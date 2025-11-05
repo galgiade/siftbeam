@@ -44,6 +44,7 @@ export type UserManagementLocale = {
     userNotFoundOrDeleted: string;
     deleteUnconfirmedUserFailed: string;
     accessDenied: string;
+    adminOnly: string;
     fetchUsersFailed: string;
   };
   label: {
@@ -99,6 +100,7 @@ export type UserManagementLocale = {
     unknownError: string;
     noStackTrace: string;
     retry: string;
+    backToUserProfile: string;
     developerInfo: string;
     checkDynamoDBConnection: string;
     checkEnvironmentVariables: string;

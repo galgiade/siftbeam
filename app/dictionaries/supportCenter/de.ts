@@ -134,7 +134,8 @@ const de: SupportCenterLocale = {
     descriptionRequired: "Problembeschreibung ist erforderlich.",
     issueTypeRequired: "Bitte wählen Sie einen Problemtyp aus.",
     formSubmissionError: "Beim Senden des Formulars ist ein Fehler aufgetreten.",
-    replyError: "Beim Senden der Antwort ist ein Fehler aufgetreten."
+    replyError: "Beim Senden der Antwort ist ein Fehler aufgetreten.",
+    updateFailed: "Aktualisierung des Status fehlgeschlagen."
   }
 };
 

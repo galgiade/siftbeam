@@ -68,7 +68,11 @@ const id: AuditLogLocale = {
   alert: {
     fetchError: "Gagal mengambil data",
     unexpectedError: "Terjadi kesalahan tak terduga",
-    adminRequired: "Memerlukan hak admin"
+    adminRequired: "Anda tidak memiliki izin untuk mengakses halaman ini. Hanya dapat diakses oleh administrator.",
+    errorOccurred: "Terjadi kesalahan",
+    backToAccount: "Kembali ke halaman akun",
+    contactSupport: "Jika masalah berlanjut, hubungi administrator sistem Anda.",
+    errorDetails: "Detail kesalahan:"
   },
   resource: {
     User: "Pengguna",

@@ -46,6 +46,7 @@ const id: UserManagementLocale = {
     userNotFoundOrDeleted: "Pengguna tidak ditemukan (sudah dihapus atau tidak pernah ada)",
     deleteUnconfirmedUserFailed: "Gagal menghapus pengguna yang belum dikonfirmasi",
     accessDenied: "Anda tidak memiliki izin untuk mengakses halaman ini. Hanya administrator yang dapat mengakses.",
+    adminOnly: "Halaman ini hanya dapat diakses oleh administrator.",
     fetchUsersFailed: "Gagal mengambil daftar pengguna."
   },
   label: {
@@ -101,6 +102,7 @@ const id: UserManagementLocale = {
     unknownError: "Kesalahan tidak diketahui",
     noStackTrace: "Tidak ada jejak tumpukan",
     retry: "Coba Lagi",
+    backToUserProfile: "Kembali ke Profil Pengguna",
     developerInfo: "Informasi Pengembang:",
     checkDynamoDBConnection: "• Periksa koneksi DynamoDB atau pengaturan Cognito",
     checkEnvironmentVariables: "• Variabel lingkungan: USER_TABLE_NAME, COGNITO_USER_POOL_ID",
@@ -120,7 +122,7 @@ const id: UserManagementLocale = {
     positionPlaceholder: "Masukkan jabatan",
     rolePlaceholder2: "Pilih peran",
     localePlaceholder: "Pilih bahasa",
-    passwordPlaceholder: "Masukkan kata sandi (8+ karakter)",
+    passwordPlaceholder: "Masukkan kata sandi (8+ kar., besar/kecil, angka)",
     requiredMark: "*",
     detailedErrors: "Kesalahan Terperinci:",
     showDebugInfo: "Tampilkan Info Debug",

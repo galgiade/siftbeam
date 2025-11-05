@@ -1,4 +1,5 @@
 import UsageLimitPresentation from "./UsageLimitPresentation";
+import UsageLimitErrorDisplay from "./UsageLimitErrorDisplay";
 import { requireUserProfile } from "@/app/lib/utils/require-auth";
 import { usageLimitDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import { getCustomerUsageLimits } from "@/app/lib/actions/usage-limits-api";
@@ -14,21 +15,22 @@ export default async function UsageLimitContainer({ locale }: UsageLimitContaine
       Promise.resolve(pickDictionary(usageLimitDictionaries, locale, 'en'))
     ]);
 
+    // 管理者権限チェック
+    if (userProfile.role !== 'admin') {
+      return (
+        <UsageLimitErrorDisplay 
+          error={dictionary.alert.accessDenied}
+          dictionary={dictionary} 
+        />
+      );
+    }
+
     if (!userProfile.sub || !userProfile.customerId) {
       return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-6">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-danger-600 mb-4">
-              {dictionary.label.errorOccurred}
-            </h2>
-            <p className="text-gray-700 mb-4">
-              {dictionary.alert.loginRequired}
-            </p>
-            <p className="text-sm text-gray-500">
-              {dictionary.label.contactSupport}
-            </p>
-          </div>
-        </div>
+        <UsageLimitErrorDisplay 
+          error={dictionary.alert.loginRequired}
+          dictionary={dictionary} 
+        />
       );
     }
 
@@ -46,19 +48,10 @@ export default async function UsageLimitContainer({ locale }: UsageLimitContaine
 
     if (!usageLimitsResult.success) {
       return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-6">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-danger-600 mb-4">
-              {dictionary.label.errorOccurred}
-            </h2>
-            <p className="text-gray-700 mb-4">
-              {usageLimitsResult.message}
-            </p>
-            <p className="text-sm text-gray-500">
-              {dictionary.label.contactSupport}
-            </p>
-          </div>
-        </div>
+        <UsageLimitErrorDisplay 
+          error={usageLimitsResult.message || dictionary.alert.fetchFailed}
+          dictionary={dictionary} 
+        />
       );
     }
 
@@ -78,19 +71,10 @@ export default async function UsageLimitContainer({ locale }: UsageLimitContaine
     const dictionary = pickDictionary(usageLimitDictionaries, locale, 'en');
     
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 p-6">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-danger-600 mb-4">
-            {dictionary.label.errorOccurred}
-          </h2>
-          <p className="text-gray-700 mb-4">
-            {error.message || dictionary.alert.unknownError}
-          </p>
-          <p className="text-sm text-gray-500">
-            {dictionary.label.contactSupport}
-          </p>
-        </div>
-      </div>
+      <UsageLimitErrorDisplay 
+        error={error.message || dictionary.alert.unknownError}
+        dictionary={dictionary} 
+      />
     );
   }
 }

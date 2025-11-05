@@ -57,7 +57,10 @@ const zh: PaymentMethodsLocale = {
     clearFilters: "清除",
     previousPage: "上一页",
     nextPage: "下一页",
-    pageNumber: "第 {page} 页"
+    pageNumber: "第 {page} 页",
+    errorDetails: "错误详情：",
+    reloadPage: "重新加载页面",
+    backToAccount: "返回账户页面"
   },
   alert: {
     setupIntentFailed: "创建 Setup Intent 失败",
@@ -71,7 +74,9 @@ const zh: PaymentMethodsLocale = {
     paymentMethodCreationFailed: "创建 Payment Method 失败",
     setupIntentNotCompleted: "Setup Intent 处理未完成",
     clientSecretNotFound: "无法获取 client_secret",
-    allCardInfoRequired: "请输入所有卡片信息。"
+    allCardInfoRequired: "请输入所有卡片信息。",
+    accessDenied: "您无权访问此页面。仅限管理员访问。",
+    authError: "发生认证错误。"
   },
   message: {
     noInvoices: "没有发票。",

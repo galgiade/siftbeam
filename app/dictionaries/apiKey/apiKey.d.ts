@@ -109,6 +109,8 @@ export type APIKeyLocale = {
     checkAdminPermission: string;
     contactAdmin: string;
     accessDenied: string;
+    adminOnly: string;
+    backToUserProfile: string;
     fetchFailed: string;
     unknownError: string;
     authError: string;

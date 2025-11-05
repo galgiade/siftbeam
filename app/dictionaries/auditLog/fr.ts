@@ -68,7 +68,11 @@ const fr: AuditLogLocale = {
   alert: {
     fetchError: "Échec du chargement des données",
     unexpectedError: "Une erreur inattendue est survenue",
-    adminRequired: "Droits d'administrateur requis"
+    adminRequired: "Vous n'avez pas l'autorisation d'accéder à cette page. Accessible uniquement aux administrateurs.",
+    errorOccurred: "Une erreur s'est produite",
+    backToAccount: "Retour à la page du compte",
+    contactSupport: "Si le problème persiste, veuillez contacter votre administrateur système.",
+    errorDetails: "Détails de l'erreur :"
   },
   resource: {
     User: "Utilisateur",

@@ -118,6 +118,9 @@ const es: UsageLimitLocale = {
 
     // Pantalla de error
     errorOccurred: "Se produjo un error",
+    errorDetails: "Detalles del error",
+    reloadPage: "Recargar página",
+    backToAccount: "Volver a la cuenta",
     contactSupport: "Si el problema continúa, póngase en contacto con soporte."
   },
   alert: {
@@ -161,7 +164,9 @@ const es: UsageLimitLocale = {
 
     // Errores
     loginRequired: "Se requiere iniciar sesión.",
-    unknownError: "Ocurrió un error desconocido."
+    unknownError: "Ocurrió un error desconocido.",
+    accessDenied: "No tiene permiso para acceder a esta página. Solo accesible para administradores.",
+    fetchFailed: "Error al obtener datos de límite de uso."
   }
 };
 

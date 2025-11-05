@@ -67,6 +67,10 @@ export type AuditLogLocale = {
     fetchError: string;
     unexpectedError: string;
     adminRequired: string;
+    errorOccurred: string;
+    backToAccount: string;
+    contactSupport: string;
+    errorDetails: string;
   };
   resource: {
     User: string;

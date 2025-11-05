@@ -134,7 +134,8 @@ const fr: SupportCenterLocale = {
     descriptionRequired: "Les détails du problème sont obligatoires.",
     issueTypeRequired: "Veuillez sélectionner un type de problème.",
     formSubmissionError: "Une erreur s'est produite lors de l'envoi du formulaire.",
-    replyError: "Une erreur est survenue lors de l'envoi de la réponse."
+    replyError: "Une erreur est survenue lors de l'envoi de la réponse.",
+    updateFailed: "Échec de la mise à jour du statut."
   }
 };
 

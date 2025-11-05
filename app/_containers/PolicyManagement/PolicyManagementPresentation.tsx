@@ -522,15 +522,6 @@ export default function PolicyManagementPresentation({
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">{dictionary.label.policyManagement}</h1>
-          <Button
-            color="primary"
-            as={Link}
-            href={`/${userAttributes.locale}/account/policy-management/create`}
-            startContent={<FaPlus size={16} />}
-            className="font-medium"
-          >
-            {dictionary.label.createNewPolicy}
-          </Button>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -579,17 +570,6 @@ export default function PolicyManagementPresentation({
                           {dictionary.label.fileTypeCount.replace('{count}', policy.acceptedFileTypes.length.toString())}
                         </p>
                       </div>
-                      <Button
-                        size="sm"
-                        color="danger"
-                        variant="light"
-                        isIconOnly
-                        onPress={() => openDeleteModal(policy)}
-                        className="ml-2"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <FaTrash size={12} />
-                      </Button>
                     </div>
                   </div>
                 ))

@@ -111,6 +111,8 @@ const es: APIKeyLocale = {
     checkAdminPermission: 'Asegúrese de tener privilegios de administrador',
     contactAdmin: 'Si el problema persiste, contacte con el administrador del sistema',
     accessDenied: 'No tiene permiso para acceder a esta página. Solo administradores.',
+    adminOnly: 'Esta página solo es accesible para administradores.',
+    backToUserProfile: 'Volver al Perfil de Usuario',
     fetchFailed: 'Error al obtener la lista de claves API.',
     unknownError: 'Se produjo un error inesperado.',
     authError: 'Error de autenticación:',

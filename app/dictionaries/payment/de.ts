@@ -57,7 +57,10 @@ const de: PaymentMethodsLocale = {
     clearFilters: "Zurücksetzen",
     previousPage: "Zurück",
     nextPage: "Weiter",
-    pageNumber: "Seite {page}"
+    pageNumber: "Seite {page}",
+    errorDetails: "Fehlerdetails:",
+    reloadPage: "Seite neu laden",
+    backToAccount: "Zurück zum Konto"
   },
   alert: {
     setupIntentFailed: "Setup-Intent konnte nicht erstellt werden",
@@ -71,7 +74,9 @@ const de: PaymentMethodsLocale = {
     paymentMethodCreationFailed: "Payment Method konnte nicht erstellt werden",
     setupIntentNotCompleted: "Setup-Intent-Verarbeitung wurde nicht abgeschlossen",
     clientSecretNotFound: "client_secret konnte nicht abgerufen werden",
-    allCardInfoRequired: "Bitte geben Sie alle Karteninformationen ein."
+    allCardInfoRequired: "Bitte geben Sie alle Karteninformationen ein.",
+    accessDenied: "Sie haben keine Berechtigung, auf diese Seite zuzugreifen. Nur für Administratoren zugänglich.",
+    authError: "Ein Authentifizierungsfehler ist aufgetreten."
   },
   message: {
     noInvoices: "Keine Rechnungen verfügbar.",

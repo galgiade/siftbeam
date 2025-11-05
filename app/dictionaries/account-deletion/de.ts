@@ -94,7 +94,8 @@ const de: AccountDeletionLocale = {
     cancelDeletionButton: "Löschantrag stornieren",
     restoringButton: "Wiederherstellung läuft...",
     supportContact: "Bei Fragen zu diesem Vorgang wenden Sie sich an die",
-    supportTeam: "Supportabteilung"
+    supportTeam: "Supportabteilung",
+    unknown: "Unbekannt"
   },
   alert: {
     deleteFailed: "Kontolöschung fehlgeschlagen",

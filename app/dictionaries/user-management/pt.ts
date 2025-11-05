@@ -46,6 +46,7 @@ const pt: UserManagementLocale = {
     userNotFoundOrDeleted: "Usuário não encontrado (já excluído ou nunca existiu)",
     deleteUnconfirmedUserFailed: "Falha ao excluir usuário não confirmado",
     accessDenied: "Você não tem permissão para acessar esta página. Apenas administradores podem acessar.",
+    adminOnly: "Esta página é acessível apenas para administradores.",
     fetchUsersFailed: "Falha ao buscar lista de usuários."
   },
   label: {
@@ -101,6 +102,7 @@ const pt: UserManagementLocale = {
     unknownError: "Erro desconhecido",
     noStackTrace: "Sem rastreamento de pilha",
     retry: "Tentar Novamente",
+    backToUserProfile: "Voltar ao Perfil do Usuário",
     developerInfo: "Informações para Desenvolvedores:",
     checkDynamoDBConnection: "• Verifique a conexão DynamoDB ou configurações do Cognito",
     checkEnvironmentVariables: "• Variáveis de ambiente: USER_TABLE_NAME, COGNITO_USER_POOL_ID",
@@ -120,7 +122,7 @@ const pt: UserManagementLocale = {
     positionPlaceholder: "Digite o cargo",
     rolePlaceholder2: "Selecione a função",
     localePlaceholder: "Selecione o idioma",
-    passwordPlaceholder: "Digite a senha (8+ caracteres)",
+    passwordPlaceholder: "Digite a senha (8+ car., mai/min, número)",
     requiredMark: "*",
     detailedErrors: "Erros Detalhados:",
     showDebugInfo: "Mostrar Informações de Depuração",

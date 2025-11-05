@@ -168,6 +168,15 @@ export default function CreateUserManagementPresentation({
       errors.password = dictionary.alert.passwordRequired;
     } else if (formData.password.length < 8) {
       errors.password = dictionary.alert.passwordPolicy;
+    } else if (!/[a-z]/.test(formData.password)) {
+      // 少なくとも1つの小文字を含む
+      errors.password = dictionary.alert.passwordLower;
+    } else if (!/[A-Z]/.test(formData.password)) {
+      // 少なくとも1つの大文字を含む
+      errors.password = dictionary.alert.passwordUpper;
+    } else if (!/\d/.test(formData.password)) {
+      // 少なくとも1つの数字を含む
+      errors.password = dictionary.alert.passwordNumber;
     }
 
     setClientErrors(errors);
@@ -328,6 +337,7 @@ export default function CreateUserManagementPresentation({
                 }}
                 variant="bordered"
                 placeholder={dictionary.label.rolePlaceholder2}
+                disallowEmptySelection={true}
                 classNames={{
                   listbox: "bg-white shadow-lg border border-gray-200",
                   popoverContent: "bg-white shadow-lg border border-gray-200"
@@ -356,6 +366,7 @@ export default function CreateUserManagementPresentation({
                 }}
                 variant="bordered"
                 placeholder={dictionary.label.localePlaceholder}
+                disallowEmptySelection={true}
                 classNames={{
                   listbox: "bg-white shadow-lg border border-gray-200",
                   popoverContent: "bg-white shadow-lg border border-gray-200"

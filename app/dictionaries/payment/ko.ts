@@ -57,7 +57,10 @@ const ko: PaymentMethodsLocale = {
     clearFilters: "초기화",
     previousPage: "이전",
     nextPage: "다음",
-    pageNumber: "페이지 {page}"
+    pageNumber: "페이지 {page}",
+    errorDetails: "오류 상세:",
+    reloadPage: "페이지 새로고침",
+    backToAccount: "계정 페이지로 돌아가기"
   },
   alert: {
     setupIntentFailed: "Setup Intent 생성 실패",
@@ -71,7 +74,9 @@ const ko: PaymentMethodsLocale = {
     paymentMethodCreationFailed: "Payment Method 생성에 실패했습니다",
     setupIntentNotCompleted: "Setup Intent 처리가 완료되지 않았습니다",
     clientSecretNotFound: "client_secret을 가져올 수 없습니다",
-    allCardInfoRequired: "모든 카드 정보를 입력해주세요."
+    allCardInfoRequired: "모든 카드 정보를 입력해주세요.",
+    accessDenied: "이 페이지에 접근할 권한이 없습니다. 관리자만 접근 가능합니다.",
+    authError: "인증 오류가 발생했습니다."
   },
   message: {
     noInvoices: "청구서가 없습니다.",

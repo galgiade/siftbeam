@@ -44,7 +44,7 @@ const de: SignInLocale = {
     emailRequired: "Bitte E-Mail-Adresse eingeben",
     passwordRequired: "Bitte Passwort eingeben",
     emailFormatInvalid: "Bitte eine gültige E-Mail-Adresse eingeben",
-    passwordFormatInvalid: "Passwort: mind. 8 Zeichen, Groß-/Kleinbuchstaben, Zahl, Symbol",
+    passwordFormatInvalid: "Passwort: mind. 8 Zeichen, Groß-/Kleinbuchstaben, Zahl",
     emailAndPasswordRequired: "Bitte E-Mail-Adresse und Passwort eingeben",
     signInFailed: "Anmeldung fehlgeschlagen",
     accountNotConfirmed: "Konto ist nicht bestätigt. Bitte E-Mail-Verifizierung abschließen",

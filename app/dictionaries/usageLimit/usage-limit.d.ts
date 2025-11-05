@@ -116,6 +116,9 @@ export type UsageLimitLocale = {
     
     // エラー画面
     errorOccurred: string;
+    errorDetails: string;
+    reloadPage: string;
+    backToAccount: string;
     contactSupport: string;
   };
   alert: {
@@ -160,5 +163,7 @@ export type UsageLimitLocale = {
     // エラー
     loginRequired: string;
     unknownError: string;
+    accessDenied: string;
+    fetchFailed: string;
   };
 };

@@ -24,6 +24,21 @@ export type SupportCenterLocale = {
     statusOpen: string;
     statusInProgress: string;
     statusClosed: string;
+    back: string;
+    reply: string;
+    replyContent: string;
+    inquiryContent: string;
+    attachedFiles: string;
+    messagePlaceholder: string;
+    markResolved: string;
+    markUnresolved: string;
+    staff: string;
+    problemType: string;
+    technicalIssue: string;
+    accountRelated: string;
+    billingRelated: string;
+    deleteFile: string;
+    fileRemoved: string;
   };
   alert: {
     requestReceived: string;
@@ -31,5 +46,6 @@ export type SupportCenterLocale = {
     subjectRequired: string;
     descriptionRequired: string;
     messageRequired: string;
+    supportRequestError: string;
   };
 };

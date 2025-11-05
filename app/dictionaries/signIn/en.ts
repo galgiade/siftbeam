@@ -44,7 +44,7 @@ const en: SignInLocale = {
     emailRequired: "Please enter your email address",
     passwordRequired: "Please enter your password",
     emailFormatInvalid: "Please enter a valid email address format",
-    passwordFormatInvalid: "Password must be at least 8 characters with uppercase, lowercase, numbers, and symbols",
+    passwordFormatInvalid: "Password must be at least 8 characters with uppercase, lowercase, and numbers",
     emailAndPasswordRequired: "Please enter your email address and password",
     signInFailed: "Sign in failed",
     accountNotConfirmed: "Account is not confirmed. Please complete email verification",

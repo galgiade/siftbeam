@@ -57,7 +57,10 @@ const ja: PaymentMethodsLocale = {
     clearFilters: "クリア",
     previousPage: "前へ",
     nextPage: "次へ",
-    pageNumber: "ページ {page}"
+    pageNumber: "ページ {page}",
+    errorDetails: "エラー詳細:",
+    reloadPage: "ページを再読み込み",
+    backToAccount: "アカウントページに戻る"
   },
   alert: {
     setupIntentFailed: "Setup Intent作成に失敗しました",
@@ -71,7 +74,9 @@ const ja: PaymentMethodsLocale = {
     paymentMethodCreationFailed: "Payment Methodの作成に失敗しました",
     setupIntentNotCompleted: "Setup Intentの処理が完了しませんでした",
     clientSecretNotFound: "client_secretが取得できませんでした",
-    allCardInfoRequired: "すべてのカード情報を入力してください。"
+    allCardInfoRequired: "すべてのカード情報を入力してください。",
+    accessDenied: "このページにアクセスする権限がありません。管理者のみアクセス可能です。",
+    authError: "認証エラーが発生しました。"
   },
   message: {
     noInvoices: "請求書がありません。",

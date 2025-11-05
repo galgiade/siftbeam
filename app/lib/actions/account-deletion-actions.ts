@@ -2,8 +2,10 @@
 
 import Stripe from 'stripe';
 import { getUserCustomAttributes, updateUserCustomAttribute } from '@/app/utils/cognito-utils';
-import { ListUsersCommand, AdminUpdateUserAttributesCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { AdminUpdateUserAttributesCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { cognitoClient } from '@/app/lib/aws-clients';
+import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
+import { queryUsers } from '@/app/lib/actions/user-api';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -68,6 +70,15 @@ export async function requestAccountDeletionAction(): Promise<DeletionRequestRes
     // 2. 同一customerIdを持つ全てのCognitoユーザーに削除フラグを追加
     const affectedUsers = await updateAllUsersWithCustomerId(customerId, deletionRequestedAt);
 
+    // 3. 監査ログを記録
+    await logSuccessAction(
+      'UPDATE',
+      'Account',
+      'deletionRequestedAt',
+      undefined,
+      deletionRequestedAt
+    );
+
     return {
       success: true,
       message: `Account deletion requested successfully. ${affectedUsers} users affected.`,
@@ -75,6 +86,15 @@ export async function requestAccountDeletionAction(): Promise<DeletionRequestRes
     };
   } catch (error) {
     console.error('Error requesting account deletion:', error);
+    
+    // 失敗の監査ログを記録
+    await logFailureAction(
+      'UPDATE',
+      'Account',
+      error instanceof Error ? error.message : 'Failed to request account deletion',
+      'deletionRequestedAt'
+    );
+    
     return {
       success: false,
       message: 'Failed to request account deletion'
@@ -121,6 +141,15 @@ export async function restoreAccountAction(): Promise<RestoreAccountResponse> {
     // 2. 同一customerIdを持つ全てのCognitoユーザーから削除フラグを削除
     const restoredUsers = await removeAllUsersCustomerIdDeletionFlag(customerId);
 
+    // 3. 監査ログを記録
+    await logSuccessAction(
+      'UPDATE',
+      'Account',
+      'deletionRequestedAt',
+      'set',
+      'null'
+    );
+
     return {
       success: true,
       message: `Account restored successfully. ${restoredUsers} users restored.`,
@@ -128,6 +157,15 @@ export async function restoreAccountAction(): Promise<RestoreAccountResponse> {
     };
   } catch (error) {
     console.error('Error restoring account:', error);
+    
+    // 失敗の監査ログを記録
+    await logFailureAction(
+      'UPDATE',
+      'Account',
+      error instanceof Error ? error.message : 'Failed to restore account',
+      'deletionRequestedAt'
+    );
+    
     return {
       success: false,
       message: 'Failed to restore account'
@@ -202,46 +240,50 @@ export async function checkDeletionStatusAction(): Promise<DeletionStatusRespons
 // 同一customerIdを持つ全てのユーザーに削除フラグを追加
 async function updateAllUsersWithCustomerId(customerId: string, deletionRequestedAt: string): Promise<number> {
   try {
-    let nextToken: string | undefined;
     let affectedUsers = 0;
+    let lastEvaluatedKey: Record<string, any> | undefined;
 
     do {
-      const command = new ListUsersCommand({
-        UserPoolId: process.env.COGNITO_USER_POOL_ID!,
-        Filter: `"custom:customerId" = "${customerId}"`,
-        PaginationToken: nextToken,
-        Limit: 60 // Cognitoの制限
+      // DynamoDBのUserテーブルからcustomerIdでユーザーを取得
+      const result = await queryUsers({
+        customerId,
+        limit: 100,
+        lastEvaluatedKey
       });
 
-      const response = await cognitoClient.send(command);
-      
-      if (response.Users) {
-        // 各ユーザーに削除フラグを追加
-        const updatePromises = response.Users.map(async (user) => {
-          if (user.Username) {
-            const updateCommand = new AdminUpdateUserAttributesCommand({
-              UserPoolId: process.env.COGNITO_USER_POOL_ID!,
-              Username: user.Username,
-              UserAttributes: [
-                {
-                  Name: 'custom:deletionRequestedAt',
-                  Value: deletionRequestedAt
-                }
-              ]
-            });
-            
-            await cognitoClient.send(updateCommand);
-            return 1;
-          }
-          return 0;
-        });
-
-        const results = await Promise.all(updatePromises);
-        affectedUsers += results.reduce((sum: number, count: number) => sum + count, 0);
+      if (!result.success || !result.data) {
+        throw new Error('Failed to query users from DynamoDB');
       }
 
-      nextToken = response.PaginationToken;
-    } while (nextToken);
+      const users = result.data.users;
+      lastEvaluatedKey = result.data.lastEvaluatedKey;
+
+      // 各ユーザーのCognito属性を更新
+      const updatePromises = users.map(async (user) => {
+        try {
+          const updateCommand = new AdminUpdateUserAttributesCommand({
+            UserPoolId: process.env.COGNITO_USER_POOL_ID!,
+            Username: user.userId, // DynamoDBのuserIdはCognitoのsub
+            UserAttributes: [
+              {
+                Name: 'custom:deletionRequestedAt',
+                Value: deletionRequestedAt
+              }
+            ]
+          });
+          
+          await cognitoClient.send(updateCommand);
+          return 1;
+        } catch (error) {
+          console.error(`Failed to update user ${user.userId}:`, error);
+          return 0;
+        }
+      });
+
+      const results = await Promise.all(updatePromises);
+      affectedUsers += results.reduce((sum: number, count: number) => sum + count, 0);
+
+    } while (lastEvaluatedKey);
 
     return affectedUsers;
   } catch (error) {
@@ -253,46 +295,50 @@ async function updateAllUsersWithCustomerId(customerId: string, deletionRequeste
 // 同一customerIdを持つ全てのユーザーから削除フラグを削除
 async function removeAllUsersCustomerIdDeletionFlag(customerId: string): Promise<number> {
   try {
-    let nextToken: string | undefined;
     let restoredUsers = 0;
+    let lastEvaluatedKey: Record<string, any> | undefined;
 
     do {
-      const command = new ListUsersCommand({
-        UserPoolId: process.env.COGNITO_USER_POOL_ID!,
-        Filter: `"custom:customerId" = "${customerId}"`,
-        PaginationToken: nextToken,
-        Limit: 60
+      // DynamoDBのUserテーブルからcustomerIdでユーザーを取得
+      const result = await queryUsers({
+        customerId,
+        limit: 100,
+        lastEvaluatedKey
       });
 
-      const response = await cognitoClient.send(command);
-      
-      if (response.Users) {
-        // 各ユーザーから削除フラグを削除
-        const updatePromises = response.Users.map(async (user) => {
-          if (user.Username) {
-            const updateCommand = new AdminUpdateUserAttributesCommand({
-              UserPoolId: process.env.COGNITO_USER_POOL_ID!,
-              Username: user.Username,
-              UserAttributes: [
-                {
-                  Name: 'custom:deletionRequestedAt',
-                  Value: '' // 空文字で削除
-                }
-              ]
-            });
-            
-            await cognitoClient.send(updateCommand);
-            return 1;
-          }
-          return 0;
-        });
-
-        const results = await Promise.all(updatePromises);
-        restoredUsers += results.reduce((sum: number, count: number) => sum + count, 0);
+      if (!result.success || !result.data) {
+        throw new Error('Failed to query users from DynamoDB');
       }
 
-      nextToken = response.PaginationToken;
-    } while (nextToken);
+      const users = result.data.users;
+      lastEvaluatedKey = result.data.lastEvaluatedKey;
+
+      // 各ユーザーのCognito属性を更新（削除フラグを削除）
+      const updatePromises = users.map(async (user) => {
+        try {
+          const updateCommand = new AdminUpdateUserAttributesCommand({
+            UserPoolId: process.env.COGNITO_USER_POOL_ID!,
+            Username: user.userId, // DynamoDBのuserIdはCognitoのsub
+            UserAttributes: [
+              {
+                Name: 'custom:deletionRequestedAt',
+                Value: '' // 空文字で削除
+              }
+            ]
+          });
+          
+          await cognitoClient.send(updateCommand);
+          return 1;
+        } catch (error) {
+          console.error(`Failed to restore user ${user.userId}:`, error);
+          return 0;
+        }
+      });
+
+      const results = await Promise.all(updatePromises);
+      restoredUsers += results.reduce((sum: number, count: number) => sum + count, 0);
+
+    } while (lastEvaluatedKey);
 
     return restoredUsers;
   } catch (error) {
@@ -304,25 +350,25 @@ async function removeAllUsersCustomerIdDeletionFlag(customerId: string): Promise
 // 同一customerIdを持つユーザー数をカウント
 async function countUsersWithCustomerId(customerId: string): Promise<number> {
   try {
-    let nextToken: string | undefined;
     let userCount = 0;
+    let lastEvaluatedKey: Record<string, any> | undefined;
 
     do {
-      const command = new ListUsersCommand({
-        UserPoolId: process.env.COGNITO_USER_POOL_ID!,
-        Filter: `"custom:customerId" = "${customerId}"`,
-        PaginationToken: nextToken,
-        Limit: 60
+      // DynamoDBのUserテーブルからcustomerIdでユーザーを取得
+      const result = await queryUsers({
+        customerId,
+        limit: 1000, // カウントなので大きめの値
+        lastEvaluatedKey
       });
 
-      const response = await cognitoClient.send(command);
-      
-      if (response.Users) {
-        userCount += response.Users.length;
+      if (!result.success || !result.data) {
+        throw new Error('Failed to query users from DynamoDB');
       }
 
-      nextToken = response.PaginationToken;
-    } while (nextToken);
+      userCount += result.data.users.length;
+      lastEvaluatedKey = result.data.lastEvaluatedKey;
+
+    } while (lastEvaluatedKey);
 
     return userCount;
   } catch (error) {

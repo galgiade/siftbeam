@@ -134,7 +134,8 @@ const zh: SupportCenterLocale = {
     descriptionRequired: "问题详情为必填项。",
     issueTypeRequired: "请选择问题类型。",
     formSubmissionError: "提交表单时发生错误。",
-    replyError: "发送回复时发生错误。"
+    replyError: "发送回复时发生错误。",
+    updateFailed: "更新状态失败。"
   }
 };
 
