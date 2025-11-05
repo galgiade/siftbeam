@@ -68,7 +68,11 @@ const zh: AuditLogLocale = {
   alert: {
     fetchError: "获取数据失败",
     unexpectedError: "发生意外错误",
-    adminRequired: "需要管理员权限"
+    adminRequired: "您无权访问此页面。仅限管理员访问。",
+    errorOccurred: "发生错误",
+    backToAccount: "返回账户页面",
+    contactSupport: "如果问题仍然存在，请联系系统管理员。",
+    errorDetails: "错误详情:"
   },
   resource: {
     User: "用户",

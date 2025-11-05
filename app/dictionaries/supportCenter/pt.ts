@@ -134,7 +134,8 @@ const pt: SupportCenterLocale = {
     descriptionRequired: "Os detalhes do problema são obrigatórios.",
     issueTypeRequired: "Selecione um tipo de problema.",
     formSubmissionError: "Ocorreu um erro ao enviar o formulário.",
-    replyError: "Ocorreu um erro ao enviar a resposta."
+    replyError: "Ocorreu um erro ao enviar a resposta.",
+    updateFailed: "Falha ao atualizar o status."
   }
 };
 

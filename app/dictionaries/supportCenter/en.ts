@@ -134,7 +134,8 @@ const en: SupportCenterLocale = {
     descriptionRequired: "Issue details are required.",
     issueTypeRequired: "Please select an issue type.",
     formSubmissionError: "An error occurred while submitting the form.",
-    replyError: "An error occurred while sending the reply."
+    replyError: "An error occurred while sending the reply.",
+    updateFailed: "Failed to update status."
   }
 };
 

@@ -94,14 +94,32 @@ export default function SignInPresentation({ dictionary, locale }: SignInPresent
   };
 
   // パスワードバリデーション関数
+  // 要件: 最小8文字、少なくとも1つの数字、1つの大文字、1つの小文字を含む
   const validatePassword = (password: string) => {
-    const pwValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/.test(password);
     if (!password) {
       return "";
     }
-    if (!pwValid) {
+    
+    // 最小8文字チェック
+    if (password.length < 8) {
       return dictionary.alert.passwordFormatInvalid;
     }
+    
+    // 少なくとも1つの小文字を含む
+    if (!/[a-z]/.test(password)) {
+      return dictionary.alert.passwordFormatInvalid;
+    }
+    
+    // 少なくとも1つの大文字を含む
+    if (!/[A-Z]/.test(password)) {
+      return dictionary.alert.passwordFormatInvalid;
+    }
+    
+    // 少なくとも1つの数字を含む
+    if (!/\d/.test(password)) {
+      return dictionary.alert.passwordFormatInvalid;
+    }
+    
     return "";
   };
 
@@ -267,7 +285,17 @@ export default function SignInPresentation({ dictionary, locale }: SignInPresent
                 <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="text-red-700 text-sm font-normal leading-relaxed">{state.message}</p>
+                <p className="text-red-700 text-sm font-normal leading-relaxed">
+                  {/* エラーコードを辞書から取得して表示 */}
+                  {state.message === 'notAuthorized' ? dictionary.alert.authErrors.notAuthorized :
+                   state.message === 'userNotConfirmed' ? dictionary.alert.authErrors.userNotConfirmed :
+                   state.message === 'userNotFound' ? dictionary.alert.authErrors.userNotFound :
+                   state.message === 'passwordResetRequired' ? dictionary.alert.authErrors.passwordResetRequired :
+                   state.message === 'invalidParameter' ? dictionary.alert.authErrors.invalidParameter :
+                   state.message === 'tooManyRequests' ? dictionary.alert.authErrors.tooManyRequests :
+                   state.message === 'signInFailed' ? dictionary.alert.signInFailed :
+                   state.message}
+                </p>
               </div>
             )}
             

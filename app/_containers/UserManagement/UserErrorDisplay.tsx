@@ -1,6 +1,11 @@
 'use client'
 
 import type { UserManagementLocale } from '@/app/dictionaries/user-management/user-management.d.ts';
+import { Button, Card } from '@heroui/react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { FaExclamationTriangle } from 'react-icons/fa';
+import AccessDeniedError from '@/app/_components/common/error/AccessDeniedError';
 
 /**
  * ユーザー情報取得エラー表示コンポーネント
@@ -12,6 +17,18 @@ export default function UserErrorDisplay({
   error: string; 
   dictionary: UserManagementLocale; 
 }) {
+  const params = useParams();
+  const locale = params.locale as string || 'ja';
+  
+  // アクセス権限エラーかどうかを判定
+  const isAccessDenied = error === dictionary.alert.accessDenied;
+
+  // アクセス権限エラーの場合
+  if (isAccessDenied) {
+    return <AccessDeniedError />;
+  }
+
+  // その他のエラーの場合（開発者向け詳細エラー）
   const handleRetry = () => {
     window.location.reload();
   };
@@ -21,19 +38,7 @@ export default function UserErrorDisplay({
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg border border-red-200">
         <div className="text-center">
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-            <svg 
-              className="h-6 w-6 text-red-600" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" 
-              />
-            </svg>
+            <FaExclamationTriangle className="h-6 w-6 text-red-600" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             {dictionary.label.fetchUsersFailed}

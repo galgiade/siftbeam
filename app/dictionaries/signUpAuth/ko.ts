@@ -38,7 +38,7 @@ const ko: SignUpAuthLocale = {
     passwordRequired: "비밀번호를 입력하세요",
     emailAndPasswordRequired: "이메일과 비밀번호를 입력하세요",
     invalidEmailFormat: "유효한 이메일 주소 형식을 입력하세요",
-    invalidPasswordFormat: "비밀번호는 대문자/소문자/숫자/기호를 포함하여 최소 8자여야 합니다",
+    invalidPasswordFormat: "비밀번호는 대문자/소문자/숫자를 포함하여 최소 8자여야 합니다",
     passwordMismatch: "비밀번호가 일치하지 않습니다",
     verificationCodeRequired: "인증 코드를 입력하세요",
     verificationCodeLength: "6자리 인증 코드를 입력하세요",

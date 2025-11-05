@@ -39,14 +39,32 @@ export default function SignUpPresentation({ locale, dictionary }: { locale: str
   };
 
   // パスワードバリデーション関数
+  // 要件: 最小8文字、少なくとも1つの数字、1つの大文字、1つの小文字を含む
   const validatePassword = (password: string) => {
-    const pwValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/.test(password);
     if (!password) {
       return "";
     }
-    if (!pwValid) {
+    
+    // 最小8文字チェック
+    if (password.length < 8) {
       return dictionary.alert.invalidPasswordFormat;
     }
+    
+    // 少なくとも1つの小文字を含む
+    if (!/[a-z]/.test(password)) {
+      return dictionary.alert.invalidPasswordFormat;
+    }
+    
+    // 少なくとも1つの大文字を含む
+    if (!/[A-Z]/.test(password)) {
+      return dictionary.alert.invalidPasswordFormat;
+    }
+    
+    // 少なくとも1つの数字を含む
+    if (!/\d/.test(password)) {
+      return dictionary.alert.invalidPasswordFormat;
+    }
+    
     return "";
   };
 

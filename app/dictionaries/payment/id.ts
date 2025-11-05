@@ -57,7 +57,10 @@ const id: PaymentMethodsLocale = {
     clearFilters: "Hapus",
     previousPage: "Sebelumnya",
     nextPage: "Berikutnya",
-    pageNumber: "Halaman {page}"
+    pageNumber: "Halaman {page}",
+    errorDetails: "Detail Kesalahan:",
+    reloadPage: "Muat Ulang Halaman",
+    backToAccount: "Kembali ke Akun"
   },
   alert: {
     setupIntentFailed: "Gagal membuat Setup Intent",
@@ -71,7 +74,9 @@ const id: PaymentMethodsLocale = {
     paymentMethodCreationFailed: "Gagal membuat Payment Method",
     setupIntentNotCompleted: "Pemrosesan Setup Intent tidak selesai",
     clientSecretNotFound: "Tidak dapat mengambil client_secret",
-    allCardInfoRequired: "Silakan masukkan semua informasi kartu."
+    allCardInfoRequired: "Silakan masukkan semua informasi kartu.",
+    accessDenied: "Anda tidak memiliki izin untuk mengakses halaman ini. Hanya dapat diakses oleh administrator.",
+    authError: "Terjadi kesalahan autentikasi."
   },
   message: {
     noInvoices: "Tidak ada tagihan yang tersedia.",

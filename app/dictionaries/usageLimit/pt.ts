@@ -118,6 +118,9 @@ const pt: UsageLimitLocale = {
 
     // Tela de erro
     errorOccurred: "Ocorreu um erro",
+    errorDetails: "Detalhes do erro",
+    reloadPage: "Recarregar página",
+    backToAccount: "Voltar à conta",
     contactSupport: "Se o problema persistir, entre em contato com o suporte."
   },
   alert: {
@@ -161,7 +164,9 @@ const pt: UsageLimitLocale = {
 
     // Erros
     loginRequired: "Login necessário.",
-    unknownError: "Ocorreu um erro desconhecido."
+    unknownError: "Ocorreu um erro desconhecido.",
+    accessDenied: "Você não tem permissão para acessar esta página. Acessível apenas para administradores.",
+    fetchFailed: "Falha ao obter dados de limite de uso."
   }
 };
 

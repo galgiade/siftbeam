@@ -15,6 +15,9 @@ export type ForgotPasswordLocale = {
     codePlaceholder: string;
     newPasswordLabel: string;
     newPasswordPlaceholder: string;
+    confirmPasswordLabel: string;
+    confirmPasswordPlaceholder: string;
+    passwordDescription: string;
     
     // ボタン
     sendCode: string;
@@ -37,8 +40,12 @@ export type ForgotPasswordLocale = {
   alert: {
     // バリデーション
     emailRequired: string;
+    invalidEmailFormat: string;
     codeRequired: string;
     newPasswordRequired: string;
+    confirmPasswordRequired: string;
+    passwordMismatch: string;
+    invalidPasswordFormat: string;
     
     // 成功メッセージ
     codeSent: string;

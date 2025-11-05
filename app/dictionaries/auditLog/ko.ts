@@ -68,7 +68,11 @@ const ko: AuditLogLocale = {
   alert: {
     fetchError: "데이터를 가져오지 못했습니다",
     unexpectedError: "예기치 않은 오류가 발생했습니다",
-    adminRequired: "관리자 권한이 필요합니다"
+    adminRequired: "이 페이지에 접근할 권한이 없습니다. 관리자만 접근 가능합니다.",
+    errorOccurred: "오류가 발생했습니다",
+    backToAccount: "계정 페이지로 돌아가기",
+    contactSupport: "문제가 지속되면 시스템 관리자에게 문의하세요.",
+    errorDetails: "오류 세부정보:"
   },
   resource: {
     User: "사용자",

@@ -19,12 +19,22 @@ export default async function AccountLayout(
   } = props;
 
   // 対応していないロケールの場合はenをデフォルトに
-  const account: AccountLocale = pickDictionary(accountDictionaries, userAttributes.locale, 'en');
+  // URLのロケールを優先して使用
+  const account: AccountLocale = pickDictionary(accountDictionaries, params.locale, 'en');
 
   // 管理者以外は特定リンクを非表示
   const isAdmin = userAttributes.role === 'admin';
   const modeLabel = isAdmin ? account.adminMode : account.userMode;
-  const hiddenForNonAdmin = new Set(['/account/account-deletion', '/account/payment']);
+  const hiddenForNonAdmin = new Set([
+    '/account/account-deletion', 
+    '/account/payment',
+    '/account/user-management', // ユーザー管理は管理者のみ表示
+    '/account/policy-management', // ポリシー管理は管理者のみ表示
+    '/account/api-management', // API管理は管理者のみ表示
+    '/account/group-management', // グループ管理は管理者のみ表示
+    '/account/limit-usage', // 使用量制限管理は管理者のみ表示
+    '/account/audit-log' // 監査ログは管理者のみ表示
+  ]);
   // ナビゲーション項目の翻訳されたラベルを含む配列を作成
   const localizedNavItems = ACCOUNT_NAVIGATION_ITEMS
     .filter(item => isAdmin || !hiddenForNonAdmin.has(item.href))
@@ -35,7 +45,7 @@ export default async function AccountLayout(
 
   return (
     <div className="min-h-screen">
-      <SideNavigation role={userAttributes.role} locale={userAttributes.locale} navigationItems={localizedNavItems} modeLabel={modeLabel} />
+      <SideNavigation role={userAttributes.role} locale={params.locale} navigationItems={localizedNavItems} modeLabel={modeLabel} />
       <main className="ml-64 p-8 pt-16">
         {children}
       </main>

@@ -63,6 +63,7 @@ export type PolicyManagementLocale = {
     confirmDelete: string; // {policyName}
     cannotUndo: string;
     delete: string;
+    backToUserProfile: string;
     statusPending: string;
     statusRunning: string;
     statusCompleted: string;
@@ -91,6 +92,7 @@ export type PolicyManagementLocale = {
     policyNotSelected: string;
     selectPolicyAndModel: string;
     accessDenied: string;
+    adminOnly: string;
     fetchPoliciesFailed: string;
     errorLabel: string;
     customerIdLabel: string;

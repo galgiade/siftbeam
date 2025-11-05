@@ -118,6 +118,9 @@ const fr: UsageLimitLocale = {
 
     // Écran d'erreur
     errorOccurred: "Une erreur s'est produite",
+    errorDetails: "Détails de l'erreur",
+    reloadPage: "Recharger la page",
+    backToAccount: "Retour au compte",
     contactSupport: "Si le problème persiste, veuillez contacter le support."
   },
   alert: {
@@ -161,7 +164,9 @@ const fr: UsageLimitLocale = {
 
     // Erreurs
     loginRequired: "Connexion requise.",
-    unknownError: "Une erreur inconnue s'est produite."
+    unknownError: "Une erreur inconnue s'est produite.",
+    accessDenied: "Vous n'avez pas l'autorisation d'accéder à cette page. Accessible uniquement aux administrateurs.",
+    fetchFailed: "Échec de la récupération des données de limite d'utilisation."
   }
 };
 

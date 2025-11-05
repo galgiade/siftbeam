@@ -6,11 +6,11 @@ import { ExclamationTriangleIcon, TrashIcon, ArrowPathIcon, ClockIcon, UserGroup
 import { requestAccountDeletionAction, restoreAccountAction } from '@/app/lib/actions/account-deletion-actions';
 import type { DeletionStatusResponse } from '@/app/lib/actions/account-deletion-actions';
 import { calculateDaysUntilDeletion, calculateDeletionDate } from '@/app/lib/utils/account-deletion-utils';
-import { UserAttributesDTO } from '@/app/lib/types/TypeAPIs';
+import type { UserProfile } from '@/app/lib/utils/require-auth';
 import type { AccountDeletionLocale } from '@/app/dictionaries/account-deletion/account-deletion.d.ts';
 
 interface AccountDeletionPresentationProps {
-  userAttributes: UserAttributesDTO;
+  userAttributes: UserProfile;
   deletionStatus: DeletionStatusResponse;
   dictionary: AccountDeletionLocale;
   locale?: string;
@@ -30,7 +30,7 @@ export default function AccountDeletionPresentation({
 
   const isAdmin = userAttributes.role === 'admin';
   const isDeleted = deletionStatus.isDeleted;
-  const deletionRequestedAt = deletionStatus.deletionRequestedAt || userAttributes.deletionRequestedAt;
+  const deletionRequestedAt = deletionStatus.deletionRequestedAt;
   const userLocale = locale || userAttributes.locale || 'ja';
 
   // 削除リクエスト実行
@@ -275,8 +275,8 @@ export default function AccountDeletionPresentation({
       )}
 
       {/* 削除確認モーダル */}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
-        <ModalContent>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg" backdrop="opaque">
+        <ModalContent className="bg-white">
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
@@ -327,8 +327,8 @@ export default function AccountDeletionPresentation({
       </Modal>
 
       {/* 復旧確認モーダル */}
-      <Modal isOpen={isRestoreOpen} onOpenChange={onRestoreOpenChange} size="lg">
-        <ModalContent>
+      <Modal isOpen={isRestoreOpen} onOpenChange={onRestoreOpenChange} size="lg" backdrop="opaque">
+        <ModalContent className="bg-white">
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">

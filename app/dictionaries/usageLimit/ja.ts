@@ -118,6 +118,9 @@ const ja: UsageLimitLocale = {
     
     // エラー画面
     errorOccurred: "エラーが発生しました",
+    errorDetails: "エラー詳細",
+    reloadPage: "ページを再読み込み",
+    backToAccount: "アカウントページに戻る",
     contactSupport: "問題が解決しない場合は、サポートにお問い合わせください。"
   },
   alert: {
@@ -161,7 +164,9 @@ const ja: UsageLimitLocale = {
     
     // エラー
     loginRequired: "ログインが必要です。",
-    unknownError: "不明なエラーが発生しました。"
+    unknownError: "不明なエラーが発生しました。",
+    accessDenied: "このページにアクセスする権限がありません。管理者のみアクセス可能です。",
+    fetchFailed: "使用量制限データの取得に失敗しました。"
   }
 };
 

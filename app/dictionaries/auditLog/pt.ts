@@ -68,7 +68,11 @@ const pt: AuditLogLocale = {
   alert: {
     fetchError: "Falha ao buscar dados",
     unexpectedError: "Ocorreu um erro inesperado",
-    adminRequired: "Privilégios de administrador necessários"
+    adminRequired: "Você não tem permissão para acessar esta página. Acessível apenas para administradores.",
+    errorOccurred: "Ocorreu um erro",
+    backToAccount: "Voltar para a página da conta",
+    contactSupport: "Se o problema persistir, entre em contato com o administrador do sistema.",
+    errorDetails: "Detalhes do erro:"
   },
   resource: {
     User: "Usuário",

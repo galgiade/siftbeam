@@ -118,6 +118,9 @@ const ko: UsageLimitLocale = {
 
     // 오류 화면
     errorOccurred: "오류가 발생했습니다",
+    errorDetails: "오류 세부정보",
+    reloadPage: "페이지 새로고침",
+    backToAccount: "계정으로 돌아가기",
     contactSupport: "문제가 지속되면 지원팀에 문의하세요."
   },
   alert: {
@@ -161,7 +164,9 @@ const ko: UsageLimitLocale = {
 
     // 오류
     loginRequired: "로그인이 필요합니다.",
-    unknownError: "알 수 없는 오류가 발생했습니다."
+    unknownError: "알 수 없는 오류가 발생했습니다.",
+    accessDenied: "이 페이지에 접근할 권한이 없습니다. 관리자만 접근 가능합니다.",
+    fetchFailed: "사용량 제한 데이터를 가져오는데 실패했습니다."
   }
 };
 

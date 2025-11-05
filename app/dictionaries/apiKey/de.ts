@@ -111,6 +111,8 @@ const de: APIKeyLocale = {
     checkAdminPermission: 'Stellen Sie sicher, dass Sie Administratorrechte haben',
     contactAdmin: 'Wenn das Problem weiterhin besteht, wenden Sie sich an Ihren Administrator',
     accessDenied: 'Sie haben keine Berechtigung für diese Seite. Nur für Administratoren.',
+    adminOnly: 'Diese Seite ist nur für Administratoren zugänglich.',
+    backToUserProfile: 'Zurück zum Benutzerprofil',
     fetchFailed: 'Abrufen der API-Schlüsselliste fehlgeschlagen.',
     unknownError: 'Ein unerwarteter Fehler ist aufgetreten.',
     authError: 'Authentifizierungsfehler:',

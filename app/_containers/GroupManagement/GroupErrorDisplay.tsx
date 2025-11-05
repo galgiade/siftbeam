@@ -2,7 +2,10 @@
 
 import { Card, Button } from "@heroui/react"
 import Link from "next/link"
+import { useParams } from 'next/navigation'
+import { FaExclamationTriangle } from 'react-icons/fa'
 import type { GroupManagementLocale } from '@/app/dictionaries/group-management/group-management.d.ts';
+import AccessDeniedError from '@/app/_components/common/error/AccessDeniedError';
 
 interface GroupErrorDisplayProps {
   error: string;
@@ -14,6 +17,18 @@ interface GroupErrorDisplayProps {
  * エラーメッセージを表示し、ユーザーに適切なアクションを提供
  */
 export default function GroupErrorDisplay({ error, dictionary }: GroupErrorDisplayProps) {
+  const params = useParams();
+  const locale = params.locale as string || 'ja';
+  
+  // アクセス権限エラーかどうかを判定
+  const isAccessDenied = error === dictionary.alert.accessDenied;
+
+  // アクセス権限エラーの場合
+  if (isAccessDenied) {
+    return <AccessDeniedError />;
+  }
+
+  // その他のエラーの場合
   const handleReload = () => {
     window.location.reload();
   };
@@ -24,19 +39,7 @@ export default function GroupErrorDisplay({ error, dictionary }: GroupErrorDispl
         <Card className="p-8 shadow-lg">
           <div className="text-center">
             <div className="mb-6">
-              <svg 
-                className="w-16 h-16 text-red-500 mx-auto mb-4" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-                />
-              </svg>
+              <FaExclamationTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 {dictionary.label.groupManagement}
               </h1>
@@ -64,7 +67,7 @@ export default function GroupErrorDisplay({ error, dictionary }: GroupErrorDispl
               <Button
                 variant="bordered"
                 as={Link}
-                href="/ja/account"
+                href={`/${locale}/account`}
                 className="font-medium"
               >
                 {dictionary.label.backToAccount}

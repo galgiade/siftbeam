@@ -57,7 +57,10 @@ const en: PaymentMethodsLocale = {
     clearFilters: "Clear",
     previousPage: "Previous",
     nextPage: "Next",
-    pageNumber: "Page {page}"
+    pageNumber: "Page {page}",
+    errorDetails: "Error Details:",
+    reloadPage: "Reload Page",
+    backToAccount: "Back to Account"
   },
   alert: {
     setupIntentFailed: "Failed to create Setup Intent",
@@ -71,7 +74,9 @@ const en: PaymentMethodsLocale = {
     paymentMethodCreationFailed: "Failed to create Payment Method",
     setupIntentNotCompleted: "Setup Intent processing was not completed",
     clientSecretNotFound: "Could not retrieve client_secret",
-    allCardInfoRequired: "Please enter all card information."
+    allCardInfoRequired: "Please enter all card information.",
+    accessDenied: "You do not have permission to access this page. Only administrators can access.",
+    authError: "An authentication error occurred."
   },
   message: {
     noInvoices: "No invoices available.",

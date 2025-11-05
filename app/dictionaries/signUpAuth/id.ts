@@ -38,7 +38,7 @@ const id: SignUpAuthLocale = {
     passwordRequired: "Masukkan kata sandi",
     emailAndPasswordRequired: "Masukkan email dan kata sandi",
     invalidEmailFormat: "Masukkan format email yang valid",
-    invalidPasswordFormat: "Kata sandi minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan simbol",
+    invalidPasswordFormat: "Kata sandi minimal 8 karakter dengan huruf besar, huruf kecil, dan angka",
     passwordMismatch: "Kata sandi tidak cocok",
     verificationCodeRequired: "Masukkan kode verifikasi",
     verificationCodeLength: "Masukkan kode 6 digit",

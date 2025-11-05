@@ -94,7 +94,8 @@ const id: AccountDeletionLocale = {
     cancelDeletionButton: "Batalkan permintaan penghapusan",
     restoringButton: "Memulihkan...",
     supportContact: "Jika Anda memiliki pertanyaan tentang tindakan ini, hubungi",
-    supportTeam: "tim dukungan"
+    supportTeam: "tim dukungan",
+    unknown: "Tidak diketahui"
   },
   alert: {
     deleteFailed: "Gagal menghapus akun",

@@ -44,7 +44,7 @@ const id: SignInLocale = {
     emailRequired: "Masukkan alamat email",
     passwordRequired: "Masukkan kata sandi",
     emailFormatInvalid: "Masukkan format email yang valid",
-    passwordFormatInvalid: "Kata sandi minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan simbol",
+    passwordFormatInvalid: "Kata sandi minimal 8 karakter dengan huruf besar, huruf kecil, dan angka",
     emailAndPasswordRequired: "Masukkan email dan kata sandi",
     signInFailed: "Gagal masuk",
     accountNotConfirmed: "Akun belum dikonfirmasi. Selesaikan verifikasi email",

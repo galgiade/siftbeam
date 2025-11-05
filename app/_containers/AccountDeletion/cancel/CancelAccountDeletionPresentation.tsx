@@ -10,7 +10,7 @@ import { UserAttributesDTO } from '@/app/lib/types/TypeAPIs';
 import { useRouter } from 'next/navigation';
 import type { AccountDeletionLocale } from '@/app/dictionaries/account-deletion/account-deletion.d.ts';
 
-interface AccountDeletionCancelPresentationProps {
+interface CancelAccountDeletionPresentationProps {
   userAttributes: UserAttributesDTO;
   deletionStatus: DeletionStatusResponse;
   locale: string;
@@ -18,13 +18,13 @@ interface AccountDeletionCancelPresentationProps {
   accessError?: 'adminOnly' | 'notDeleted';
 }
 
-export default function AccountDeletionCancelPresentation({
+export default function CancelAccountDeletionPresentation({
   userAttributes,
   deletionStatus,
   locale,
   dictionary,
   accessError,
-}: AccountDeletionCancelPresentationProps) {
+}: CancelAccountDeletionPresentationProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();

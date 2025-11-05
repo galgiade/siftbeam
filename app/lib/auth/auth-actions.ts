@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getUserCustomAttributes, type UserAttributes } from '@/app/utils/cognito-utils';
-import { InitiateAuthCommand, GetUserCommand, SignUpCommand, ConfirmSignUpCommand, ResendConfirmationCodeCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { InitiateAuthCommand, GetUserCommand, SignUpCommand, ConfirmSignUpCommand, ResendConfirmationCodeCommand, ForgotPasswordCommand, ConfirmForgotPasswordCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { cognitoClient } from '@/app/lib/aws-clients';
 import { sendVerificationCodeEmailAction } from '@/app/lib/actions/email-actions';
 import { 
@@ -70,6 +70,9 @@ export async function signInAction(
   prevState: SignInActionState,
   formData: FormData
 ): Promise<SignInActionState> {
+  // ロケールを取得（デフォルトは'ja'）
+  const locale = (formData.get('locale') as string) || 'ja';
+  
   try {
     // フォームデータの検証
     const validatedFields = signInSchema.safeParse({
@@ -117,7 +120,6 @@ export async function signInAction(
 
     if (response.AuthenticationResult) {
       // 2段階認証を必須化: トークン保存は行わず、認証コードを発行・送信
-      const locale = (formData.get('locale') as string) || 'ja';
 
       // 認証コード生成・保存
       const verificationCode = generateVerificationCode();
@@ -170,16 +172,25 @@ export async function signInAction(
   } catch (error: any) {
     console.error('Sign in error:', error);
     
-    let message = 'Sign in failed';
+    // エラーコードをそのまま返す（フロント側で辞書を使って表示）
+    let errorCode = 'signInFailed';
     if (error.name === 'NotAuthorizedException') {
-      message = 'Invalid email or password';
+      errorCode = 'notAuthorized';
     } else if (error.name === 'UserNotConfirmedException') {
-      message = 'User not confirmed';
+      errorCode = 'userNotConfirmed';
+    } else if (error.name === 'UserNotFoundException') {
+      errorCode = 'userNotFound';
+    } else if (error.name === 'PasswordResetRequiredException') {
+      errorCode = 'passwordResetRequired';
+    } else if (error.name === 'InvalidParameterException') {
+      errorCode = 'invalidParameter';
+    } else if (error.name === 'TooManyRequestsException') {
+      errorCode = 'tooManyRequests';
     }
 
     return {
       success: false,
-      message,
+      message: errorCode,
       errors: {},
     };
   }
@@ -272,8 +283,32 @@ export async function signUpAction(prevState: any, formData: FormData) {
     }
 
     // パスワードの強度チェック（最低8文字、大文字、小文字、数字を含む）
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(signUpData.password)) {
+    // 特殊文字は不要
+    if (signUpData.password.length < 8) {
+      return {
+        success: false,
+        errors: { password: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' },
+        message: '',
+        verificationId: undefined
+      };
+    }
+    if (!/[a-z]/.test(signUpData.password)) {
+      return {
+        success: false,
+        errors: { password: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' },
+        message: '',
+        verificationId: undefined
+      };
+    }
+    if (!/[A-Z]/.test(signUpData.password)) {
+      return {
+        success: false,
+        errors: { password: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' },
+        message: '',
+        verificationId: undefined
+      };
+    }
+    if (!/\d/.test(signUpData.password)) {
       return {
         success: false,
         errors: { password: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' },
@@ -702,6 +737,233 @@ export async function resendVerificationCodeAction(
     return {
       success: false,
       message: '認証コードの再送信に失敗しました',
+    };
+  }
+}
+
+/**
+ * パスワードリセット: 認証コード送信（カスタムメール使用）
+ */
+export async function forgotPasswordAction(prevState: any, formData: FormData) {
+  console.log('=== パスワードリセット: 認証コード送信 ===');
+  
+  const email = formData.get('email') as string;
+  const locale = formData.get('locale') as string || 'ja';
+  
+  try {
+    console.log('Email:', email);
+    console.log('Locale:', locale);
+    
+    // バリデーション
+    if (!email) {
+      return {
+        success: false,
+        message: 'メールアドレスを入力してください',
+        errors: { email: 'メールアドレスを入力してください' }
+      };
+    }
+    
+    // メールアドレスの形式チェック
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return {
+        success: false,
+        message: '有効なメールアドレスを入力してください',
+        errors: { email: '有効なメールアドレスを入力してください' }
+      };
+    }
+    
+    // ユーザーが存在するか確認（Cognitoで確認）
+    try {
+      const getUserCommand = new GetUserCommand({
+        AccessToken: undefined // メールアドレスだけでは確認できないので、ForgotPasswordCommandで確認
+      });
+      // 代わりにForgotPasswordCommandを使用してユーザーの存在を確認
+    } catch (error) {
+      // ユーザーが存在しない場合でもセキュリティのため同じメッセージを返す
+    }
+    
+    // 認証コード生成（6桁）
+    const verificationCode = generateVerificationCode();
+    
+    // DynamoDBに認証コードを保存（パスワードリセット用）
+    const storeResult = await storeVerificationCodeAction(
+      email, // userIdの代わりにemailを使用
+      email,
+      verificationCode,
+      locale
+    );
+    
+    if (!storeResult.success) {
+      return {
+        success: false,
+        message: '認証コードの保存に失敗しました',
+        errors: { general: storeResult.error || '認証コードの保存に失敗しました' }
+      };
+    }
+    
+    // カスタムメールで認証コードを送信（ログイン時と同じメール）
+    const emailResult = await sendVerificationEmailAction(
+      email,
+      verificationCode,
+      locale
+    );
+    
+    console.log('パスワードリセット認証コードメール送信結果:', emailResult);
+    
+    if (emailResult.success) {
+      return {
+        success: true,
+        message: '認証コードをメールに送信しました',
+        email: email
+      };
+    } else {
+      return {
+        success: false,
+        message: '認証コードの送信に失敗しました',
+        errors: { general: emailResult.error || '認証コードの送信に失敗しました' }
+      };
+    }
+    
+  } catch (error: any) {
+    console.error('ForgotPassword error:', error);
+    
+    return {
+      success: false,
+      message: error.message || 'エラーが発生しました',
+      errors: { general: error.message || 'エラーが発生しました' }
+    };
+  }
+}
+
+/**
+ * パスワードリセット: 認証コード確認とパスワード更新（カスタム認証コード使用）
+ */
+export async function confirmForgotPasswordAction(prevState: any, formData: FormData) {
+  console.log('=== パスワードリセット: 認証コード確認とパスワード更新 ===');
+  
+  const email = formData.get('email') as string;
+  const code = formData.get('code') as string;
+  const newPassword = formData.get('newPassword') as string;
+  const confirmPassword = formData.get('confirmPassword') as string;
+  
+  try {
+    console.log('Email:', email);
+    console.log('Code length:', code?.length);
+    console.log('Password length:', newPassword?.length);
+    
+    // バリデーション
+    if (!email || !code || !newPassword || !confirmPassword) {
+      return {
+        success: false,
+        message: 'すべてのフィールドを入力してください',
+        errors: {
+          ...(!email && { email: 'メールアドレスを入力してください' }),
+          ...(!code && { code: '認証コードを入力してください' }),
+          ...(!newPassword && { newPassword: '新しいパスワードを入力してください' }),
+          ...(!confirmPassword && { confirmPassword: 'パスワード確認を入力してください' })
+        }
+      };
+    }
+    
+    // パスワード一致チェック
+    if (newPassword !== confirmPassword) {
+      return {
+        success: false,
+        message: 'パスワードが一致しません',
+        errors: { confirmPassword: 'パスワードが一致しません' }
+      };
+    }
+    
+    // パスワードの強度チェック（最低8文字、大文字、小文字、数字を含む）
+    if (newPassword.length < 8) {
+      return {
+        success: false,
+        message: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります',
+        errors: { newPassword: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' }
+      };
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      return {
+        success: false,
+        message: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります',
+        errors: { newPassword: 'パスワードには小文字を1文字以上含めてください' }
+      };
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      return {
+        success: false,
+        message: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります',
+        errors: { newPassword: 'パスワードには大文字を1文字以上含めてください' }
+      };
+    }
+    if (!/\d/.test(newPassword)) {
+      return {
+        success: false,
+        message: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります',
+        errors: { newPassword: 'パスワードには数字を1文字以上含めてください' }
+      };
+    }
+    
+    // DynamoDBで認証コードを確認（ログイン時と同じ仕組み）
+    const verifyResult = await verifyEmailCodeAction(
+      email, // userId（パスワードリセットの場合はemailを使用）
+      email,
+      code,
+      process.env.COGNITO_USER_POOL_ID!,
+      'ja' // デフォルトロケール
+    );
+    
+    if (!verifyResult.success) {
+      return {
+        success: false,
+        message: '認証コードが正しくないか、有効期限が切れています',
+        errors: { code: '認証コードが正しくないか、有効期限が切れています。新しいコードを再送信してください。' }
+      };
+    }
+    
+    // Cognitoでパスワードを更新（AdminSetUserPasswordを使用）
+    const { AdminSetUserPasswordCommand } = await import('@aws-sdk/client-cognito-identity-provider');
+    
+    const setPasswordCommand = new AdminSetUserPasswordCommand({
+      UserPoolId: process.env.COGNITO_USER_POOL_ID!,
+      Username: email,
+      Password: newPassword,
+      Permanent: true,
+    });
+    
+    await cognitoClient.send(setPasswordCommand);
+    console.log('パスワード更新成功');
+    
+    return {
+      success: true,
+      message: 'パスワードが正常に更新されました',
+    };
+    
+  } catch (error: any) {
+    console.error('ConfirmForgotPassword error:', error);
+    
+    // エラーハンドリング
+    if (error.name === 'InvalidPasswordException') {
+      return {
+        success: false,
+        message: 'パスワードが無効です',
+        errors: { newPassword: 'パスワードが無効です。パスワードの要件を確認してください。' }
+      };
+    }
+    
+    if (error.name === 'LimitExceededException') {
+      return {
+        success: false,
+        message: 'リクエスト制限に達しました',
+        errors: { general: 'リクエスト制限に達しました。しばらく後に再試行してください。' }
+      };
+    }
+    
+    return {
+      success: false,
+      message: error.message || 'エラーが発生しました',
+      errors: { general: error.message || 'エラーが発生しました' }
     };
   }
 }

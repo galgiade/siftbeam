@@ -46,6 +46,7 @@ const zh: UserManagementLocale = {
     userNotFoundOrDeleted: "未找到用户（已删除或从未存在）",
     deleteUnconfirmedUserFailed: "删除未确认用户失败",
     accessDenied: "您无权访问此页面。仅管理员可以访问。",
+    adminOnly: "此页面仅管理员可以访问。",
     fetchUsersFailed: "获取用户列表失败。"
   },
   label: {
@@ -101,6 +102,7 @@ const zh: UserManagementLocale = {
     unknownError: "未知错误",
     noStackTrace: "无堆栈跟踪",
     retry: "重试",
+    backToUserProfile: "返回用户资料",
     developerInfo: "开发者信息：",
     checkDynamoDBConnection: "• 检查 DynamoDB 连接或 Cognito 设置",
     checkEnvironmentVariables: "• 环境变量：USER_TABLE_NAME, COGNITO_USER_POOL_ID",
@@ -120,7 +122,7 @@ const zh: UserManagementLocale = {
     positionPlaceholder: "输入职位",
     rolePlaceholder2: "选择角色",
     localePlaceholder: "选择语言",
-    passwordPlaceholder: "输入密码（8+ 字符）",
+    passwordPlaceholder: "输入密码（8+ 字符，大小写，数字）",
     requiredMark: "*",
     detailedErrors: "详细错误：",
     showDebugInfo: "显示调试信息",

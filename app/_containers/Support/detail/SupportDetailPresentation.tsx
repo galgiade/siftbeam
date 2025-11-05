@@ -3,11 +3,11 @@
 import { useState, useActionState, useEffect, startTransition, useCallback } from "react"
 import { Button, Card, Textarea } from "@heroui/react"
 import { SupportRequest, SupportReply } from "@/app/lib/types/TypeAPIs"
-import { createSupportReply } from "@/app/lib/actions/support-api"
+import { createSupportReply, updateSupportRequest } from "@/app/lib/actions/support-api"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
 import type { SupportCenterLocale } from '@/app/dictionaries/supportCenter/supportCenter.d.ts';
 import type { CommonLocale } from '@/app/dictionaries/common/common.d.ts';
-import { FaLifeRing, FaPaperPlane, FaArrowLeft, FaClock, FaCircleCheck, FaCircleExclamation, FaUser, FaHeadset, FaFile, FaImage, FaVideo, FaMusic } from "react-icons/fa6"
+import { FaLifeRing, FaPaperPlane, FaArrowLeft, FaClock, FaCircleCheck, FaCircleExclamation, FaUser, FaHeadset, FaFile, FaImage, FaVideo, FaMusic, FaRotateLeft } from "react-icons/fa6"
 import Link from "next/link"
 import FileUploader from "@/app/_components/FileUploader"
 import { v4 as uuidv4 } from 'uuid'
@@ -128,6 +128,11 @@ export default function SupportDetailPresentation({
   const [replyId, setReplyId] = useState(() => uuidv4()); // 初期化時にUUID生成
   const [replyError, setReplyError] = useState(""); // 返信エラーメッセージ
   
+  // ステータス変更の状態管理
+  const [currentStatus, setCurrentStatus] = useState<SupportRequest['status']>(supportRequest.status);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [statusUpdateError, setStatusUpdateError] = useState("");
+  
   // ハイドレーション対応
   const [isMounted, setIsMounted] = useState(false);
   
@@ -139,6 +144,32 @@ export default function SupportDetailPresentation({
   const handleReplyFilesUploaded = useCallback((fileKeys: string[]) => {
     setReplyFileKeys(fileKeys);
   }, []);
+
+  // ステータス変更ハンドラー
+  const handleStatusChange = async () => {
+    setIsUpdatingStatus(true);
+    setStatusUpdateError("");
+    
+    try {
+      // open → closed または closed → open
+      const newStatus: SupportRequest['status'] = currentStatus === 'open' ? 'closed' : 'open';
+      
+      const result = await updateSupportRequest({
+        'support-requestId': supportRequest['support-requestId'],
+        status: newStatus
+      });
+      
+      if (result.success) {
+        setCurrentStatus(newStatus);
+      } else {
+        setStatusUpdateError(result.message || dictionary.alert.updateFailed);
+      }
+    } catch (error: any) {
+      setStatusUpdateError(error?.message || dictionary.alert.updateFailed);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   // Server Actionの状態管理
   const [state, formAction, isPending] = useActionState(
@@ -285,7 +316,7 @@ export default function SupportDetailPresentation({
                 <h2 className="text-xl font-bold text-gray-900">
                   {supportRequest.subject}
                 </h2>
-                <StatusChip status={supportRequest.status} />
+                <StatusChip status={currentStatus} />
               </div>
               
               <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
@@ -296,6 +327,23 @@ export default function SupportDetailPresentation({
                   <span>{dictionary.label.updatedAt} {formatDate(supportRequest.updatedAt)}</span>
                 )}
               </div>
+            </div>
+            
+            {/* ステータス変更ボタン */}
+            <div className="flex flex-col gap-2">
+              <Button
+                color={currentStatus === 'open' ? 'success' : 'warning'}
+                variant="flat"
+                startContent={currentStatus === 'open' ? <FaCircleCheck size={16} /> : <FaRotateLeft size={16} />}
+                onPress={handleStatusChange}
+                isLoading={isUpdatingStatus}
+                isDisabled={isUpdatingStatus}
+              >
+                {currentStatus === 'open' ? dictionary.label.markResolved : dictionary.label.markUnresolved}
+              </Button>
+              {statusUpdateError && (
+                <p className="text-xs text-red-600">{statusUpdateError}</p>
+              )}
             </div>
           </div>
           
@@ -403,7 +451,7 @@ export default function SupportDetailPresentation({
         </Card>
 
         {/* 返信フォーム */}
-        {supportRequest.status !== 'closed' && (
+        {currentStatus !== 'closed' && (
           <Card className="p-6 shadow-lg">
             <h3 className="text-lg font-bold mb-4">{dictionary.label.sendReply}</h3>
             
@@ -488,7 +536,7 @@ export default function SupportDetailPresentation({
           </Card>
         )}
         
-        {supportRequest.status === 'closed' && (
+        {currentStatus === 'closed' && (
           <Card className="p-6 shadow-lg">
             <div className="text-center py-8 text-gray-500">
               <FaCircleCheck size={48} className="mx-auto mb-4 text-gray-300" />

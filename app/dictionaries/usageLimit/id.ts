@@ -118,6 +118,9 @@ const id: UsageLimitLocale = {
 
     // Layar kesalahan
     errorOccurred: "Terjadi kesalahan",
+    errorDetails: "Detail kesalahan",
+    reloadPage: "Muat ulang halaman",
+    backToAccount: "Kembali ke akun",
     contactSupport: "Jika masalah berlanjut, hubungi dukungan."
   },
   alert: {
@@ -161,7 +164,9 @@ const id: UsageLimitLocale = {
 
     // Kesalahan
     loginRequired: "Login diperlukan.",
-    unknownError: "Terjadi kesalahan yang tidak diketahui."
+    unknownError: "Terjadi kesalahan yang tidak diketahui.",
+    accessDenied: "Anda tidak memiliki izin untuk mengakses halaman ini. Hanya dapat diakses oleh administrator.",
+    fetchFailed: "Gagal mengambil data batas penggunaan."
   }
 };
 

@@ -111,6 +111,8 @@ const en: APIKeyLocale = {
     checkAdminPermission: 'Please ensure you have administrator privileges',
     contactAdmin: 'If the problem persists, contact your system administrator',
     accessDenied: 'You do not have permission to access this page. Admin only.',
+    adminOnly: 'This page is only accessible to administrators.',
+    backToUserProfile: 'Back to User Profile',
     fetchFailed: 'Failed to fetch API key list.',
     unknownError: 'An unexpected error occurred.',
     authError: 'Authentication error:',

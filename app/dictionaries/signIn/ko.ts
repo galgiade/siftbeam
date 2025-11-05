@@ -44,7 +44,7 @@ const ko: SignInLocale = {
     emailRequired: "이메일 주소를 입력하세요",
     passwordRequired: "비밀번호를 입력하세요",
     emailFormatInvalid: "유효한 이메일 주소 형식을 입력하세요",
-    passwordFormatInvalid: "비밀번호는 대문자/소문자/숫자/기호를 포함하여 최소 8자여야 합니다",
+    passwordFormatInvalid: "비밀번호는 대문자/소문자/숫자를 포함하여 최소 8자여야 합니다",
     emailAndPasswordRequired: "이메일과 비밀번호를 입력하세요",
     signInFailed: "로그인에 실패했습니다",
     accountNotConfirmed: "계정이 확인되지 않았습니다. 이메일 인증을 완료해주세요",

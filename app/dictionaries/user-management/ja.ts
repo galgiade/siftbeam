@@ -46,6 +46,7 @@ const ja: UserManagementLocale = {
     userNotFoundOrDeleted: "ユーザーが見つかりません（既に削除されているか、存在しません）",
     deleteUnconfirmedUserFailed: "未確認ユーザーの削除に失敗しました",
     accessDenied: "このページにアクセスする権限がありません。管理者のみアクセス可能です。",
+    adminOnly: "このページは管理者のみアクセス可能です。",
     fetchUsersFailed: "ユーザー一覧の取得に失敗しました。"
   },
   label: {
@@ -101,6 +102,7 @@ const ja: UserManagementLocale = {
     unknownError: "不明なエラー",
     noStackTrace: "スタックトレースなし",
     retry: "再試行",
+    backToUserProfile: "ユーザープロフィールに戻る",
     developerInfo: "開発者向け情報:",
     checkDynamoDBConnection: "• DynamoDB接続またはCognito設定を確認してください",
     checkEnvironmentVariables: "• 環境変数: USER_TABLE_NAME, COGNITO_USER_POOL_ID",
@@ -120,7 +122,7 @@ const ja: UserManagementLocale = {
     positionPlaceholder: "役職を入力",
     rolePlaceholder2: "ロールを選択",
     localePlaceholder: "言語を選択",
-    passwordPlaceholder: "パスワードを入力（8文字以上）",
+    passwordPlaceholder: "パスワードを入力（大文字・小文字・数字を含む8文字以上）",
     requiredMark: "*",
     detailedErrors: "詳細エラー:",
     showDebugInfo: "デバッグ情報を表示",

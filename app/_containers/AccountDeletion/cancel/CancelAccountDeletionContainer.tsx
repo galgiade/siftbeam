@@ -1,13 +1,13 @@
 import { checkDeletionStatusAction } from "@/app/lib/actions/account-deletion-actions";
-import AccountDeletionCancelPresentation from "./AccountDeletionPresentation";
+import AccountDeletionCancelPresentation from "./CancelAccountDeletionPresentation";
 import { requireUserProfile } from "@/app/lib/utils/require-auth";
 import { accountDeletionDictionaries } from "@/app/dictionaries/mappings";
 
-export default async function AccountDeletionCancelContainer({ locale }: { locale: string }) {
+export default async function CancelAccountDeletionContainer({ locale }: { locale: string }) {
   const dictionary = accountDeletionDictionaries[locale as keyof typeof accountDeletionDictionaries] || accountDeletionDictionaries['ja'];
   
-  // ユーザーの属性を取得
-  const userAttributes = await requireUserProfile();
+  // ユーザーの属性を取得（無限ループ防止のためskipDeletionCheck=trueを指定）
+  const userAttributes = await requireUserProfile(locale, true);
   
   // 管理者権限チェック - 管理者以外はエラーを表示
   if (userAttributes.role !== 'admin') {

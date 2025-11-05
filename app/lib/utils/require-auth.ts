@@ -14,7 +14,7 @@ export interface UserProfile {
   paymentMethodId?: string;
 }
 
-export async function requireUserProfile(locale: string = 'ja'): Promise<UserProfile> {
+export async function requireUserProfile(locale: string = 'ja', skipDeletionCheck: boolean = false): Promise<UserProfile> {
   try {
     const userAttributes = await getUserCustomAttributes();
     
@@ -52,10 +52,13 @@ export async function requireUserProfile(locale: string = 'ja'): Promise<UserPro
       console.log('paymentMethodId未設定 - 支払い方法登録ページにリダイレクト');
       redirect(`/${locale}/signup/payment`);
     }
-    if (userAttributes['custom:deletionRequestedAt']) {
-      console.log('deletionRequestedAt設定 - 削除キャンセルページにリダイレクト');
-      redirect(`/${locale}/account/account-deletion`);
+    
+    // 削除リクエストがある場合は削除ページにリダイレクト（無限ループ防止のためskipDeletionCheckで制御）
+    if (!skipDeletionCheck && userAttributes['custom:deletionRequestedAt']) {
+      console.log('deletionRequestedAt設定 - アカウント削除キャンセルページにリダイレクト');
+      redirect(`/${locale}/cancel-account-deletion`);
     }
+    
     return {
       sub: userAttributes.sub,
       email: userAttributes.email || '',

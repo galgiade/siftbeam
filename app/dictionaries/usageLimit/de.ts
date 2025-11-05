@@ -118,6 +118,9 @@ const de: UsageLimitLocale = {
 
     // Fehlerbildschirm
     errorOccurred: "Ein Fehler ist aufgetreten",
+    errorDetails: "Fehlerdetails",
+    reloadPage: "Seite neu laden",
+    backToAccount: "Zurück zum Konto",
     contactSupport: "Wenn das Problem weiterhin besteht, wenden Sie sich bitte an den Support."
   },
   alert: {
@@ -161,7 +164,9 @@ const de: UsageLimitLocale = {
 
     // Fehler
     loginRequired: "Anmeldung erforderlich.",
-    unknownError: "Ein unbekannter Fehler ist aufgetreten."
+    unknownError: "Ein unbekannter Fehler ist aufgetreten.",
+    accessDenied: "Sie haben keine Berechtigung, auf diese Seite zuzugreifen. Nur für Administratoren zugänglich.",
+    fetchFailed: "Fehler beim Abrufen der Nutzungslimitdaten."
   }
 };
 

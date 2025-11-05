@@ -1,5 +1,6 @@
 import PaymentPresentation from "./PaymentPresentation";
-import { getUserCustomAttributes } from '@/app/utils/cognito-utils';
+import PaymentErrorDisplay from "./PaymentErrorDisplay";
+import { requireUserProfile } from '@/app/lib/utils/require-auth';
 import { paymentDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import type { PaymentLocale } from '@/app/dictionaries/payment/payment.d.ts';
 import Stripe from 'stripe';
@@ -7,12 +8,24 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export default async function PaymentContainer({ locale }: { locale: string }) {
-  // ユーザーの属性を取得してcustomerIdを取得
-  const userAttributes = await getUserCustomAttributes();
-  const customerId = userAttributes?.['custom:customerId'];
-  
-  // 辞書を取得
-  const dictionary: PaymentLocale = pickDictionary(paymentDictionaries, locale, 'en');
+  try {
+    // 辞書を取得
+    const dictionary: PaymentLocale = pickDictionary(paymentDictionaries, locale, 'en');
+
+    // ユーザーの属性を取得
+    const userProfile = await requireUserProfile(locale);
+    
+    // 管理者権限チェック
+    if (userProfile.role !== 'admin') {
+      return (
+        <PaymentErrorDisplay 
+          error={dictionary.alert.accessDenied}
+          dictionary={dictionary} 
+        />
+      );
+    }
+
+    const customerId = userProfile.customerId;
 
   // customerIdが存在する場合、Stripe APIから直接データを取得
   let paymentMethods = null;
@@ -55,13 +68,25 @@ export default async function PaymentContainer({ locale }: { locale: string }) {
     }
   }
 
-  return (
-    <PaymentPresentation 
-      customerId={customerId}
-      dictionary={dictionary}
-      paymentMethods={paymentMethods}
-      defaultPaymentMethodId={defaultPaymentMethodId}
-      invoices={invoices}
-    />
-  );
+    return (
+      <PaymentPresentation 
+        customerId={customerId}
+        dictionary={dictionary}
+        paymentMethods={paymentMethods}
+        defaultPaymentMethodId={defaultPaymentMethodId}
+        invoices={invoices}
+      />
+    );
+  } catch (error: any) {
+    console.error('Error in PaymentContainer:', error);
+    
+    const dictionary: PaymentLocale = pickDictionary(paymentDictionaries, locale, 'en');
+    
+    return (
+      <PaymentErrorDisplay 
+        error={error.message || dictionary.alert.authError}
+        dictionary={dictionary} 
+      />
+    );
+  }
 }

@@ -56,6 +56,9 @@ export type PaymentLocale = {
     previousPage: string;
     nextPage: string;
     pageNumber: string;
+    errorDetails: string;
+    reloadPage: string;
+    backToAccount: string;
   };
   alert: {
     setupIntentFailed: string;
@@ -70,6 +73,8 @@ export type PaymentLocale = {
     setupIntentNotCompleted: string;
     clientSecretNotFound: string;
     allCardInfoRequired: string;
+    accessDenied: string;
+    authError: string;
   };
   message: {
     noInvoices: string;

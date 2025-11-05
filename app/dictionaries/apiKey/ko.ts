@@ -111,6 +111,8 @@ const ko: APIKeyLocale = {
     checkAdminPermission: '관리자 권한이 있는지 확인하세요',
     contactAdmin: '문제가 지속되면 시스템 관리자에게 문의하세요',
     accessDenied: '이 페이지에 접근 권한이 없습니다. 관리자 전용입니다.',
+    adminOnly: '이 페이지는 관리자만 액세스할 수 있습니다.',
+    backToUserProfile: '사용자 프로필로 돌아가기',
     fetchFailed: 'API 키 목록을 가져오지 못했습니다.',
     unknownError: '예기치 않은 오류가 발생했습니다.',
     authError: '인증 오류:',

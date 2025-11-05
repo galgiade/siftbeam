@@ -68,7 +68,11 @@ const ja: AuditLogLocale = {
   alert: {
     fetchError: "データの取得に失敗しました",
     unexpectedError: "予期しないエラーが発生しました",
-    adminRequired: "Admin privileges required"
+    adminRequired: "このページにアクセスする権限がありません。管理者のみアクセス可能です。",
+    errorOccurred: "エラーが発生しました",
+    backToAccount: "アカウントページに戻る",
+    contactSupport: "問題が解決しない場合は、システム管理者にお問い合わせください。",
+    errorDetails: "エラー詳細:"
   },
   resource: {
     User: "ユーザー",

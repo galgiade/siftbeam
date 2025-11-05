@@ -68,7 +68,11 @@ const en: AuditLogLocale = {
   alert: {
     fetchError: "Failed to fetch data",
     unexpectedError: "An unexpected error occurred",
-    adminRequired: "Admin privileges required"
+    adminRequired: "You do not have permission to access this page. Only administrators can access.",
+    errorOccurred: "An error occurred",
+    backToAccount: "Back to Account Page",
+    contactSupport: "If the problem persists, please contact your system administrator.",
+    errorDetails: "Error Details:"
   },
   resource: {
     User: "User",

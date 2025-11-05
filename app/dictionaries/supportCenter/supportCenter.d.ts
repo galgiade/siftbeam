@@ -141,5 +141,6 @@ export type SupportCenterLocale = {
     issueTypeRequired: string;
     formSubmissionError: string;
     replyError: string;
+    updateFailed: string;
   };
 };

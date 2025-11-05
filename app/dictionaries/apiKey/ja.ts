@@ -111,6 +111,8 @@ const ja: APIKeyLocale = {
     checkAdminPermission: '管理者権限があることを確認してください',
     contactAdmin: '問題が続く場合は、システム管理者にお問い合わせください',
     accessDenied: 'このページにアクセスする権限がありません。管理者のみアクセス可能です。',
+    adminOnly: 'このページは管理者のみアクセス可能です。',
+    backToUserProfile: 'ユーザープロフィールに戻る',
     fetchFailed: 'APIキー一覧の取得に失敗しました。',
     unknownError: '予期しないエラーが発生しました。',
     authError: '認証エラー:',

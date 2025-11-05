@@ -68,7 +68,11 @@ const de: AuditLogLocale = {
   alert: {
     fetchError: "Fehler beim Abrufen der Daten",
     unexpectedError: "Ein unerwarteter Fehler ist aufgetreten",
-    adminRequired: "Administratorrechte erforderlich"
+    adminRequired: "Sie haben keine Berechtigung, auf diese Seite zuzugreifen. Nur für Administratoren zugänglich.",
+    errorOccurred: "Ein Fehler ist aufgetreten",
+    backToAccount: "Zurück zur Kontoseite",
+    contactSupport: "Wenn das Problem weiterhin besteht, wenden Sie sich bitte an Ihren Systemadministrator.",
+    errorDetails: "Fehlerdetails:"
   },
   resource: {
     User: "Benutzer",

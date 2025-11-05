@@ -44,7 +44,7 @@ const pt: SignInLocale = {
     emailRequired: "Digite seu e-mail",
     passwordRequired: "Digite sua senha",
     emailFormatInvalid: "Digite um e-mail válido",
-    passwordFormatInvalid: "A senha deve ter pelo menos 8 caracteres com maiúsculas, minúsculas, números e símbolos",
+    passwordFormatInvalid: "A senha deve ter pelo menos 8 caracteres com maiúsculas, minúsculas e números",
     emailAndPasswordRequired: "Digite e-mail e senha",
     signInFailed: "Falha ao entrar",
     accountNotConfirmed: "Conta não confirmada. Conclua a verificação por e-mail",

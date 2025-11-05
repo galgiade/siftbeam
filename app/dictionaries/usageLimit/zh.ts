@@ -118,6 +118,9 @@ const zh: UsageLimitLocale = {
 
     // 错误屏幕
     errorOccurred: "发生错误",
+    errorDetails: "错误详情",
+    reloadPage: "重新加载页面",
+    backToAccount: "返回账户",
     contactSupport: "如果问题持续存在,请联系支持。"
   },
   alert: {
@@ -161,7 +164,9 @@ const zh: UsageLimitLocale = {
 
     // 错误
     loginRequired: "需要登录。",
-    unknownError: "发生未知错误。"
+    unknownError: "发生未知错误。",
+    accessDenied: "您无权访问此页面。仅限管理员访问。",
+    fetchFailed: "获取使用量限制数据失败。"
   }
 };
 
