@@ -136,7 +136,7 @@ const pt: TermsLocale = {
         billingPayment: {
           title: "Cobrança/Pagamento",
           items: [
-            "Fechamento: fim do mês; Pagamento: dia 5.",
+            "Ciclo de cobrança: Fechamento mensal no final do mês (uso do dia 1 ao último dia do mês). Data de emissão da fatura: dia 1 do mês seguinte. Data de vencimento do pagamento: dia 15 do mês seguinte.",
             "Pagamento: cartão de crédito (Stripe).",
             "Arredondamento por precisão/unidade mínima Stripe (regras da Empresa).",
             "Impostos conforme lei.",
@@ -242,7 +242,7 @@ const pt: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "14 de agosto de 2025",
+    lastUpdated: "6 de novembro de 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japão",

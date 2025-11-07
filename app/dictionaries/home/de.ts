@@ -1,7 +1,7 @@
 const de = {
   hero: {
     title: "siftbeam",
-    subtitle: "Unternehmensdaten nutzen, um mit KI die Geschäfte von morgen zu gestalten",
+    subtitle: "Eine Plattform für effiziente Datenverarbeitung und -verwaltung",
     contact: "Kontakt",
     buttons: {
       howTo: "So funktioniert es",
@@ -9,20 +9,20 @@ const de = {
     }
   },
   features: {
-    title: "Drei Werte durch fortschrittliche KI-Technologie",
+    title: "Drei Kernfunktionen der Datenverarbeitungsplattform",
     dataAnalysis: {
-      title: "Datenanalyse",
-      description: "Daten sicher analysieren, um einzigartige Muster zu entdecken.",
+      title: "Flexible Datenverwaltung",
+      description: "Dateien mit richtlinienbasierten Kontrollen hochladen und verwalten. Verarbeitungshistorie detailliert nachverfolgen.",
       points: [
         "Policyauswahl und Massen-Uploads",
-        "Monatliche Nutzung und Überschreitungswarnungen",
+        "Monatliche Nutzungsanzeige und Überschreitungswarnungen",
         "Filter nach Benutzer/Policy/Datum/Nutzung",
-        "ZIP-Massendownload, Löschen, KI-Lernen umschalten",
+        "ZIP-Massendownload, Löschen, Lernberechtigung umschalten",
       ]
     },
     anomalyDetection: {
-      title: "Echtzeit-Anomalieerkennung",
-      description: "Hochpräzise Erkennung, um Geschäftsrisiken frühzeitig zu identifizieren und zu beheben.",
+      title: "Nutzungsüberwachung und -kontrolle",
+      description: "Datennutzung in Echtzeit überwachen und Benachrichtigungen oder automatische Einschränkungen basierend auf konfigurierten Limits ausführen.",
       points: [
         "Zwei Modi: Benachrichtigen oder Einschränken",
         "Schwellenwerte basierend auf Nutzung oder Kosten",
@@ -31,12 +31,12 @@ const de = {
       ]
     },
     customAI: {
-      title: "Individuelle KI-Vorhersagen",
-      description: "Auf Ihren Daten trainierte KI-Modelle sagen Trends voraus und unterstützen Entscheidungen.",
+      title: "Analyse der Verarbeitungsergebnisse und Berichte",
+      description: "Detaillierte Analysedaten der Verarbeitungsergebnisse einsehen und für die Betriebsoptimierung nutzen.",
       points: [
-        "Kernmetriken: Precision/Recall/F1/Fehlerrate",
-        "Operative Metriken wie P95-Latenz",
-        "Berichtslinks ansehen und validieren",
+        "Detaillierte Metriken der Verarbeitungsergebnisse prüfen",
+        "Operative Leistungsindikatoren wie Latenz",
+        "Detaillierte Berichte ansehen und validieren",
         "Nach Policy filtern und sortieren",
       ]
     }
@@ -44,21 +44,21 @@ const de = {
   steps: {
     title: "In 3 einfachen Schritten starten",
     step1: {
-      title: "Sichere Datenanbindung",
-      description: "Verschlüsselte Daten per Drag & Drop oder API sicher hochladen. Zwei-Faktor-Authentifizierung sorgt für umfassende Sicherheit."
+      title: "Policy-Einrichtung und Daten-Upload",
+      description: "Policies erstellen, die erlaubte Dateiformate definieren, dann Daten per Drag & Drop oder API hochladen. Zwei-Faktor-Authentifizierung gewährleistet Sicherheit."
     },
     step2: {
-      title: "KI-Modelle anpassen",
-      description: "Hochleistungsmodelle auswählen und an individuelle Anforderungen anpassen."
+      title: "Automatisierte Verarbeitungsausführung",
+      description: "Hochgeladene Daten werden automatisch basierend auf der ausgewählten Policy verarbeitet. Verarbeitungsergebnisse werden ein Jahr lang gespeichert."
     },
     step3: {
-      title: "Analyse in Echtzeit",
-      description: "Ergebnisse in Echtzeit mit einem intuitiven Dashboard visualisieren. Pay-as-you-go optimiert die Kosten."
+      title: "Verwaltung der Verarbeitungshistorie und Leistungsbewertung",
+      description: "Verarbeitungshistorie mit einem intuitiven Dashboard überprüfen. Leistungsmetriken des Verarbeitungsmodells in Echtzeit überwachen für optimalen Betrieb. Pay-as-you-go optimiert die Kosten."
     }
   },
   cta: {
-    title: "Verschaffen Sie sich Vorhersagekraft für Ihr Geschäft",
-    description: "Bringen Sie Ihr Unternehmen mit modernster KI-Technologie auf das nächste Level. Kontaktieren Sie uns gerne jetzt.",
+    title: "Starten Sie jetzt effiziente Datenverarbeitung",
+    description: "Verarbeitungsregeln mit Policies definieren und große Datenmengen effizient verwalten. Pay-as-you-go-Preise eliminieren unnötige Kosten.",
     button: "Kontakt",
     secondaryButton: "Zuerst die Einrichtungsschritte ansehen"
   }

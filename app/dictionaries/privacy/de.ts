@@ -51,6 +51,7 @@ const de: PrivacyLocale = {
         "Speicherregion: Grundsätzlich Japan (Region Tokio). Änderungen werden vorab angekündigt.",
         "Bei Regionsänderungen erfolgt grundsätzlich mindestens 30 Tage vorher eine Benachrichtigung per E-Mail und/oder im Produkt (außer in Notfällen/gesetzlich erforderlichen Fällen).",
         "Aufbewahrungsdauer: Verarbeitete Daten werden 1 Jahr gespeichert und anschließend automatisch gelöscht. Nutzer können Daten einzeln löschen.",
+        "Abrechnung & Zahlung: Monatlicher Abschluss am Monatsende (Nutzung vom 1. bis zum letzten Tag des Monats). Rechnungsdatum: 1. des Folgemonats. Zahlungsfrist: 15. des Folgemonats.",
         "Kontolöschung: Logische Löschung auf Antrag und endgültige Löschung nach 90 Tagen (Backups können zusätzliche Zeit erfordern).",
         "Bei technischen Problemen: Zugriff/Nutzung der minimal erforderlichen Nutzerdaten zur Untersuchung/Behebung; nach Lösung werden Daten zügig gelöscht oder anonymisiert.",
       ],
@@ -316,7 +317,7 @@ const de: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "14. August 2025",
+    lastUpdated: "6. November 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japan",

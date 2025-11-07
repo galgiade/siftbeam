@@ -17,6 +17,7 @@ export interface UploadFileInput {
   supportRequestId?: string; // サポートリクエスト作成時は未定
   context: 'request' | 'reply'; // リクエストかリプライかを指定
   replyId?: string; // リプライの場合のみ必要
+  uploadType: 'support' | 'neworder'; // アップロード先の種類（必須）
 }
 
 /**
@@ -157,7 +158,10 @@ export async function uploadFileToS3(input: UploadFileInput): Promise<ApiRespons
       contentType: input.file.type,
       customerId: input.customerId,
       userId: input.userId,
-      supportRequestId: input.supportRequestId
+      supportRequestId: input.supportRequestId,
+      context: input.context,
+      replyId: input.replyId,
+      uploadType: input.uploadType
     });
 
     // ファイルサイズチェック (10MB制限)
@@ -176,13 +180,34 @@ export async function uploadFileToS3(input: UploadFileInput): Promise<ApiRespons
     const sanitizedFileName = sanitizeFileName(input.file.name);
     
     const supportRequestId = input.supportRequestId || 'unknown';
+    const uploadType = input.uploadType; // 必須パラメータ
+    
+    if (!uploadType) {
+      console.error('❌ uploadType is missing!');
+      return {
+        success: false,
+        message: 'アップロード先の種類（uploadType）が指定されていません。',
+        errors: { 
+          uploadType: ['uploadTypeは必須パラメータです。']
+        }
+      };
+    }
+    
+    console.log('🔍 Upload path generation:', {
+      uploadType,
+      inputUploadType: input.uploadType,
+      context: input.context,
+      replyId: input.replyId
+    });
     
     let fileKey: string;
     if (input.context === 'reply' && input.replyId) {
-      fileKey = `support/${input.customerId}/${supportRequestId}/reply/${input.replyId}/${sanitizedFileName}`;
+      fileKey = `${uploadType}/${input.customerId}/${supportRequestId}/reply/${input.replyId}/${sanitizedFileName}`;
     } else {
-      fileKey = `support/${input.customerId}/${supportRequestId}/request/${sanitizedFileName}`;
+      fileKey = `${uploadType}/${input.customerId}/${supportRequestId}/request/${sanitizedFileName}`;
     }
+    
+    console.log('📁 Generated fileKey:', fileKey);
     
     // ファイルをArrayBufferに変換
     const arrayBuffer = await input.file.arrayBuffer();
@@ -347,6 +372,7 @@ export async function uploadMultipleFiles(
   files: File[],
   customerId: string,
   userId: string,
+  uploadType: 'support' | 'neworder', // 必須パラメータ（省略可能なパラメータの前に配置）
   supportRequestId?: string,
   context: 'request' | 'reply' = 'request',
   replyId?: string
@@ -356,8 +382,22 @@ export async function uploadMultipleFiles(
       fileCount: files.length,
       customerId,
       userId,
-      supportRequestId
+      supportRequestId,
+      context,
+      replyId,
+      uploadType
     });
+
+    if (!uploadType) {
+      console.error('❌ uploadType is missing in uploadMultipleFiles!');
+      return {
+        success: false,
+        message: 'アップロード先の種類（uploadType）が指定されていません。',
+        errors: { 
+          uploadType: ['uploadTypeは必須パラメータです。']
+        }
+      };
+    }
 
     if (files.length === 0) {
       return {
@@ -387,7 +427,8 @@ export async function uploadMultipleFiles(
         userId,
         supportRequestId,
         context,
-        replyId
+        replyId,
+        uploadType
       });
 
       if (uploadResult.success && uploadResult.data) {

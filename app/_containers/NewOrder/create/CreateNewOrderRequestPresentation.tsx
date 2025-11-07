@@ -374,6 +374,7 @@ export default function CreateNewOrderRequestPresentation({
                   maxFileSize={50}
                   disabled={isPending}
                   commonDictionary={commonDictionary}
+                  uploadType="neworder"
                 />
               )}
               {!formData.newOrderRequestId && (

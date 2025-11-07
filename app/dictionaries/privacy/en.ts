@@ -51,6 +51,7 @@ const en: PrivacyLocale = {
         "Storage region: in principle, Japan (Tokyo region). Changes will be notified in advance.",
         "For region changes, the Company will, in principle, notify at least 30 days in advance via email and/or in-product notice (except in emergencies or where required by law).",
         "Retention period: processed data is stored for 1 year and then automatically deleted. Users can delete data individually.",
+        "Billing & Payment: Monthly closing at month-end (usage from 1st to last day of the month). Invoice issue date: 1st of the following month. Payment due date: 15th of the following month.",
         "Account deletion: logical deletion upon request and permanent deletion after 90 days (backups may require additional time).",
         "In the event of technical trouble: the Company may access/use the minimum necessary User Data for investigation and resolution and will delete or anonymize it promptly after resolution.",
       ],
@@ -316,7 +317,7 @@ const en: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "August 14, 2025",
+    lastUpdated: "November 6, 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu-shi, Shizuoka, Japan",

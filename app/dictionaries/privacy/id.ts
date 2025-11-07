@@ -52,6 +52,7 @@ const id: PrivacyLocale = {
         "Wilayah penyimpanan: pada prinsipnya Jepang (wilayah Tokyo). Perubahan akan diberitahukan sebelumnya.",
         "Untuk perubahan wilayah, pada prinsipnya pemberitahuan dilakukan minimal 30 hari sebelumnya melalui email dan/atau pemberitahuan dalam produk (kecuali dalam keadaan darurat/ketentuan hukum).",
         "Periode retensi: data yang telah diproses disimpan selama 1 tahun dan kemudian dihapus secara otomatis. Pengguna dapat menghapus data secara individual.",
+        "Penagihan & Pembayaran: Penutupan bulanan pada akhir bulan (penggunaan dari tanggal 1 hingga akhir bulan). Tanggal penerbitan faktur: tanggal 1 bulan berikutnya. Tanggal jatuh tempo pembayaran: tanggal 15 bulan berikutnya.",
         "Penghapusan akun: penghapusan logis setelah permintaan dan penghapusan permanen setelah 90 hari (cadangan mungkin memerlukan waktu tambahan).",
         "Jika terjadi masalah teknis: Perusahaan dapat mengakses/menggunakan Data Pengguna yang minimum diperlukan untuk investigasi dan resolusi; setelah itu akan segera dihapus atau dianonimkan.",
       ],
@@ -317,7 +318,7 @@ const id: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "14 Agustus 2025",
+    lastUpdated: "6 November 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Jepang",

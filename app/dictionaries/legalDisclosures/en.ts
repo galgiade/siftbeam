@@ -30,8 +30,9 @@ const enUS: LegalDisclosuresLocale = {
       title: "Payment Methods & Terms",
       items: [
         "Payment method: Credit card (via Stripe)",
-        "Billing cycle: End of month",
-        "Payment due: 5th of each month",
+        "Billing cycle: Monthly closing at month-end (usage from 1st to last day of the month)",
+        "Invoice issue date: 1st of the following month",
+        "Payment due date: 15th of the following month",
         "Rounding: May occur based on Stripe's currency precision and minimum payment units",
         "Taxes: Additional charges may apply as required by law",
         "Additional fees: Internet connection costs (customer responsibility)",
@@ -96,7 +97,7 @@ const enUS: LegalDisclosuresLocale = {
     },
   },
   appendix: {
-    lastUpdated: "September 21, 2025",
+    lastUpdated: "November 6, 2025",
     company: {
       name: "ConnectTech Inc.",
       address: "Dias Waigo 202, 315-1485 Waigo-cho, Naka-ku, Hamamatsu-shi, Shizuoka, Japan",

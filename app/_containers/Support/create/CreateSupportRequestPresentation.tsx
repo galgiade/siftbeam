@@ -264,6 +264,7 @@ export default function CreateSupportRequestPresentation({
                 maxFileSize={10}
                 disabled={isPending}
                 commonDictionary={commonDictionary}
+                uploadType="support"
               />
               {formData.fileKeys.length > 0 && (
                 <p className="text-xs text-gray-600">

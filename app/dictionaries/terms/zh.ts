@@ -136,7 +136,7 @@ const zhCN: TermsLocale = {
         billingPayment: {
           title: "结算/支付",
           items: [
-            "结算：月末；支付日：每月 5 日。",
+            "结算周期：每月月末结算（当月1日至月末的使用量）。发票签发日：次月1日。付款截止日：次月15日。",
             "支付方式：信用卡（通过 Stripe）。",
             "四舍五入：根据 Stripe 货币精度/最小单位进行舍入（依公司舍入规则）。",
             "税费：依法另计。",
@@ -242,7 +242,7 @@ const zhCN: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "2025年8月14日",
+    lastUpdated: "2025年11月6日",
     company: {
       name: "Connect Tech Inc.",
       address: "日本静冈县滨松市中央区和合町315-1485 迪亚斯和合202号",
