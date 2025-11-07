@@ -1,7 +1,7 @@
 const pt = {
   hero: {
     title: "siftbeam",
-    subtitle: "Aproveite os dados da sua empresa para criar os negócios do futuro com o poder da IA",
+    subtitle: "Uma plataforma para processamento e gestão eficiente de dados",
     contact: "Fale conosco",
     buttons: {
       howTo: "Veja como funciona",
@@ -9,20 +9,20 @@ const pt = {
     }
   },
   features: {
-    title: "Três valores alcançados pela tecnologia de IA avançada",
+    title: "Três funcionalidades principais da plataforma de processamento de dados",
     dataAnalysis: {
-      title: "Análise de dados",
-      description: "Analise dados com segurança para descobrir padrões exclusivos.",
+      title: "Gestão flexível de dados",
+      description: "Envie e gerencie arquivos com controles baseados em políticas. Rastreie o histórico de processamento em detalhes.",
       points: [
         "Seleção de políticas e uploads em massa",
         "Barra de uso mensal e alertas de excesso",
         "Filtros por usuário/política/data/uso",
-        "Download ZIP em massa, excluir, alternar aprendizado de IA",
+        "Download ZIP em massa, excluir, alternar permissão de aprendizado",
       ]
     },
     anomalyDetection: {
-      title: "Detecção de anomalias em tempo real",
-      description: "Detecção de anomalias de alta precisão para identificar riscos de negócio antecipadamente.",
+      title: "Monitoramento e controle de uso",
+      description: "Monitore o uso de dados em tempo real e execute notificações ou restrições automáticas com base nos limites configurados.",
       points: [
         "Dois modos: notificar ou restringir",
         "Limiares com base no uso ou custo",
@@ -31,12 +31,12 @@ const pt = {
       ]
     },
     customAI: {
-      title: "Previsões de IA personalizadas",
-      description: "Modelos de IA treinados com seus dados preveem tendências futuras e apoiam a tomada de decisão.",
+      title: "Análise de resultados de processamento e relatórios",
+      description: "Revise os dados de análise detalhados dos resultados de processamento e utilize-os para otimização operacional.",
       points: [
-        "Métricas principais: Precisão/Recall/F1/Taxa de erro",
-        "Métricas operacionais como latência P95",
-        "Ver e validar links de relatórios",
+        "Revise as métricas detalhadas dos resultados de processamento",
+        "Indicadores de desempenho operacional como latência",
+        "Ver e validar relatórios detalhados",
         "Filtrar e ordenar por política",
       ]
     }
@@ -44,21 +44,21 @@ const pt = {
   steps: {
     title: "Comece em 3 passos simples",
     step1: {
-      title: "Integração segura de dados",
-      description: "Envie dados criptografados com segurança por arrastar e soltar ou API. Autenticação em dois fatores garante total segurança."
+      title: "Configuração de política e upload de dados",
+      description: "Crie políticas que definem os formatos de arquivo permitidos, depois envie dados por arrastar e soltar ou API. Autenticação em dois fatores garante segurança."
     },
     step2: {
-      title: "Personalização do modelo de IA",
-      description: "Selecione e ajuste modelos de IA de alto desempenho adaptados às suas necessidades."
+      title: "Execução automatizada do processamento",
+      description: "Os dados enviados são processados automaticamente com base na política selecionada. Os resultados do processamento são armazenados por um ano."
     },
     step3: {
-      title: "Análise em tempo real",
-      description: "Visualize resultados em tempo real com um painel intuitivo. Modelo de pagamento por uso otimiza custos."
+      title: "Gestão do histórico de processamento e avaliação de desempenho",
+      description: "Revise o histórico de processamento com um painel intuitivo. Monitore as métricas de desempenho do modelo de processamento em tempo real para operações ideais. Modelo de pagamento por uso otimiza custos."
     }
   },
   cta: {
-    title: "Obtenha o poder de prever o futuro do seu negócio",
-    description: "Leve seu negócio ao próximo nível com a mais recente tecnologia de IA. Fale conosco agora mesmo.",
+    title: "Comece o processamento eficiente de dados agora",
+    description: "Defina regras de processamento com políticas e gerencie grandes volumes de dados de forma eficiente. O preço por uso elimina custos desnecessários.",
     button: "Fale conosco",
     secondaryButton: "Veja primeiro as etapas de configuração"
   }

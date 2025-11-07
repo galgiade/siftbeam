@@ -30,8 +30,9 @@ const ko: LegalDisclosuresLocale = {
       title: "결제 방법 및 조건",
       items: [
         "결제 방법: 신용카드 (Stripe를 통한)",
-        "청구 주기: 월말",
-        "결제 기한: 매월 5일",
+        "청구 주기: 매월 월말 마감 (당월 1일~말일 사용분)",
+        "청구서 발행일: 익월 1일",
+        "결제 기한: 익월 15일",
         "반올림: Stripe의 통화 정밀도 및 최소 결제 단위에 따라 발생할 수 있습니다",
         "세금: 법률에 따라 추가 요금이 적용될 수 있습니다",
         "추가 요금: 인터넷 연결 비용 (고객 부담)",
@@ -96,7 +97,7 @@ const ko: LegalDisclosuresLocale = {
     },
   },
   appendix: {
-    lastUpdated: "2025년 9월 21일",
+    lastUpdated: "2025년 11월 6일",
     company: {
       name: "ConnectTech Inc.",
       address: "Dias Waigo 202, 315-1485 Waigo-cho, Naka-ku, Hamamatsu-shi, Shizuoka, Japan",

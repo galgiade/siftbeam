@@ -51,6 +51,7 @@ const fr: PrivacyLocale = {
         "Région de stockage : en principe, Japon (région de Tokyo). Les changements seront notifiés à l'avance.",
         "En cas de changement de région, notification au moins 30 jours à l'avance par e-mail et/ou via le service (sauf urgence/exigence légale).",
         "Durée de conservation : les données traitées sont conservées pendant 1 an puis supprimées automatiquement. L'utilisateur peut supprimer des données individuellement.",
+        "Facturation & Paiement : Clôture mensuelle en fin de mois (utilisation du 1er au dernier jour du mois). Date d'émission de la facture : 1er du mois suivant. Date d'échéance du paiement : 15 du mois suivant.",
         "Suppression de compte : suppression logique sur demande et suppression définitive après 90 jours (sauvegardes susceptibles de nécessiter un délai supplémentaire).",
         "En cas d'incident technique : accès/utilisation des données limité au strict nécessaire pour l'analyse et la résolution ; suppression ou anonymisation rapide après résolution.",
       ],
@@ -316,7 +317,7 @@ const fr: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "14 août 2025",
+    lastUpdated: "6 novembre 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japon",

@@ -136,7 +136,7 @@ const id: TermsLocale = {
         billingPayment: {
           title: "Penagihan/Pembayaran",
           items: [
-            "Penutupan: akhir bulan; Tanggal bayar: tanggal 5.",
+            "Siklus penagihan: Penutupan bulanan pada akhir bulan (penggunaan dari tanggal 1 hingga akhir bulan). Tanggal penerbitan faktur: tanggal 1 bulan berikutnya. Tanggal jatuh tempo pembayaran: tanggal 15 bulan berikutnya.",
             "Pembayaran: kartu kredit (Stripe).",
             "Pembulatan sesuai presisi/unit minimum Stripe (aturan pembulatan Perusahaan).",
             "Pajak sesuai hukum.",
@@ -242,7 +242,7 @@ const id: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "14 Agustus 2025",
+    lastUpdated: "6 November 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Jepang",

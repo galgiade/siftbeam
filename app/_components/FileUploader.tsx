@@ -18,6 +18,7 @@ interface FileUploaderProps {
   acceptedFileTypes?: string[];
   disabled?: boolean;
   commonDictionary: CommonLocale; // 共通辞書を追加
+  uploadType: 'support' | 'neworder'; // アップロード先の種類（必須）
 }
 
 interface UploadingFile {
@@ -57,12 +58,18 @@ export default function FileUploader({
   maxFileSize = 10, // MB
   acceptedFileTypes = ['*/*'],
   disabled = false,
-  commonDictionary
+  commonDictionary,
+  uploadType // 必須パラメータ、デフォルト値なし
 }: FileUploaderProps) {
   const dict = commonDictionary.common.fileUploader;
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // コンポーネントマウント時にuploadTypeをログ出力
+  useEffect(() => {
+    console.log('📤 FileUploader mounted with uploadType:', uploadType);
+  }, [uploadType]);
 
   // ファイル状態変更時に親コンポーネントに通知
   useEffect(() => {
@@ -130,7 +137,18 @@ export default function FileUploader({
       );
 
       const filesToUpload = pendingFiles.map(f => f.file);
-      const result = await uploadMultipleFiles(filesToUpload, customerId, userId, supportRequestId, context, replyId);
+      
+      console.log('🚀 FileUploader calling uploadMultipleFiles with:', {
+        fileCount: filesToUpload.length,
+        customerId,
+        userId,
+        uploadType,
+        supportRequestId,
+        context,
+        replyId
+      });
+      
+      const result = await uploadMultipleFiles(filesToUpload, customerId, userId, uploadType, supportRequestId, context, replyId);
 
       if (result.success && result.data) {
         // 成功したファイルを更新

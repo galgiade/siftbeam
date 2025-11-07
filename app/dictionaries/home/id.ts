@@ -1,7 +1,7 @@
 const id = {
   hero: {
     title: "siftbeam",
-    subtitle: "Manfaatkan data perusahaan untuk menciptakan bisnis masa depan dengan kekuatan AI",
+    subtitle: "Platform untuk pemrosesan dan pengelolaan data yang efisien",
     contact: "Hubungi Kami",
     buttons: {
       howTo: "Lihat cara kerja",
@@ -9,20 +9,20 @@ const id = {
     }
   },
   features: {
-    title: "Tiga nilai yang diwujudkan oleh teknologi AI canggih",
+    title: "Tiga fitur inti platform pemrosesan data",
     dataAnalysis: {
-      title: "Analisis Data",
-      description: "Analisis data dengan aman untuk menemukan pola unik.",
+      title: "Pengelolaan data yang fleksibel",
+      description: "Unggah dan kelola file dengan kontrol berbasis kebijakan. Lacak riwayat pemrosesan secara detail.",
       points: [
         "Pemilihan kebijakan dan unggahan massal",
         "Bilah penggunaan bulanan dan peringatan kelebihan",
         "Filter berdasarkan pengguna/kebijakan/tanggal/penggunaan",
-        "Unduh massal ZIP, hapus, alihkan pembelajaran AI",
+        "Unduh massal ZIP, hapus, alihkan izin pembelajaran",
       ]
     },
     anomalyDetection: {
-      title: "Deteksi anomali real-time",
-      description: "Deteksi anomali presisi tinggi untuk mengidentifikasi risiko bisnis lebih awal.",
+      title: "Pemantauan dan kontrol penggunaan",
+      description: "Pantau penggunaan data secara real-time dan jalankan notifikasi atau pembatasan otomatis berdasarkan batas yang dikonfigurasi.",
       points: [
         "Dua mode: beri tahu atau batasi",
         "Ambang berdasarkan penggunaan atau biaya",
@@ -31,12 +31,12 @@ const id = {
       ]
     },
     customAI: {
-      title: "Prediksi AI kustom",
-      description: "Model AI yang dilatih dengan data Anda memprediksi tren masa depan dan mendukung pengambilan keputusan.",
+      title: "Analisis hasil pemrosesan dan laporan",
+      description: "Tinjau data analisis terperinci dari hasil pemrosesan dan manfaatkan untuk optimasi operasional.",
       points: [
-        "Metrik utama: Precision/Recall/F1/Tingkat kesalahan",
-        "Metrik operasional seperti latensi P95",
-        "Lihat dan validasi tautan laporan",
+        "Tinjau metrik terperinci dari hasil pemrosesan",
+        "Indikator kinerja operasional seperti latensi",
+        "Lihat dan validasi laporan terperinci",
         "Filter dan urutkan berdasarkan kebijakan",
       ]
     }
@@ -44,21 +44,21 @@ const id = {
   steps: {
     title: "Mulai dalam 3 langkah mudah",
     step1: {
-      title: "Integrasi data yang aman",
-      description: "Unggah data terenkripsi dengan aman melalui drag & drop atau API. Autentikasi dua faktor memastikan keamanan penuh."
+      title: "Pengaturan kebijakan dan unggah data",
+      description: "Buat kebijakan yang mendefinisikan format file yang diizinkan, lalu unggah data melalui drag & drop atau API. Autentikasi dua faktor memastikan keamanan."
     },
     step2: {
-      title: "Kustomisasi model AI",
-      description: "Pilih dan sesuaikan model AI berkinerja tinggi sesuai kebutuhan Anda."
+      title: "Eksekusi pemrosesan otomatis",
+      description: "Data yang diunggah diproses secara otomatis berdasarkan kebijakan yang dipilih. Hasil pemrosesan disimpan selama satu tahun."
     },
     step3: {
-      title: "Analisis real-time",
-      description: "Visualisasikan hasil analisis secara real-time dengan dasbor intuitif. Model bayar sesuai pemakaian mengoptimalkan biaya."
+      title: "Pengelolaan riwayat pemrosesan dan evaluasi kinerja",
+      description: "Tinjau riwayat pemrosesan dengan dasbor intuitif. Pantau metrik kinerja model pemrosesan secara real-time untuk operasi optimal. Model bayar sesuai pemakaian mengoptimalkan biaya."
     }
   },
   cta: {
-    title: "Dapatkan kemampuan memprediksi masa depan bisnis Anda",
-    description: "Bawa bisnis Anda ke level berikutnya dengan teknologi AI terbaru. Hubungi kami sekarang.",
+    title: "Mulai pemrosesan data yang efisien sekarang",
+    description: "Tentukan aturan pemrosesan dengan kebijakan dan kelola volume data besar secara efisien. Harga bayar sesuai pemakaian menghilangkan biaya yang tidak perlu.",
     button: "Hubungi Kami",
     secondaryButton: "Lihat langkah penyiapan terlebih dahulu"
   }

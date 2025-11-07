@@ -136,7 +136,7 @@ const de: TermsLocale = {
         billingPayment: {
           title: "Abrechnung/Zahlung",
           items: [
-            "Abschluss: Monatsende; Zahlung: 5. Tag des Monats.",
+            "Abrechnungszyklus: Monatlicher Abschluss am Monatsende (Nutzung vom 1. bis zum letzten Tag des Monats). Rechnungsdatum: 1. des Folgemonats. Zahlungsfrist: 15. des Folgemonats.",
             "Zahlung: Kreditkarte (Stripe).",
             "Rundung gem. Stripe-Präzision/Mindesteinheit (Unternehmens-Regeln).",
             "Steuern gem. Gesetz zusätzlich.",
@@ -242,7 +242,7 @@ const de: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "14. August 2025",
+    lastUpdated: "6. November 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japan",

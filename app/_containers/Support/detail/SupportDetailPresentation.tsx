@@ -498,6 +498,7 @@ export default function SupportDetailPresentation({
                   maxFileSize={10}
                   disabled={isPending}
                   commonDictionary={commonDictionary}
+                  uploadType="support"
                 />
                 {replyFileKeys.length > 0 && (
                   <p className="text-xs text-gray-600 mt-2">

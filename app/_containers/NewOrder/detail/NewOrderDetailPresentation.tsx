@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useActionState, useEffect, startTransition, useCallback } from "react"
-import { Button, Card, Textarea, Chip, Divider } from "@heroui/react"
+import { Button, Card, Textarea } from "@heroui/react"
 import { NewOrderRequest, NewOrderReply } from "@/app/lib/types/TypeAPIs"
-import { createNewOrderReply, CreateNewOrderReplyInput } from "@/app/lib/actions/neworder-api"
+import { createNewOrderReply } from "@/app/lib/actions/neworder-api"
 import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
 import type { NewOrderLocale } from '@/app/dictionaries/newOrder/newOrder.d.ts';
 import type { CommonLocale } from '@/app/dictionaries/common/common.d';
 import { useRouter } from "next/navigation"
-import { FaRocket, FaPaperPlane, FaArrowLeft, FaClock, FaCircleCheck, FaCircleExclamation, FaUser, FaHeadset, FaFile, FaImage, FaVideo, FaMusic } from "react-icons/fa6"
+import { FaPaperPlane, FaArrowLeft, FaClock, FaCircleCheck, FaCircleExclamation, FaUser, FaHeadset, FaFile, FaImage, FaVideo, FaMusic } from "react-icons/fa6"
 import Link from "next/link"
 import FileUploader from "@/app/_components/FileUploader"
 import { v4 as uuidv4 } from 'uuid'
@@ -467,6 +467,7 @@ export default function NewOrderDetailPresentation({
                   maxFileSize={50}
                   disabled={isPending}
                   commonDictionary={commonDictionary}
+                  uploadType="neworder"
                 />
                 {replyFileKeys.length > 0 && (
                   <p className="text-xs text-gray-600 mt-2">

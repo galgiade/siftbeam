@@ -51,6 +51,7 @@ const pt: PrivacyLocale = {
         "Região de armazenamento: em princípio, Japão (região de Tóquio). Mudanças serão notificadas com antecedência.",
         "Para mudanças de região, a Empresa notificará, em princípio, com pelo menos 30 dias de antecedência por e-mail e/ou aviso no produto (exceto em emergências/exigências legais).",
         "Período de retenção: dados processados são armazenados por 1 ano e depois excluídos automaticamente. Os usuários podem excluir dados individualmente.",
+        "Faturamento e Pagamento: Fechamento mensal no final do mês (uso do dia 1 ao último dia do mês). Data de emissão da fatura: dia 1 do mês seguinte. Data de vencimento do pagamento: dia 15 do mês seguinte.",
         "Exclusão de conta: exclusão lógica mediante solicitação e exclusão permanente após 90 dias (backups podem demandar tempo adicional).",
         "Em caso de problemas técnicos: a Empresa pode acessar/utilizar o mínimo necessário dos Dados do Usuário para investigação e solução; após resolvido, excluirá ou anonimizará prontamente.",
       ],
@@ -316,7 +317,7 @@ const pt: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "14 de agosto de 2025",
+    lastUpdated: "6 de novembro de 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japão",

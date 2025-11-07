@@ -136,7 +136,7 @@ const en: TermsLocale = {
         billingPayment: {
           title: "Billing/Payment",
           items: [
-            "Billing: month-end; Payment date: 5th of each month.",
+            "Billing cycle: Monthly closing at month-end (usage from 1st to last day of the month). Invoice issue date: 1st of the following month. Payment due date: 15th of the following month.",
             "Payment via credit card (Stripe).",
             "Rounding per Stripe precision/minimum unit (Company rounding rules).",
             "Taxes added as required by law.",
@@ -242,7 +242,7 @@ const en: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "August 14, 2025",
+    lastUpdated: "November 6, 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japan",

@@ -30,8 +30,9 @@ const id: LegalDisclosuresLocale = {
       title: "Metode Pembayaran & Ketentuan",
       items: [
         "Metode pembayaran: Kartu kredit (melalui Stripe)",
-        "Siklus penagihan: Akhir bulan",
-        "Tanggal jatuh tempo pembayaran: 5 setiap bulan",
+        "Siklus penagihan: Penutupan bulanan pada akhir bulan (penggunaan dari tanggal 1 hingga akhir bulan)",
+        "Tanggal penerbitan faktur: tanggal 1 bulan berikutnya",
+        "Tanggal jatuh tempo pembayaran: tanggal 15 bulan berikutnya",
         "Pembulatan: Dapat terjadi berdasarkan presisi mata uang Stripe dan unit pembayaran minimum",
         "Pajak: Biaya tambahan dapat berlaku sesuai hukum",
         "Biaya tambahan: Biaya koneksi internet (tanggung jawab pelanggan)",
@@ -96,7 +97,7 @@ const id: LegalDisclosuresLocale = {
     },
   },
   appendix: {
-    lastUpdated: "21 September 2025",
+    lastUpdated: "6 November 2025",
     company: {
       name: "ConnectTech Inc.",
       address: "Dias Waigo 202, 315-1485 Waigo-cho, Naka-ku, Hamamatsu-shi, Shizuoka, Jepang",

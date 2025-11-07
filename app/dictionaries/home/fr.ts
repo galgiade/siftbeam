@@ -1,7 +1,7 @@
 const fr = {
   hero: {
     title: "siftbeam",
-    subtitle: "Exploiter les données de l'entreprise pour créer l'avenir avec la puissance de l'IA",
+    subtitle: "Une plateforme pour le traitement et la gestion efficaces des données",
     contact: "Nous contacter",
     buttons: {
       howTo: "Voir le mode d'emploi",
@@ -9,20 +9,20 @@ const fr = {
     }
   },
   features: {
-    title: "Trois valeurs réalisées par une technologie IA avancée",
+    title: "Trois fonctionnalités principales de la plateforme de traitement de données",
     dataAnalysis: {
-      title: "Analyse des données",
-      description: "Analyser les données en toute sécurité pour découvrir des schémas uniques.",
+      title: "Gestion flexible des données",
+      description: "Téléversez et gérez des fichiers avec des contrôles basés sur des politiques. Suivez l'historique de traitement en détail.",
       points: [
         "Sélection des politiques et téléversements en masse",
         "Barre d'utilisation mensuelle et alertes de dépassement",
         "Filtres par utilisateur/politique/date/utilisation",
-        "Téléchargement ZIP en masse, suppression, bascule apprentissage IA",
+        "Téléchargement ZIP en masse, suppression, bascule autorisation d'apprentissage",
       ]
     },
     anomalyDetection: {
-      title: "Détection d'anomalies en temps réel",
-      description: "Détection d'anomalies de haute précision pour identifier et traiter rapidement les risques.",
+      title: "Surveillance et contrôle de l'utilisation",
+      description: "Surveillez l'utilisation des données en temps réel et exécutez des notifications ou des restrictions automatiques selon les limites configurées.",
       points: [
         "Deux modes: notifier ou restreindre",
         "Seuils basés sur l'utilisation ou le coût",
@@ -31,12 +31,12 @@ const fr = {
       ]
     },
     customAI: {
-      title: "Prédictions IA personnalisées",
-      description: "Des modèles IA entraînés sur vos données prédisent les tendances futures et soutiennent la prise de décision.",
+      title: "Analyse des résultats de traitement et rapports",
+      description: "Consultez les données d'analyse détaillées des résultats de traitement et utilisez-les pour l'optimisation opérationnelle.",
       points: [
-        "Métriques clés: Précision/Rappel/F1/Taux d'erreur",
-        "Métriques opérationnelles comme la latence P95",
-        "Voir et valider les liens de rapport",
+        "Consultez les métriques détaillées des résultats de traitement",
+        "Indicateurs de performance opérationnels comme la latence",
+        "Voir et valider les rapports détaillés",
         "Filtrer et trier par politique",
       ]
     }
@@ -44,21 +44,21 @@ const fr = {
   steps: {
     title: "Commencez en 3 étapes simples",
     step1: {
-      title: "Intégration de données sécurisée",
-      description: "Téléchargez des données chiffrées en toute sécurité via glisser-déposer ou API. L'authentification à deux facteurs garantit une sécurité totale."
+      title: "Configuration de politique et téléversement de données",
+      description: "Créez des politiques définissant les formats de fichiers autorisés, puis téléversez des données via glisser-déposer ou API. L'authentification à deux facteurs garantit la sécurité."
     },
     step2: {
-      title: "Personnalisation du modèle IA",
-      description: "Sélectionnez et ajustez des modèles IA performants adaptés à vos besoins."
+      title: "Exécution automatique du traitement",
+      description: "Les données téléversées sont automatiquement traitées selon la politique sélectionnée. Les résultats de traitement sont conservés pendant un an."
     },
     step3: {
-      title: "Analyse en temps réel",
-      description: "Visualisez les résultats d'analyse en temps réel avec un tableau de bord intuitif. Le modèle à l'usage optimise les coûts."
+      title: "Gestion de l'historique de traitement et évaluation des performances",
+      description: "Consultez l'historique de traitement avec un tableau de bord intuitif. Surveillez les métriques de performance du modèle de traitement en temps réel pour des opérations optimales. Le modèle à l'usage optimise les coûts."
     }
   },
   cta: {
-    title: "Obtenez le pouvoir de prédire l'avenir de votre entreprise",
-    description: "Faites passer votre activité au niveau supérieur avec les technologies IA les plus récentes. Contactez-nous dès maintenant.",
+    title: "Commencez le traitement efficace des données maintenant",
+    description: "Définissez les règles de traitement avec des politiques et gérez efficacement de gros volumes de données. La tarification à l'usage élimine les coûts inutiles.",
     button: "Nous contacter",
     secondaryButton: "Voir d'abord les étapes de configuration"
   }

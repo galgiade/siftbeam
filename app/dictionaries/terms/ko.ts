@@ -136,7 +136,7 @@ const ko: TermsLocale = {
         billingPayment: {
           title: "청구/결제",
           items: [
-            "청구 주기: 월말 마감; 결제일: 매월 5일.",
+            "청구 주기: 매월 월말 마감(당월 1일~말일 사용분). 청구서 발행일: 익월 1일. 결제 기한: 익월 15일.",
             "결제 수단: 신용카드(Stripe 이용).",
             "반올림: Stripe 통화 정밀도/최소 단위에 따라 반올림(회사 규칙 적용).",
             "세금: 법령에 따라 별도 부과.",
@@ -242,7 +242,7 @@ const ko: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "2025년 8월 14일",
+    lastUpdated: "2025년 11월 6일",
     company: {
       name: "Connect Tech Inc.",
       address: "일본 시즈오카현 하마마쓰시 주오구 와고초 315-1485 디아스 와고 202호",

@@ -442,7 +442,7 @@ export async function createSubscriptionAction(paymentMethodId: string) {
       throw new Error('Stripe price IDs are not configured. Please check environment variables.');
     }
 
-    // クレジットカード式請求日設定（締め日: 月末、請求日: 翌月5日）
+    // 請求サイクル設定（締め日: 月末、請求日: 翌月1日、支払期日: 翌月5日）
     const now = new Date();
     // 日本時間での現在日時を取得（UTC+9）
     const jstOffset = 9 * 60 * 60 * 1000; // 9時間をミリ秒で
@@ -451,13 +451,14 @@ export async function createSubscriptionAction(paymentMethodId: string) {
     const currentYear = nowJST.getFullYear();
     const currentMonth = nowJST.getMonth();
     
-    // 来月の5日を請求日として設定（JST）
-    const billingDate = new Date(currentYear, currentMonth + 1, 5, 0, 0, 0, 0);
+    // 来月の1日を請求サイクルの開始日として設定（JST）
+    // これにより、月末締め（当月1日〜末日）→翌月1日に請求書発行となる
+    const billingDate = new Date(currentYear, currentMonth + 1, 1, 0, 0, 0, 0);
     
     // UTCタイムスタンプに変換（JST -> UTC）
     const billingCycleAnchor = Math.floor((billingDate.getTime() - jstOffset) / 1000);
 
-    // 従量課金対応のサブスクリプションを作成（請求日固定）
+    // 従量課金対応のサブスクリプションを作成（月末締め）
     const subscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [
@@ -469,8 +470,12 @@ export async function createSubscriptionAction(paymentMethodId: string) {
         }
       ],
       default_payment_method: paymentMethodId,
-      // 請求サイクルを毎月5日に固定
+      // 請求サイクルを毎月1日開始（前月1日〜末日の利用分を集計）
       billing_cycle_anchor: billingCycleAnchor,
+      // 支払期日を請求書発行から15日後に設定（翌月1日発行→15日支払期日）
+      days_until_due: 15,
+      // 請求書を自動的に確定する
+      collection_method: 'charge_automatically',
       // 従量課金の場合、最初の請求書は作成しない
       proration_behavior: 'none',
       expand: ['latest_invoice.payment_intent']
