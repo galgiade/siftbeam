@@ -12,14 +12,14 @@ import { dynamoDocClient } from '@/app/lib/aws-clients';
 import { ApiResponse } from '@/app/lib/types/TypeAPIs';
 import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
 
-const NEWORDER_REQUEST_TABLE_NAME = process.env.NEWORDER_REQUEST_TABLE_NAME || 'siftbeam-neworder-request';
-const NEWORDER_REPLY_TABLE_NAME = process.env.NEWORDER_REPLY_TABLE_NAME || 'siftbeam-neworder-reply';
+const NEWORDER_REQUEST_TABLE_NAME = process.env.NEWORDER_REQUEST_TABLE_NAME || 'siftbeam-new-order-requests';
+const NEWORDER_REPLY_TABLE_NAME = process.env.NEWORDER_REPLY_TABLE_NAME || 'siftbeam-new-order-replies';
 
 /**
  * 新規オーダーリクエスト型定義
  */
 export interface NewOrderRequest {
-  'neworder-requestId': string;
+  newOrderRequestId: string;
   customerId: string;
   userId: string;
   userName: string;
@@ -37,8 +37,8 @@ export interface NewOrderRequest {
  * 新規オーダー返信型定義
  */
 export interface NewOrderReply {
-  'neworder-replyId': string;
-  'neworder-requestId': string; // GSIキー名に合わせる
+  newOrderReplyId: string;
+  newOrderRequestId: string; // GSIキー名に合わせる
   userId: string;
   userName: string;
   senderType: 'customer' | 'support' | 'admin';
@@ -52,7 +52,7 @@ export interface NewOrderReply {
  * 新規オーダーリクエスト作成用のインターフェース
  */
 export interface CreateNewOrderRequestInput {
-  'neworder-requestId'?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
+  newOrderRequestId?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
   customerId: string;
   userId: string;
   userName: string;
@@ -67,7 +67,7 @@ export interface CreateNewOrderRequestInput {
  * 新規オーダーリクエスト更新用のインターフェース
  */
 export interface UpdateNewOrderRequestInput {
-  'neworder-requestId': string;
+  newOrderRequestId: string;
   dataType?: 'structured' | 'unstructured' | 'mixed' | 'other';
   modelType?: 'classification' | 'regression' | 'clustering' | 'nlp' | 'computer_vision' | 'other';
   subject?: string;
@@ -90,8 +90,8 @@ export interface QueryNewOrderRequestsInput {
  * 新規オーダー返信作成用のインターフェース
  */
 export interface CreateNewOrderReplyInput {
-  'neworder-replyId'?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
-  'neworder-requestId': string; // GSIキー名に合わせる
+  newOrderReplyId?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
+  newOrderRequestId: string; // GSIキー名に合わせる
   userId: string;
   userName: string;
   senderType: 'customer' | 'support' | 'admin';
@@ -103,7 +103,7 @@ export interface CreateNewOrderReplyInput {
  * 新規オーダー返信更新用のインターフェース
  */
 export interface UpdateNewOrderReplyInput {
-  'neworder-replyId': string;
+  newOrderReplyId: string;
   message?: string;
   fileKeys?: string[];
 }
@@ -112,7 +112,7 @@ export interface UpdateNewOrderReplyInput {
  * 新規オーダー返信クエリ用のインターフェース
  */
 export interface QueryNewOrderRepliesInput {
-  'neworder-requestId': string; // GSIキー名に合わせる
+  newOrderRequestId: string; // GSIキー名に合わせる
   limit?: number;
   lastEvaluatedKey?: Record<string, any>;
 }
@@ -226,7 +226,7 @@ export async function getNewOrderRequestById(newOrderRequestId: string): Promise
 
     const command = new GetCommand({
       TableName: NEWORDER_REQUEST_TABLE_NAME,
-      Key: { 'neworder-requestId': newOrderRequestId }
+      Key: { newOrderRequestId: newOrderRequestId }
     });
 
     const result = await dynamoDocClient.send(command);
@@ -367,11 +367,11 @@ export async function createNewOrderRequest(input: CreateNewOrderRequestInput): 
     }
 
     // 新規オーダーリクエストIDを生成（事前生成されたIDがあればそれを使用）
-    const newOrderRequestId = input['neworder-requestId'] || generateId();
+    const newOrderRequestId = input.newOrderRequestId || generateId();
     const now = new Date().toISOString();
     
     const newOrderRequest: NewOrderRequest = {
-      'neworder-requestId': newOrderRequestId,
+      newOrderRequestId: newOrderRequestId,
       customerId: input.customerId,
       userId: input.userId,
       userName: input.userName.trim(),
@@ -390,7 +390,7 @@ export async function createNewOrderRequest(input: CreateNewOrderRequestInput): 
       Item: newOrderRequest,
       ConditionExpression: 'attribute_not_exists(#newOrderRequestId)',
       ExpressionAttributeNames: {
-        '#newOrderRequestId': 'neworder-requestId'
+        '#newOrderRequestId': 'newOrderRequestId'
       }
     });
 
@@ -514,11 +514,11 @@ export async function updateNewOrderRequest(input: UpdateNewOrderRequestInput): 
     // DynamoDB更新
     const updateCommand = new UpdateCommand({
       TableName: NEWORDER_REQUEST_TABLE_NAME,
-      Key: { 'neworder-requestId': input['neworder-requestId'] },
+      Key: { newOrderRequestId: input.newOrderRequestId },
       UpdateExpression: `SET ${updateExpression.join(', ')}`,
       ExpressionAttributeNames: {
         ...expressionAttributeNames,
-        '#newOrderRequestId': 'neworder-requestId'
+        '#newOrderRequestId': 'newOrderRequestId'
       },
       ExpressionAttributeValues: expressionAttributeValues,
       ConditionExpression: 'attribute_exists(#newOrderRequestId)',
@@ -528,13 +528,13 @@ export async function updateNewOrderRequest(input: UpdateNewOrderRequestInput): 
     const result = await dynamoDocClient.send(updateCommand);
 
     console.log('New order request updated successfully:', {
-      newOrderRequestId: input['neworder-requestId'],
+      newOrderRequestId: input.newOrderRequestId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
 
     // 監査ログ記録（成功）
     const updatedFields = Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt').join(', ');
-    await logSuccessAction('UPDATE', 'NewOrderRequest', updatedFields, '', input['neworder-requestId']);
+    await logSuccessAction('UPDATE', 'NewOrderRequest', updatedFields, '', input.newOrderRequestId);
 
     return {
       success: true,
@@ -544,7 +544,7 @@ export async function updateNewOrderRequest(input: UpdateNewOrderRequestInput): 
 
   } catch (error: any) {
     // 監査ログ記録（失敗）
-    await logFailureAction('UPDATE', 'NewOrderRequest', error?.message || '新規オーダーリクエスト更新に失敗しました', 'request', '', input['neworder-requestId']);
+    await logFailureAction('UPDATE', 'NewOrderRequest', error?.message || '新規オーダーリクエスト更新に失敗しました', 'request', '', input.newOrderRequestId);
     
     return handleError(error, '新規オーダーリクエスト更新');
   }
@@ -569,10 +569,10 @@ export async function deleteNewOrderRequest(
       // ソフト削除（ステータスをclosedに変更）
       const updateCommand = new UpdateCommand({
         TableName: NEWORDER_REQUEST_TABLE_NAME,
-        Key: { 'neworder-requestId': newOrderRequestId },
+        Key: { newOrderRequestId: newOrderRequestId },
         UpdateExpression: 'SET #status = :status, #updatedAt = :updatedAt',
         ExpressionAttributeNames: {
-          '#newOrderRequestId': 'neworder-requestId',
+          '#newOrderRequestId': 'newOrderRequestId',
           '#status': 'status',
           '#updatedAt': 'updatedAt'
         },
@@ -588,10 +588,10 @@ export async function deleteNewOrderRequest(
       // ハード削除
       const deleteCommand = new DeleteCommand({
         TableName: NEWORDER_REQUEST_TABLE_NAME,
-        Key: { 'neworder-requestId': newOrderRequestId },
+        Key: { newOrderRequestId: newOrderRequestId },
         ConditionExpression: 'attribute_exists(#newOrderRequestId)',
         ExpressionAttributeNames: {
-          '#newOrderRequestId': 'neworder-requestId'
+          '#newOrderRequestId': 'newOrderRequestId'
         }
       });
 
@@ -629,7 +629,7 @@ export async function getNewOrderReplyById(newOrderReplyId: string): Promise<Api
 
     const command = new GetCommand({
       TableName: NEWORDER_REPLY_TABLE_NAME,
-      Key: { 'neworder-replyId': newOrderReplyId }
+      Key: { newOrderReplyId: newOrderReplyId }
     });
 
     const result = await dynamoDocClient.send(command);
@@ -663,13 +663,13 @@ export async function queryNewOrderReplies(
   try {
     const command = new QueryCommand({
       TableName: NEWORDER_REPLY_TABLE_NAME,
-      IndexName: 'neworder-requestId-createdAt-index',
+      IndexName: 'newOrderRequestId-createdAt-index',
       KeyConditionExpression: '#newOrderRequestId = :newOrderRequestId',
       ExpressionAttributeNames: {
-        '#newOrderRequestId': 'neworder-requestId' // GSIのキー名に合わせる
+        '#newOrderRequestId': 'newOrderRequestId' // GSIのキー名に合わせる
       },
       ExpressionAttributeValues: {
-        ':newOrderRequestId': input['neworder-requestId']
+        ':newOrderRequestId': input.newOrderRequestId
       },
       ScanIndexForward: true, // 古い順にソート（会話の流れ）
       Limit: input.limit || 1000,
@@ -680,7 +680,7 @@ export async function queryNewOrderReplies(
     const newOrderReplies = result.Items as NewOrderReply[];
 
     console.log('New order replies queried successfully:', { 
-      'neworder-requestId': input['neworder-requestId'],
+      newOrderRequestId: input.newOrderRequestId,
       count: newOrderReplies.length
     });
 
@@ -707,8 +707,8 @@ export async function createNewOrderReply(input: CreateNewOrderReplyInput): Prom
     // 入力バリデーション
     const errors: Record<string, string[]> = {};
     
-    if (!input['neworder-requestId']?.trim()) {
-      errors['neworder-requestId'] = ['新規オーダーリクエストIDは必須です。'];
+    if (!input.newOrderRequestId?.trim()) {
+      errors['newOrderRequestId'] = ['新規オーダーリクエストIDは必須です。'];
     }
     
     if (!input.userId?.trim()) {
@@ -737,12 +737,12 @@ export async function createNewOrderReply(input: CreateNewOrderReplyInput): Prom
     }
 
     // 新規オーダー返信IDを生成（事前生成されたIDがあればそれを使用）
-    const newOrderReplyId = input['neworder-replyId'] || generateId();
+    const newOrderReplyId = input.newOrderReplyId || generateId();
     const now = new Date().toISOString();
     
     const newOrderReply: NewOrderReply = {
-      'neworder-replyId': newOrderReplyId,
-      'neworder-requestId': input['neworder-requestId'], // GSIキー名に合わせる
+      newOrderReplyId: newOrderReplyId,
+      newOrderRequestId: input.newOrderRequestId, // GSIキー名に合わせる
       userId: input.userId,
       userName: input.userName.trim(),
       senderType: input.senderType,
@@ -757,7 +757,7 @@ export async function createNewOrderReply(input: CreateNewOrderReplyInput): Prom
       Item: newOrderReply,
       ConditionExpression: 'attribute_not_exists(#newOrderReplyId)',
       ExpressionAttributeNames: {
-        '#newOrderReplyId': 'neworder-replyId'
+        '#newOrderReplyId': 'newOrderReplyId'
       }
     });
 
@@ -765,7 +765,7 @@ export async function createNewOrderReply(input: CreateNewOrderReplyInput): Prom
 
     console.log('New order reply created successfully:', { 
       newOrderReplyId,
-      'neworder-requestId': input['neworder-requestId'],
+      newOrderRequestId: input.newOrderRequestId,
       senderType: input.senderType
     });
 
@@ -835,11 +835,11 @@ export async function updateNewOrderReply(input: UpdateNewOrderReplyInput): Prom
     // DynamoDB更新
     const updateCommand = new UpdateCommand({
       TableName: NEWORDER_REPLY_TABLE_NAME,
-      Key: { 'neworder-replyId': input['neworder-replyId'] },
+      Key: { newOrderReplyId: input.newOrderReplyId },
       UpdateExpression: `SET ${updateExpression.join(', ')}`,
       ExpressionAttributeNames: {
         ...expressionAttributeNames,
-        '#newOrderReplyId': 'neworder-replyId'
+        '#newOrderReplyId': 'newOrderReplyId'
       },
       ExpressionAttributeValues: expressionAttributeValues,
       ConditionExpression: 'attribute_exists(#newOrderReplyId)',
@@ -849,7 +849,7 @@ export async function updateNewOrderReply(input: UpdateNewOrderReplyInput): Prom
     const result = await dynamoDocClient.send(updateCommand);
 
     console.log('New order reply updated successfully:', {
-      newOrderReplyId: input['neworder-replyId'],
+      newOrderReplyId: input.newOrderReplyId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
 
@@ -882,10 +882,10 @@ export async function deleteNewOrderReply(
     // 新規オーダー返信は通常ハード削除（会話の整合性のため）
     const deleteCommand = new DeleteCommand({
       TableName: NEWORDER_REPLY_TABLE_NAME,
-      Key: { 'neworder-replyId': newOrderReplyId },
+      Key: { newOrderReplyId: newOrderReplyId },
       ConditionExpression: 'attribute_exists(#newOrderReplyId)',
       ExpressionAttributeNames: {
-        '#newOrderReplyId': 'neworder-replyId'
+        '#newOrderReplyId': 'newOrderReplyId'
       }
     });
 

@@ -120,7 +120,7 @@ export default async function createPaymentSubscription(
     console.log('Current JST:', nowJST.toISOString());
     console.log('請求サイクル: 月末締め（当月1日〜末日）');
     console.log('請求書発行日: 翌月1日');
-    console.log('支払期日: 翌月15日（days_until_dueで設定）');
+    console.log('支払方法: カード自動決済（請求書発行時に即座に決済）');
     console.log('Next billing cycle start (JST):', billingDate.toISOString());
     console.log('Billing cycle anchor (UTC timestamp):', billingCycleAnchor);
 
@@ -136,9 +136,7 @@ export default async function createPaymentSubscription(
       default_payment_method: paymentMethodId,
       // 請求サイクルを毎月1日開始（前月1日〜末日の利用分を集計）
       billing_cycle_anchor: billingCycleAnchor,
-      // 支払期日を請求書発行から15日後に設定（翌月1日発行→15日支払期日）
-      days_until_due: 15,
-      // 請求書を自動的に確定する
+      // カード自動決済（請求書発行時に即座に決済される）
       collection_method: 'charge_automatically',
       // 従量課金の場合、最初の請求書は作成しない
       proration_behavior: 'none',

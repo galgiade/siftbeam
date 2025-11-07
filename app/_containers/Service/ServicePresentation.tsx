@@ -78,7 +78,7 @@ export default function ServicePresentation({
     console.log('ServicePresentation - Processing History:', {
       count: processingHistory.length,
       sample: processingHistory.length > 0 ? {
-        id: processingHistory[0]['processing-historyId'],
+        id: processingHistory[0].processingHistoryId,
         userName: processingHistory[0].userName,
         aiTrainingUsage: processingHistory[0].aiTrainingUsage,
         status: processingHistory[0].status
@@ -209,7 +209,7 @@ export default function ServicePresentation({
     console.log('通知制限の詳細:');
     usageLimits.notifyLimits.forEach((limit, index) => {
       console.log(`通知制限 ${index + 1}:`, {
-        'usage-limitsId': limit['usage-limitsId'],
+        usageLimitId: limit.usageLimitId,
         usageLimitValue: limit.usageLimitValue,
         usageUnit: limit.usageUnit,
         amountLimitValue: limit.amountLimitValue,
@@ -228,7 +228,7 @@ export default function ServicePresentation({
     console.log('利用停止制限の詳細:');
     usageLimits.restrictLimits.forEach((limit, index) => {
       console.log(`利用停止制限 ${index + 1}:`, {
-        'usage-limitsId': limit['usage-limitsId'],
+        usageLimitId: limit.usageLimitId,
         usageLimitValue: limit.usageLimitValue,
         usageUnit: limit.usageUnit,
         amountLimitValue: limit.amountLimitValue,

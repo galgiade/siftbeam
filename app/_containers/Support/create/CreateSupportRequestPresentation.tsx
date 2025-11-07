@@ -59,7 +59,7 @@ export default function CreateSupportRequestPresentation({
     async (prevState: any, formData: FormData) => {
       try {
         const createSupportRequestInput = {
-          'support-requestId': JSON.parse(formData.get('supportRequestId') as string),
+          supportRequestId: JSON.parse(formData.get('supportRequestId') as string),
           customerId: userAttributes.customerId,
           userId: userAttributes.sub,
           userName: userAttributes.preferred_username || dictionary.label.customer,

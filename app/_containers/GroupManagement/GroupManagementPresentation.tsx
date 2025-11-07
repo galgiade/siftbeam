@@ -649,7 +649,7 @@ export default function GroupManagementPresentation({
                               const isLastUser = groupUsers.length <= 1;
                               return (
                                 <Chip
-                                  key={userGroup['user-groupId']}
+                                  key={userGroup.userGroupId}
                                   size="sm"
                                   variant="flat"
                                   color="primary"
@@ -785,7 +785,7 @@ export default function GroupManagementPresentation({
                               const isLastPolicy = groupPolicies.length <= 1;
                               return (
                                 <Chip
-                                  key={policyGroup['policy-groupId']}
+                                  key={policyGroup.policyGroupId}
                                   size="sm"
                                   variant="flat"
                                   color="secondary"

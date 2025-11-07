@@ -136,12 +136,13 @@ const en: TermsLocale = {
         billingPayment: {
           title: "Billing/Payment",
           items: [
-            "Billing cycle: Monthly closing at month-end (usage from 1st to last day of the month). Invoice issue date: 1st of the following month. Payment due date: 15th of the following month.",
+            "Billing cycle: Monthly closing at month-end (usage from 1st to last day of the month). Invoice issue date: 1st of the following month.",
+            "Payment timing: Automatic charge to registered credit card upon invoice issuance.",
             "Payment via credit card (Stripe).",
             "Rounding per Stripe precision/minimum unit (Company rounding rules).",
             "Taxes added as required by law.",
             "No refunds for services already provided (unless required by law).",
-            "Late charges: 14.6% p.a.",
+            "Late charges: 14.6% p.a. if payment delay occurs.",
           ],
         },
         priceChange: {
@@ -242,7 +243,7 @@ const en: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "November 6, 2025",
+    lastUpdated: "November 7, 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japan",

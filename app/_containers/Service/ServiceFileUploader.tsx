@@ -168,7 +168,7 @@ export default function ServiceFileUploader({
       // 注: createdAtは処理開始時刻として自動的に設定されます
       // S3イベントLambdaがファイルサイズを更新します
       const historyResult = await createProcessingHistory({
-        'processing-historyId': processingHistoryId,
+        processingHistoryId: processingHistoryId,
         userId,
         userName: userName || 'User',
         customerId,
@@ -267,7 +267,7 @@ export default function ServiceFileUploader({
       
       // トリガーファイルの内容を作成（API版と統一）
       const triggerContent = {
-        'processing-historyId': processingHistoryId,
+        processingHistoryId: processingHistoryId,
         userId,
         userName: userName || 'User',
         customerId,

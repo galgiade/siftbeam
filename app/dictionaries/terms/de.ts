@@ -136,12 +136,13 @@ const de: TermsLocale = {
         billingPayment: {
           title: "Abrechnung/Zahlung",
           items: [
-            "Abrechnungszyklus: Monatlicher Abschluss am Monatsende (Nutzung vom 1. bis zum letzten Tag des Monats). Rechnungsdatum: 1. des Folgemonats. Zahlungsfrist: 15. des Folgemonats.",
+            "Abrechnungszyklus: Monatlicher Abschluss am Monatsende (Nutzung vom 1. bis zum letzten Tag des Monats). Rechnungsdatum: 1. des Folgemonats.",
+            "Zahlungszeitpunkt: Automatische Belastung der registrierten Kreditkarte bei Rechnungsstellung.",
             "Zahlung: Kreditkarte (Stripe).",
             "Rundung gem. Stripe-Präzision/Mindesteinheit (Unternehmens-Regeln).",
             "Steuern gem. Gesetz zusätzlich.",
             "Keine Rückerstattung für bereits erbrachte Leistungen (außer gesetzlich erforderlich).",
-            "Verzugszinsen: 14,6 % p. a.",
+            "Verzugszinsen: 14,6 % p. a. bei Zahlungsverzug.",
           ],
         },
         priceChange: {
@@ -242,7 +243,7 @@ const de: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "6. November 2025",
+    lastUpdated: "7. November 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japan",

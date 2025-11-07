@@ -8,7 +8,7 @@ interface ProcessingHistoryStatus {
 }
 
 interface ProcessingHistoryForUtils {
-  'processing-historyId': string;
+  processingHistoryId: string;
   status: 'in_progress' | 'success' | 'failed' | 'canceled' | 'deleted' | 'delete_failed';
   uploadedFileKeys: string[] | Array<{ S: string }>;
   downloadS3Keys: string[] | Array<{ S: string }>;

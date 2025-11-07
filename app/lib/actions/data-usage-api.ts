@@ -9,13 +9,13 @@ import {
 import { dynamoDocClient } from '@/app/lib/aws-clients';
 import { ApiResponse } from '@/app/lib/types/TypeAPIs';
 
-const DATA_USAGE_TABLE_NAME = process.env.DATA_USAGE_TABLE_NAME || 'siftbeam-data-usage';
+const DATA_USAGE_TABLE_NAME = process.env.DATA_USAGE_TABLE_NAME || 'siftbeam-data-usages';
 
 /**
  * データ使用量のインターフェース
  */
 export interface DataUsage {
-  'data-usageId': string;
+  dataUsageId: string;
   customerId: string;
   userId: string;
   userName: string;
@@ -33,7 +33,7 @@ export interface DataUsage {
  * データ使用量作成用のインターフェース
  */
 export interface CreateDataUsageInput {
-  'data-usageId'?: string;
+  dataUsageId?: string;
   customerId: string;
   userId: string;
   userName: string;
@@ -124,11 +124,11 @@ export async function createDataUsage(input: CreateDataUsageInput): Promise<ApiR
       };
     }
 
-    const dataUsageId = input['data-usageId'] || generateId();
+    const dataUsageIdValue = input.dataUsageId || generateId();
     const now = new Date().toISOString();
     
     const dataUsage: DataUsage = {
-      'data-usageId': dataUsageId,
+      dataUsageId: dataUsageIdValue,
       customerId: input.customerId,
       userId: input.userId,
       userName: input.userName,
@@ -154,7 +154,7 @@ export async function createDataUsage(input: CreateDataUsageInput): Promise<ApiR
     await dynamoDocClient.send(putCommand);
 
     console.log('Data usage created successfully:', {
-      dataUsageId,
+      dataUsageId: dataUsageIdValue,
       customerId: input.customerId,
       usageAmountBytes: input.usageAmountBytes
     });
@@ -315,12 +315,12 @@ export async function updateDataUsage(
     const command = new UpdateCommand({
       TableName: DATA_USAGE_TABLE_NAME,
       Key: {
-        'data-usageId': dataUsageId
+        dataUsageId: dataUsageId
       },
       UpdateExpression: `SET ${updateExpressions.join(', ')}`,
       ExpressionAttributeNames: {
         ...expressionAttributeNames,
-        '#dataUsageId': 'data-usageId'
+        '#dataUsageId': dataUsageId
       },
       ExpressionAttributeValues: expressionAttributeValues,
       ConditionExpression: 'attribute_exists(#dataUsageId)',
@@ -364,7 +364,7 @@ export async function getDataUsageById(
     const command = new GetCommand({
       TableName: DATA_USAGE_TABLE_NAME,
       Key: {
-        'data-usageId': dataUsageId
+        dataUsageId: dataUsageId
       }
     });
     

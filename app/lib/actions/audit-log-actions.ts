@@ -15,14 +15,14 @@ const client = new DynamoDBClient({
 });
 
 const docClient = DynamoDBDocumentClient.from(client);
-const TABLE_NAME = 'siftbeam-audit-logs';
+const TABLE_NAME = process.env.AUDIT_LOG_TABLE_NAME || 'siftbeam-audit-logs';
 
 // 型定義
 export type AuditAction = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'ATTACH' | 'DETACH';
 export type AuditStatus = 'SUCCESS' | 'FAILED';
 
 export interface AuditLogEntry {
-  'audit-logsId': string;
+  auditLogId: string;
   userId: string;
   userName: string;
   action: AuditAction;
@@ -88,7 +88,7 @@ export async function createAuditLogAction(params: CreateAuditLogParams): Promis
     const now = new Date().toISOString();
 
     const auditLogEntry: AuditLogEntry = {
-      'audit-logsId': auditLogId,
+      auditLogId: auditLogId,
       userId,
       userName,
       action: params.action,
@@ -330,7 +330,7 @@ export async function getAuditLogByIdAction(auditLogId: string): Promise<GetAudi
     const command = new GetCommand({
       TableName: TABLE_NAME,
       Key: {
-        'audit-logsId': auditLogId,
+        auditLogId: auditLogId,
       },
     });
 

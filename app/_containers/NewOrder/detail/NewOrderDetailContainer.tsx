@@ -49,7 +49,7 @@ export default async function NewOrderDetailContainer({ locale, newOrderRequestI
     let repliesResult;
     try {
       repliesResult = await queryNewOrderReplies({
-        'neworder-requestId': newOrderRequestId,
+        newOrderRequestId: newOrderRequestId,
         limit: 100
       });
     } catch (error) {

@@ -12,14 +12,14 @@ import { dynamoDocClient } from '@/app/lib/aws-clients';
 import { ApiResponse, SupportRequest, SupportReply } from '@/app/lib/types/TypeAPIs';
 import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
 
-const SUPPORT_REQUEST_TABLE_NAME = process.env.SUPPORT_REQUEST_TABLE_NAME || 'siftbeam-support-request';
-const SUPPORT_REPLY_TABLE_NAME = process.env.SUPPORT_REPLY_TABLE_NAME || 'siftbeam-support-reply';
+const SUPPORT_REQUEST_TABLE_NAME = process.env.SUPPORT_REQUEST_TABLE_NAME || 'siftbeam-support-requests';
+const SUPPORT_REPLY_TABLE_NAME = process.env.SUPPORT_REPLY_TABLE_NAME || 'siftbeam-support-replies';
 
 /**
  * サポートリクエスト作成用のインターフェース
  */
 export interface CreateSupportRequestInput {
-  'support-requestId'?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
+  supportRequestId?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
   customerId: string;
   userId: string;
   userName: string;
@@ -33,7 +33,7 @@ export interface CreateSupportRequestInput {
  * サポートリクエスト更新用のインターフェース
  */
 export interface UpdateSupportRequestInput {
-  'support-requestId': string;
+  supportRequestId: string;
   issueType?: 'technical' | 'billing' | 'feature' | 'bug' | 'other';
   subject?: string;
   description?: string;
@@ -55,8 +55,8 @@ export interface QuerySupportRequestsInput {
  * サポート返信作成用のインターフェース
  */
 export interface CreateSupportReplyInput {
-  'support-replyId'?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
-  'support-requestId': string;
+  supportReplyId?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
+  supportRequestId: string;
   userId: string;
   userName: string;
   senderType: 'customer' | 'support' | 'admin';
@@ -68,7 +68,7 @@ export interface CreateSupportReplyInput {
  * サポート返信更新用のインターフェース
  */
 export interface UpdateSupportReplyInput {
-  'support-replyId': string;
+  supportReplyId: string;
   message?: string;
   fileKeys?: string[];
 }
@@ -77,7 +77,7 @@ export interface UpdateSupportReplyInput {
  * サポート返信クエリ用のインターフェース
  */
 export interface QuerySupportRepliesInput {
-  'support-requestId': string;
+  supportRequestId: string;
   limit?: number;
   lastEvaluatedKey?: Record<string, any>;
 }
@@ -191,7 +191,7 @@ export async function getSupportRequestById(supportRequestId: string): Promise<A
 
     const command = new GetCommand({
       TableName: SUPPORT_REQUEST_TABLE_NAME,
-      Key: { 'support-requestId': supportRequestId }
+      Key: { supportRequestId: supportRequestId }
     });
 
     const result = await dynamoDocClient.send(command);
@@ -328,11 +328,11 @@ export async function createSupportRequest(input: CreateSupportRequestInput): Pr
     }
 
     // サポートリクエストIDを生成（事前生成されたIDがあればそれを使用）
-    const supportRequestId = input['support-requestId'] || generateId();
+    const supportRequestId = input.supportRequestId || generateId();
     const now = new Date().toISOString();
     
     const newSupportRequest: SupportRequest = {
-      'support-requestId': supportRequestId,
+      supportRequestId: supportRequestId,
       customerId: input.customerId,
       userId: input.userId,
       userName: input.userName.trim(),
@@ -350,7 +350,7 @@ export async function createSupportRequest(input: CreateSupportRequestInput): Pr
       Item: newSupportRequest,
       ConditionExpression: 'attribute_not_exists(#supportRequestId)',
       ExpressionAttributeNames: {
-        '#supportRequestId': 'support-requestId'
+        '#supportRequestId': 'supportRequestId'
       }
     });
 
@@ -464,11 +464,11 @@ export async function updateSupportRequest(input: UpdateSupportRequestInput): Pr
     // DynamoDB更新
     const updateCommand = new UpdateCommand({
       TableName: SUPPORT_REQUEST_TABLE_NAME,
-      Key: { 'support-requestId': input['support-requestId'] },
+      Key: { supportRequestId: input.supportRequestId },
       UpdateExpression: `SET ${updateExpression.join(', ')}`,
       ExpressionAttributeNames: {
         ...expressionAttributeNames,
-        '#supportRequestId': 'support-requestId'
+        '#supportRequestId': 'supportRequestId'
       },
       ExpressionAttributeValues: expressionAttributeValues,
       ConditionExpression: 'attribute_exists(#supportRequestId)',
@@ -478,7 +478,7 @@ export async function updateSupportRequest(input: UpdateSupportRequestInput): Pr
     const result = await dynamoDocClient.send(updateCommand);
 
     console.log('Support request updated successfully:', {
-      supportRequestId: input['support-requestId'],
+      supportRequestId: input.supportRequestId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
 
@@ -512,10 +512,10 @@ export async function deleteSupportRequest(
       // ソフト削除（ステータスをclosedに変更）
       const updateCommand = new UpdateCommand({
         TableName: SUPPORT_REQUEST_TABLE_NAME,
-        Key: { 'support-requestId': supportRequestId },
+        Key: { supportRequestId: supportRequestId },
         UpdateExpression: 'SET #status = :status, #updatedAt = :updatedAt',
         ExpressionAttributeNames: {
-          '#supportRequestId': 'support-requestId',
+          '#supportRequestId': 'supportRequestId',
           '#status': 'status',
           '#updatedAt': 'updatedAt'
         },
@@ -531,10 +531,10 @@ export async function deleteSupportRequest(
       // ハード削除
       const deleteCommand = new DeleteCommand({
         TableName: SUPPORT_REQUEST_TABLE_NAME,
-        Key: { 'support-requestId': supportRequestId },
+        Key: { supportRequestId: supportRequestId },
         ConditionExpression: 'attribute_exists(#supportRequestId)',
         ExpressionAttributeNames: {
-          '#supportRequestId': 'support-requestId'
+          '#supportRequestId': 'supportRequestId'
         }
       });
 
@@ -572,7 +572,7 @@ export async function getSupportReplyById(supportReplyId: string): Promise<ApiRe
 
     const command = new GetCommand({
       TableName: SUPPORT_REPLY_TABLE_NAME,
-      Key: { 'support-replyId': supportReplyId }
+      Key: { supportReplyId: supportReplyId }
     });
 
     const result = await dynamoDocClient.send(command);
@@ -606,13 +606,13 @@ export async function querySupportReplies(
   try {
     const command = new QueryCommand({
       TableName: SUPPORT_REPLY_TABLE_NAME,
-      IndexName: 'support-requestId-createdAt-index',
+      IndexName: 'supportRequestId-createdAt-index',
       KeyConditionExpression: '#supportRequestId = :supportRequestId',
       ExpressionAttributeNames: {
-        '#supportRequestId': 'support-requestId'
+        '#supportRequestId': 'supportRequestId'
       },
       ExpressionAttributeValues: {
-        ':supportRequestId': input['support-requestId']
+        ':supportRequestId': input.supportRequestId
       },
       ScanIndexForward: true, // 古い順にソート（会話の流れ）
       Limit: input.limit || 1000,
@@ -623,7 +623,7 @@ export async function querySupportReplies(
     const supportReplies = result.Items as SupportReply[];
 
     console.log('Support replies queried successfully:', { 
-      supportRequestId: input['support-requestId'],
+      supportRequestId: input.supportRequestId,
       count: supportReplies.length
     });
 
@@ -651,8 +651,8 @@ export async function createSupportReply(input: CreateSupportReplyInput): Promis
     // 入力バリデーション
     const errors: Record<string, string[]> = {};
     
-    if (!input['support-requestId']?.trim()) {
-      errors['support-requestId'] = ['サポートリクエストIDは必須です。'];
+    if (!input.supportRequestId?.trim()) {
+      errors.supportRequestId = ['サポートリクエストIDは必須です。'];
     }
     
     if (!input.userId?.trim()) {
@@ -681,12 +681,12 @@ export async function createSupportReply(input: CreateSupportReplyInput): Promis
     }
 
     // サポート返信IDを生成（事前生成されたIDがあればそれを使用）
-    const supportReplyId = input['support-replyId'] || generateId();
+    const supportReplyId = input.supportReplyId || generateId();
     const now = new Date().toISOString();
     
     const newSupportReply: SupportReply = {
-      'support-replyId': supportReplyId,
-      'support-requestId': input['support-requestId'],
+      supportReplyId: supportReplyId,
+      supportRequestId: input.supportRequestId,
       userId: input.userId,
       userName: input.userName.trim(),
       senderType: input.senderType,
@@ -701,7 +701,7 @@ export async function createSupportReply(input: CreateSupportReplyInput): Promis
       Item: newSupportReply,
       ConditionExpression: 'attribute_not_exists(#supportReplyId)',
       ExpressionAttributeNames: {
-        '#supportReplyId': 'support-replyId'
+        '#supportReplyId': 'supportReplyId'
       }
     });
 
@@ -709,7 +709,7 @@ export async function createSupportReply(input: CreateSupportReplyInput): Promis
 
     console.log('Support reply created successfully:', { 
       supportReplyId,
-      supportRequestId: input['support-requestId'],
+      supportRequestId: input.supportRequestId,
       senderType: input.senderType
     });
 
@@ -779,11 +779,11 @@ export async function updateSupportReply(input: UpdateSupportReplyInput): Promis
     // DynamoDB更新
     const updateCommand = new UpdateCommand({
       TableName: SUPPORT_REPLY_TABLE_NAME,
-      Key: { 'support-replyId': input['support-replyId'] },
+      Key: { supportReplyId: input.supportReplyId },
       UpdateExpression: `SET ${updateExpression.join(', ')}`,
       ExpressionAttributeNames: {
         ...expressionAttributeNames,
-        '#supportReplyId': 'support-replyId'
+        '#supportReplyId': 'supportReplyId'
       },
       ExpressionAttributeValues: expressionAttributeValues,
       ConditionExpression: 'attribute_exists(#supportReplyId)',
@@ -793,7 +793,7 @@ export async function updateSupportReply(input: UpdateSupportReplyInput): Promis
     const result = await dynamoDocClient.send(updateCommand);
 
     console.log('Support reply updated successfully:', {
-      supportReplyId: input['support-replyId'],
+      supportReplyId: input.supportReplyId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
 
@@ -826,10 +826,10 @@ export async function deleteSupportReply(
     // サポート返信は通常ハード削除（会話の整合性のため）
     const deleteCommand = new DeleteCommand({
       TableName: SUPPORT_REPLY_TABLE_NAME,
-      Key: { 'support-replyId': supportReplyId },
+      Key: { supportReplyId: supportReplyId },
       ConditionExpression: 'attribute_exists(#supportReplyId)',
       ExpressionAttributeNames: {
-        '#supportReplyId': 'support-replyId'
+        '#supportReplyId': 'supportReplyId'
       }
     });
 

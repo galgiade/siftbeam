@@ -317,7 +317,7 @@ const zhCN: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "2025年11月6日",
+    lastUpdated: "2025年11月7日",
     company: {
       name: "Connect Tech Inc.",
       address: "日本静冈县滨松市中央区和合町315-1485 迪亚斯和合202号",

@@ -279,7 +279,7 @@ export default function NewOrderManagementPresentation({
             <div className="space-y-4">
               {filteredNewOrderRequests.map((request) => (
                 <div
-                  key={request['neworder-requestId']}
+                  key={request.newOrderRequestId}
                   className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-white"
                 >
                   <div className="flex justify-between items-start mb-3">
@@ -324,7 +324,7 @@ export default function NewOrderManagementPresentation({
                         variant="flat"
                         size="sm"
                         as={Link}
-                        href={`/${userAttributes.locale}/account/new-order/${request['neworder-requestId']}`}
+                        href={`/${userAttributes.locale}/account/new-order/${request.newOrderRequestId}`}
                         startContent={<FaEye size={14} />}
                       >
                         {dictionary.label.viewDetails}
@@ -333,7 +333,7 @@ export default function NewOrderManagementPresentation({
                   </div>
                   
                   <div className="text-xs text-gray-500 border-t pt-2">
-                    {dictionary.label.orderId} {request['neworder-requestId']}
+                    {dictionary.label.orderId} {request.newOrderRequestId}
                   </div>
                 </div>
               ))}

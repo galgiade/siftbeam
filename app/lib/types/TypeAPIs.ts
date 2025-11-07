@@ -44,7 +44,7 @@ export interface Group {
 }
 
 export interface UserGroup {
-  'user-groupId': string; // DynamoDBのパーティションキー
+  userGroupId: string; // DynamoDBのパーティションキー
   userId: string;
   groupId: string;
   customerId: string;
@@ -53,7 +53,7 @@ export interface UserGroup {
 }
 
 export interface PolicyGroup {
-  'policy-groupId': string; // DynamoDBのパーティションキー
+  policyGroupId: string; // DynamoDBのパーティションキー
   groupId: string;
   policyId: string;
   customerId: string;
@@ -65,7 +65,7 @@ export interface PolicyGroup {
  * サポートリクエストの型定義
  */
 export interface SupportRequest {
-  'support-requestId': string; // DynamoDBのパーティションキー
+  supportRequestId: string; // DynamoDBのパーティションキー
   customerId: string;
   userId: string;
   userName: string;
@@ -82,8 +82,8 @@ export interface SupportRequest {
  * サポート返信の型定義
  */
 export interface SupportReply {
-  'support-replyId': string; // DynamoDBのパーティションキー
-  'support-requestId': string;
+  supportReplyId: string; // DynamoDBのパーティションキー
+  supportRequestId: string;
   userId: string;
   userName: string;
   senderType: 'customer' | 'support' | 'admin';
@@ -97,7 +97,7 @@ export interface SupportReply {
  * 新規オーダーリクエストの型定義
  */
 export interface NewOrderRequest {
-  'neworder-requestId': string; // DynamoDBのパーティションキー
+  newOrderRequestId: string; // DynamoDBのパーティションキー
   customerId: string;
   userId: string;
   userName: string;
@@ -115,8 +115,8 @@ export interface NewOrderRequest {
  * 新規オーダー返信の型定義
  */
 export interface NewOrderReply {
-  'neworder-replyId': string; // DynamoDBのパーティションキー
-  'neworder-requestId': string; // GSIキー名に合わせる
+  newOrderReplyId: string; // DynamoDBのパーティションキー
+  newOrderRequestId: string;
   userId: string;
   userName: string;
   senderType: 'customer' | 'support' | 'admin';

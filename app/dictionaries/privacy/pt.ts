@@ -317,7 +317,7 @@ const pt: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "6 de novembro de 2025",
+    lastUpdated: "7 de novembro de 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japão",

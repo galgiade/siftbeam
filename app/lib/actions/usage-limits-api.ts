@@ -18,7 +18,7 @@ const USAGE_LIMITS_TABLE_NAME = process.env.USAGE_LIMITS_TABLE_NAME || 'siftbeam
  * 使用量制限の型定義
  */
 export interface UsageLimit {
-  'usage-limitsId': string;
+  usageLimitId: string;
   customerId: string;
   usageLimitValue?: number;
   usageUnit?: 'MB' | 'GB' | 'TB';
@@ -33,7 +33,7 @@ export interface UsageLimit {
  * 使用量制限作成用のインターフェース
  */
 export interface CreateUsageLimitInput {
-  'usage-limitsId'?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
+  usageLimitId?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
   customerId: string;
   usageLimitValue?: number;
   usageUnit?: 'MB' | 'GB' | 'TB';
@@ -46,7 +46,7 @@ export interface CreateUsageLimitInput {
  * 使用量制限更新用のインターフェース
  */
 export interface UpdateUsageLimitInput {
-  'usage-limitsId': string;
+  usageLimitId: string;
   usageLimitValue?: number;
   usageUnit?: 'MB' | 'GB' | 'TB';
   amountLimitValue?: number;
@@ -89,11 +89,11 @@ function generateUUID(): string {
  */
 export async function createUsageLimit(input: CreateUsageLimitInput): Promise<ApiResponse<UsageLimit>> {
   try {
-    const usageLimitsId = input['usage-limitsId'] || generateUUID();
+    const usageLimitIdValue = input.usageLimitId || generateUUID();
     const now = new Date().toISOString();
 
     const usageLimit: UsageLimit = {
-      'usage-limitsId': usageLimitsId,
+      usageLimitId: usageLimitIdValue,
       customerId: input.customerId,
       usageLimitValue: input.usageLimitValue,
       usageUnit: input.usageUnit,
@@ -107,9 +107,9 @@ export async function createUsageLimit(input: CreateUsageLimitInput): Promise<Ap
     const command = new PutCommand({
       TableName: USAGE_LIMITS_TABLE_NAME,
       Item: usageLimit,
-      ConditionExpression: 'attribute_not_exists(#usageLimitsId)',
+      ConditionExpression: 'attribute_not_exists(usageLimitId)',
       ExpressionAttributeNames: {
-        '#usageLimitsId': 'usage-limitsId'
+        '#usageLimitId': 'usageLimitId'
       }
     });
 
@@ -152,7 +152,7 @@ export async function getUsageLimit(usageLimitsId: string): Promise<ApiResponse<
     const command = new GetCommand({
       TableName: USAGE_LIMITS_TABLE_NAME,
       Key: {
-        'usage-limitsId': usageLimitsId
+        usageLimitId: usageLimitsId
       }
     });
 
@@ -231,23 +231,23 @@ export async function updateUsageLimit(input: UpdateUsageLimitInput): Promise<Ap
     const command = new UpdateCommand({
       TableName: USAGE_LIMITS_TABLE_NAME,
       Key: {
-        'usage-limitsId': input['usage-limitsId']
+        usageLimitId: input.usageLimitId
       },
       UpdateExpression: `SET ${updateExpressions.join(', ')}`,
       ExpressionAttributeNames: expressionAttributeNames,
       ExpressionAttributeValues: expressionAttributeValues,
-      ConditionExpression: 'attribute_exists(#usageLimitsId)',
+      ConditionExpression: 'attribute_exists(#usageLimitId)',
       ReturnValues: 'ALL_NEW'
     });
 
     // ConditionExpression用の属性名を追加
-    command.input.ExpressionAttributeNames!['#usageLimitsId'] = 'usage-limitsId';
+    command.input.ExpressionAttributeNames!['#usageLimitId'] = 'usageLimitId';
 
     const result = await dynamoDocClient.send(command);
 
     // 監査ログ記録（成功）
     const updatedFields = Object.keys(command.input.ExpressionAttributeValues || {}).filter(key => key !== ':updatedAt').join(', ');
-    await logSuccessAction('UPDATE', 'UsageLimit', updatedFields, '', input['usage-limitsId']);
+    await logSuccessAction('UPDATE', 'UsageLimit', updatedFields, '', input.usageLimitId);
 
     return {
       success: true,
@@ -266,7 +266,7 @@ export async function updateUsageLimit(input: UpdateUsageLimitInput): Promise<Ap
     }
 
     // 監査ログ記録（失敗）
-    await logFailureAction('UPDATE', 'UsageLimit', error?.message || '使用量制限更新に失敗しました', 'limit', '', input['usage-limitsId']);
+    await logFailureAction('UPDATE', 'UsageLimit', error?.message || '使用量制限更新に失敗しました', 'limit', '', input.usageLimitId);
 
     return {
       success: false,
@@ -283,11 +283,11 @@ export async function deleteUsageLimit(usageLimitsId: string): Promise<ApiRespon
     const command = new DeleteCommand({
       TableName: USAGE_LIMITS_TABLE_NAME,
       Key: {
-        'usage-limitsId': usageLimitsId
+        usageLimitId: usageLimitsId
       },
-      ConditionExpression: 'attribute_exists(#usageLimitsId)',
+      ConditionExpression: 'attribute_exists(#usageLimitId)',
       ExpressionAttributeNames: {
-        '#usageLimitsId': 'usage-limitsId'
+        '#usageLimitId': 'usageLimitId'
       }
     });
 
@@ -423,11 +423,11 @@ export async function createMultipleUsageLimits(inputs: CreateUsageLimitInput[])
     const putRequests: any[] = [];
 
     for (const input of inputs) {
-      const usageLimitsId = input['usage-limitsId'] || generateUUID();
+      const usageLimitIdValue = input.usageLimitId || generateUUID();
       const now = new Date().toISOString();
 
       const usageLimit: UsageLimit = {
-        'usage-limitsId': usageLimitsId,
+        usageLimitId: usageLimitIdValue,
         customerId: input.customerId,
         usageLimitValue: input.usageLimitValue,
         usageUnit: input.usageUnit,

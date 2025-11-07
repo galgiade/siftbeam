@@ -32,7 +32,7 @@ const zhCN: LegalDisclosuresLocale = {
         "支付方式: 信用卡（通过Stripe）",
         "计费周期: 每月月末结算（当月1日至月末的使用量）",
         "发票签发日: 次月1日",
-        "付款截止日: 次月15日",
+        "付款时间: 开具发票时自动从已注册的信用卡扣款",
         "四舍五入: 可能基于Stripe的货币精度和最小支付单位发生",
         "税费: 可能根据法律适用额外费用",
         "额外费用: 互联网连接费用（客户承担）",
@@ -97,7 +97,7 @@ const zhCN: LegalDisclosuresLocale = {
     },
   },
   appendix: {
-    lastUpdated: "2025年11月6日",
+    lastUpdated: "2025年11月7日",
     company: {
       name: "ConnectTech Inc.",
       address: "日本静冈县滨松市中央区和合町315-1485 迪亚斯和合202号",

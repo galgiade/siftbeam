@@ -98,7 +98,7 @@ export default function CreateNewOrderRequestPresentation({
         });
 
         const createNewOrderRequestInput = {
-          'neworder-requestId': newOrderRequestIdStr ? JSON.parse(newOrderRequestIdStr) : undefined,
+          newOrderRequestId: newOrderRequestIdStr ? JSON.parse(newOrderRequestIdStr) : undefined,
           customerId: userAttributes.customerId,
           userId: userAttributes.sub,
           userName: userAttributes.preferred_username || dictionary.label.customer,

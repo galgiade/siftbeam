@@ -34,7 +34,7 @@ const API_GATEWAY_REGION = process.env.REGION || 'ap-northeast-1';
 export type APIKeyStatus = "active" | "inactive" | "expired" | "revoked";
 
 export interface APIKeyEntry {
-  'api-keysId': string;
+  apiKeyId: string;
   apiName: string;
   description?: string;
   policyId: string;
@@ -62,7 +62,7 @@ export interface CreateAPIKeyRequest {
 }
 
 export interface UpdateAPIKeyRequest {
-  'api-keysId': string;
+  apiKeyId: string;
   apiName?: string;
   description?: string;
   status?: APIKeyStatus;
@@ -332,7 +332,7 @@ export async function createAPIKeyAction(request: CreateAPIKeyRequest): Promise<
     }
 
     const apiKeyEntry: APIKeyEntry = {
-      'api-keysId': apiKeyId, // API GatewayのIDを使用
+      apiKeyId: apiKeyId, // API GatewayのIDを使用
       apiName: request.apiName,
       description: request.description,
       policyId: request.policyId,
@@ -348,7 +348,7 @@ export async function createAPIKeyAction(request: CreateAPIKeyRequest): Promise<
       Item: apiKeyEntry,
       ConditionExpression: 'attribute_not_exists(#apiKeysId)', // 重複防止
       ExpressionAttributeNames: {
-        '#apiKeysId': 'api-keysId'
+        '#apiKeysId': apiKeyId
       }
     });
 
@@ -524,7 +524,7 @@ export async function getAPIKeyByIdAction(apiKeyId: string): Promise<APIKeyRespo
     const command = new GetCommand({
       TableName: API_KEY_TABLE_NAME,
       Key: {
-        'api-keysId': apiKeyId,
+        apiKeyId: apiKeyId,
       },
     });
 
@@ -544,7 +544,7 @@ export async function getAPIKeyByIdAction(apiKeyId: string): Promise<APIKeyRespo
     return { success: true, apiKey };
   } catch (error: any) {
     console.error('Error fetching API key by ID:', error);
-    await logFailureAction('READ', 'APIKey', error.message || 'Failed to fetch API key', 'api-keysId', apiKeyId);
+    await logFailureAction('READ', 'APIKey', error.message || 'Failed to fetch API key', apiKeyId, apiKeyId);
     return { success: false, message: error.message || 'Failed to fetch API key' };
   }
 }
@@ -583,13 +583,13 @@ export async function getAPIKeyByGatewayIdAction(gatewayApiKeyId: string): Promi
 export async function updateAPIKeyAction(request: UpdateAPIKeyRequest): Promise<APIKeyResponse> {
   try {
     // 既存のAPIキーを取得して権限確認
-    const existingApiKey = await getAPIKeyByIdAction(request['api-keysId']);
+    const existingApiKey = await getAPIKeyByIdAction(request.apiKeyId);
     if (!existingApiKey.success || !existingApiKey.apiKey) {
       return existingApiKey;
     }
 
     console.log('Existing API Key data from DynamoDB:', {
-      apiKeyId: existingApiKey.apiKey['api-keysId'],
+      apiKeyId: existingApiKey.apiKey.apiKeyId,
       apiName: existingApiKey.apiKey.apiName
     });
 
@@ -618,11 +618,11 @@ export async function updateAPIKeyAction(request: UpdateAPIKeyRequest): Promise<
       try {
         const enabled = request.status === 'active';
         console.log('Attempting to update API Gateway key status:', {
-          apiKeyId: request['api-keysId'],
+          apiKeyId: request.apiKeyId,
           newStatus: request.status,
           enabled
         });
-        await updateAPIGatewayKeyStatus(request['api-keysId'], enabled);
+        await updateAPIGatewayKeyStatus(request.apiKeyId, enabled);
       } catch (gatewayError: any) {
         console.warn('Failed to update API Gateway key status:', gatewayError.message);
         // API Gateway更新に失敗してもDynamoDB更新は続行（警告のみ）
@@ -653,7 +653,7 @@ export async function updateAPIKeyAction(request: UpdateAPIKeyRequest): Promise<
         
         if (patchOperations.length > 0) {
           const updateTagCommand = new UpdateApiKeyCommand({
-            apiKey: request['api-keysId'],
+            apiKey: request.apiKeyId,
             patchOperations
           });
           
@@ -676,7 +676,7 @@ export async function updateAPIKeyAction(request: UpdateAPIKeyRequest): Promise<
 
     const command = new UpdateCommand({
       TableName: API_KEY_TABLE_NAME,
-      Key: { 'api-keysId': request['api-keysId'] },
+      Key: { apiKeyId: request.apiKeyId },
       UpdateExpression: `SET ${updateExpressions.join(', ')}`,
       ExpressionAttributeNames: Object.keys(expressionAttributeNames).length > 0 ? expressionAttributeNames : undefined,
       ExpressionAttributeValues: expressionAttributeValues,
@@ -734,7 +734,7 @@ export async function updateAPIKeyAction(request: UpdateAPIKeyRequest): Promise<
     };
   } catch (error: any) {
     console.error('Error updating API key:', error);
-    await logFailureAction('UPDATE', 'APIKey', error.message || 'Failed to update API key', 'api-keysId', '', request['api-keysId']);
+    await logFailureAction('UPDATE', 'APIKey', error.message || 'Failed to update API key', 'apiKeyId', '', request.apiKeyId);
     return {
       success: false,
       message: error.message || 'Failed to update API key'
@@ -759,7 +759,7 @@ export async function deleteAPIKeyAction(apiKeyId: string): Promise<APIKeyRespon
     // DynamoDBからAPIキーを削除
     const command = new DeleteCommand({
       TableName: API_KEY_TABLE_NAME,
-      Key: { 'api-keysId': apiKeyId }
+      Key: { apiKeyId: apiKeyId }
     });
 
     await docClient.send(command);
@@ -803,7 +803,7 @@ export async function toggleAPIKeyStatusAction(apiKeyId: string): Promise<APIKey
     const newStatus: APIKeyStatus = existingApiKey.apiKey.status === 'active' ? 'inactive' : 'active';
 
     return await updateAPIKeyAction({
-      'api-keysId': apiKeyId,
+      apiKeyId: apiKeyId,
       status: newStatus
     });
   } catch (error: any) {
@@ -828,7 +828,7 @@ export async function getAPIKeyValueAction(apiKeyId: string): Promise<{
     // DynamoDBで権限確認（このAPIキーが自分のcustomerIdに属しているか）
     const apiKeyResult = await getAPIKeyByIdAction(apiKeyId);
     if (!apiKeyResult.success || !apiKeyResult.apiKey) {
-      await logFailureAction('READ', 'APIKey', 'API key not found or access denied', 'api-keysId', apiKeyId);
+      await logFailureAction('READ', 'APIKey', 'API key not found or access denied', apiKeyId, apiKeyId);
       return { success: false, message: 'API key not found or access denied' };
     }
 
@@ -842,7 +842,7 @@ export async function getAPIKeyValueAction(apiKeyId: string): Promise<{
     return { success: true, value };
   } catch (error: any) {
     console.error('Error getting API key value:', error);
-    await logFailureAction('READ', 'APIKey', error.message || 'Failed to get API key value', 'api-keysId', apiKeyId);
+    await logFailureAction('READ', 'APIKey', error.message || 'Failed to get API key value', apiKeyId, apiKeyId);
     return { 
       success: false, 
       message: error.message || 'Failed to get API key value' 

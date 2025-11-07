@@ -136,12 +136,13 @@ const es: TermsLocale = {
         billingPayment: {
           title: "Facturación/Pago",
           items: [
-            "Ciclo de facturación: Cierre mensual a fin de mes (uso del día 1 al último día del mes). Fecha de emisión de factura: día 1 del mes siguiente. Fecha de vencimiento de pago: día 15 del mes siguiente.",
+            "Ciclo de facturación: Cierre mensual a fin de mes (uso del día 1 al último día del mes). Fecha de emisión de factura: día 1 del mes siguiente.",
+            "Momento del pago: Cargo automático a la tarjeta de crédito registrada al emitir la factura.",
             "Pago mediante tarjeta de crédito (Stripe).",
             "Redondeos conforme a la precisión/unidad mínima de Stripe.",
             "Impuestos añadidos según ley aplicable.",
             "Sin reembolsos por servicios ya prestados (salvo que la ley lo exija).",
-            "Intereses por demora: 14,6% anual.",
+            "Intereses por demora: 14,6% anual si ocurre retraso en el pago.",
           ],
         },
         priceChange: {
@@ -242,7 +243,7 @@ const es: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "6 de noviembre de 2025",
+    lastUpdated: "7 de noviembre de 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japón",

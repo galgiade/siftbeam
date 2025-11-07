@@ -91,7 +91,7 @@ export default function ProcessingHistoryList({
       let fileName = result.data.fileName;
       if (s3Keys.length > 1) {
         // 複数ファイルの場合はカスタムZIPファイル名
-        fileName = `${history.policyName}_${history['processing-historyId'].substring(0, 8)}.zip`;
+        fileName = `${history.policyName}_${history.processingHistoryId.substring(0, 8)}.zip`;
       }
       
       // ダウンロードを開始
@@ -131,11 +131,11 @@ export default function ProcessingHistoryList({
 
   const handleToggleAiTraining = async (history: ProcessingHistory) => {
     const newValue = history.aiTrainingUsage === 'allow' ? 'deny' : 'allow';
-    setUpdatingId(history['processing-historyId']);
+    setUpdatingId(history.processingHistoryId);
 
     try {
       const result = await updateProcessingHistory({
-        'processing-historyId': history['processing-historyId'],
+        processingHistoryId: history.processingHistoryId,
         aiTrainingUsage: newValue
       });
 
@@ -195,7 +195,7 @@ export default function ProcessingHistoryList({
                   const statusInfo = getProcessingStatusMessage(history.status);
                   
                   return (
-                    <TableRow key={history['processing-historyId']}>
+                    <TableRow key={history.processingHistoryId}>
                       {/* ポリシー */}
                       <TableCell>
                         <p className="font-medium text-sm">{history.policyName}</p>
@@ -243,7 +243,7 @@ export default function ProcessingHistoryList({
                               startContent={<FaCheck />}
                               onPress={() => handleToggleAiTraining(history)}
                               isDisabled={
-                                updatingId === history['processing-historyId'] || 
+                                updatingId === history.processingHistoryId || 
                                 history.status === 'in_progress'
                               }
                             >
@@ -256,7 +256,7 @@ export default function ProcessingHistoryList({
                               startContent={<FaTimes />}
                               onPress={() => handleToggleAiTraining(history)}
                               isDisabled={
-                                updatingId === history['processing-historyId'] || 
+                                updatingId === history.processingHistoryId || 
                                 history.status === 'in_progress'
                               }
                             >

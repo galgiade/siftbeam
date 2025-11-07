@@ -136,12 +136,13 @@ const id: TermsLocale = {
         billingPayment: {
           title: "Penagihan/Pembayaran",
           items: [
-            "Siklus penagihan: Penutupan bulanan pada akhir bulan (penggunaan dari tanggal 1 hingga akhir bulan). Tanggal penerbitan faktur: tanggal 1 bulan berikutnya. Tanggal jatuh tempo pembayaran: tanggal 15 bulan berikutnya.",
+            "Siklus penagihan: Penutupan bulanan pada akhir bulan (penggunaan dari tanggal 1 hingga akhir bulan). Tanggal penerbitan faktur: tanggal 1 bulan berikutnya.",
+            "Waktu pembayaran: Debit otomatis ke kartu kredit terdaftar saat penerbitan faktur.",
             "Pembayaran: kartu kredit (Stripe).",
             "Pembulatan sesuai presisi/unit minimum Stripe (aturan pembulatan Perusahaan).",
             "Pajak sesuai hukum.",
             "Tanpa pengembalian untuk layanan yang sudah diberikan (kecuali diwajibkan hukum).",
-            "Denda keterlambatan: 14,6% per tahun.",
+            "Denda keterlambatan: 14,6% per tahun jika terjadi keterlambatan pembayaran.",
           ],
         },
         priceChange: {
@@ -242,7 +243,7 @@ const id: TermsLocale = {
     },
   },
   appendix: {
-    lastUpdated: "6 November 2025",
+    lastUpdated: "7 November 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Jepang",
