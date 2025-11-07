@@ -29,6 +29,30 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Testing
+
+このプロジェクトでは、Jestと@testing-library/reactを使用してテストを実行します。
+
+### テストの実行
+
+```bash
+# すべてのテストを実行
+npm test
+
+# ウォッチモードでテストを実行
+npm run test:watch
+
+# カバレッジレポートを生成
+npm run test:coverage
+
+# CI環境でテストを実行
+npm run test:ci
+```
+
+### テストの詳細
+
+詳細なテストガイドについては、[TESTING.md](TESTING.md)を参照してください。
+
 ## Coding Guidelines
 
 Please refer to the project coding standards:

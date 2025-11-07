@@ -1,0 +1,12 @@
+{
+  "jest.autoRun": "off",
+  "jest.showCoverageOnLoad": false,
+  "jest.runMode": "on-demand",
+  "files.exclude": {
+    "**/coverage": true
+  },
+  "search.exclude": {
+    "**/coverage": true
+  }
+}
+
