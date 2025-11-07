@@ -20,58 +20,58 @@ export default function StructuredData({ data }: StructuredDataProps) {
 // 全言語対応の翻訳データ
 const translations = {
   ja: {
-    description: "企業データを活用し、AIの力で未来のビジネスを創造するプラットフォーム",
-    features: ["データ分析", "リアルタイム異常検知", "カスタムAI予測"],
-    keywords: "AI,データ分析,異常検知,機械学習,AWS,ビジネス予測,リアルタイム分析",
-    dashboard: "ダッシュボード画面"
+    description: "企業データを効率的に処理・管理するクラウドプラットフォーム。ポリシーベースの柔軟な管理と従量課金で、セキュアなデータ運用を実現。",
+    features: ["ポリシーベースのファイル管理", "使用量監視と自動制限", "詳細な処理履歴とレポート"],
+    keywords: "データ処理,ファイル管理,ポリシー管理,クラウドストレージ,使用量監視,従量課金,AWS,エンタープライズデータ",
+    dashboard: "データ管理ダッシュボード"
   },
   'en-US': {
-    description: "Leveraging corporate data to create future businesses with AI power",
-    features: ["Data Analysis", "Real-time Anomaly Detection", "Custom AI Predictions"],
-    keywords: "AI,data analysis,anomaly detection,machine learning,AWS,business prediction,real-time analysis",
-    dashboard: "Dashboard Screen"
+    description: "A cloud platform for efficient data processing and management. Flexible policy-based management with pay-as-you-go pricing for secure data operations.",
+    features: ["Policy-based file management", "Usage monitoring and auto-restriction", "Detailed processing history and reports"],
+    keywords: "data processing,file management,policy management,cloud storage,usage monitoring,pay-as-you-go,AWS,enterprise data",
+    dashboard: "Data Management Dashboard"
   },
   'zh-CN': {
-    description: "利用企业数据与 AI 力量创造未来业务",
-    features: ["数据分析", "实时异常检测", "自定义 AI 预测"],
-    keywords: "AI,数据分析,异常检测,机器学习,AWS,业务预测,实时分析",
-    dashboard: "仪表板屏幕"
+    description: "高效处理和管理企业数据的云平台。基于策略的灵活管理和按量付费,实现安全的数据运营。",
+    features: ["基于策略的文件管理", "使用量监控和自动限制", "详细的处理历史和报告"],
+    keywords: "数据处理,文件管理,策略管理,云存储,使用量监控,按量付费,AWS,企业数据",
+    dashboard: "数据管理仪表板"
   },
   ko: {
-    description: "기업 데이터를 활용하여 AI의 힘으로 미래 비즈니스를 창출합니다",
-    features: ["데이터 분석", "실시간 이상 감지", "맞춤형 AI 예측"],
-    keywords: "AI,데이터분석,이상감지,머신러닝,AWS,비즈니스예측,실시간분석",
-    dashboard: "대시보드 화면"
+    description: "기업 데이터를 효율적으로 처리하고 관리하는 클라우드 플랫폼. 정책 기반의 유연한 관리와 종량제로 안전한 데이터 운영을 실현합니다.",
+    features: ["정책 기반 파일 관리", "사용량 모니터링 및 자동 제한", "상세한 처리 이력 및 보고서"],
+    keywords: "데이터처리,파일관리,정책관리,클라우드스토리지,사용량모니터링,종량제,AWS,기업데이터",
+    dashboard: "데이터 관리 대시보드"
   },
   fr: {
-    description: "Exploiter les données d'entreprise pour créer des entreprises futures avec la puissance de l'IA",
-    features: ["Analyse de données", "Détection d'anomalies en temps réel", "Prédictions IA personnalisées"],
-    keywords: "IA,analyse de données,détection d'anomalies,apprentissage automatique,AWS,prédiction d'entreprise,analyse en temps réel",
-    dashboard: "Écran du tableau de bord"
+    description: "Une plateforme cloud pour le traitement et la gestion efficaces des données d'entreprise. Gestion flexible basée sur des politiques avec tarification à l'usage pour des opérations de données sécurisées.",
+    features: ["Gestion de fichiers basée sur des politiques", "Surveillance de l'utilisation et restriction automatique", "Historique de traitement détaillé et rapports"],
+    keywords: "traitement de données,gestion de fichiers,gestion de politiques,stockage cloud,surveillance d'utilisation,paiement à l'usage,AWS,données d'entreprise",
+    dashboard: "Tableau de bord de gestion des données"
   },
   de: {
-    description: "Unternehmensdaten nutzen, um zukünftige Geschäfte mit KI-Kraft zu schaffen",
-    features: ["Datenanalyse", "Echtzeit-Anomalieerkennung", "Benutzerdefinierte KI-Vorhersagen"],
-    keywords: "KI,Datenanalyse,Anomalieerkennung,maschinelles Lernen,AWS,Geschäftsvorhersage,Echtzeitanalyse",
-    dashboard: "Dashboard-Bildschirm"
+    description: "Eine Cloud-Plattform für effiziente Datenverarbeitung und -verwaltung. Flexible richtlinienbasierte Verwaltung mit nutzungsbasierter Abrechnung für sichere Datenoperationen.",
+    features: ["Richtlinienbasierte Dateiverwaltung", "Nutzungsüberwachung und automatische Einschränkung", "Detaillierte Verarbeitungshistorie und Berichte"],
+    keywords: "Datenverarbeitung,Dateiverwaltung,Richtlinienverwaltung,Cloud-Speicher,Nutzungsüberwachung,nutzungsbasierte Abrechnung,AWS,Unternehmensdaten",
+    dashboard: "Datenverwaltungs-Dashboard"
   },
   es: {
-    description: "Aprovechar los datos corporativos para crear negocios futuros con el poder de la IA",
-    features: ["Análisis de datos", "Detección de anomalías en tiempo real", "Predicciones de IA personalizadas"],
-    keywords: "IA,análisis de datos,detección de anomalías,aprendizaje automático,AWS,predicción de negocios,análisis en tiempo real",
-    dashboard: "Pantalla del panel de control"
+    description: "Una plataforma en la nube para el procesamiento y gestión eficiente de datos empresariales. Gestión flexible basada en políticas con precios de pago por uso para operaciones de datos seguras.",
+    features: ["Gestión de archivos basada en políticas", "Monitoreo de uso y restricción automática", "Historial de procesamiento detallado e informes"],
+    keywords: "procesamiento de datos,gestión de archivos,gestión de políticas,almacenamiento en la nube,monitoreo de uso,pago por uso,AWS,datos empresariales",
+    dashboard: "Panel de gestión de datos"
   },
   pt: {
-    description: "Aproveitar dados corporativos para criar negócios futuros com o poder da IA",
-    features: ["Análise de dados", "Detecção de anomalias em tempo real", "Previsões de IA personalizadas"],
-    keywords: "IA,análise de dados,detecção de anomalias,aprendizado de máquina,AWS,previsão de negócios,análise em tempo real",
-    dashboard: "Tela do painel de controle"
+    description: "Uma plataforma em nuvem para processamento e gerenciamento eficiente de dados empresariais. Gerenciamento flexível baseado em políticas com preços de pagamento por uso para operações de dados seguras.",
+    features: ["Gerenciamento de arquivos baseado em políticas", "Monitoramento de uso e restrição automática", "Histórico de processamento detalhado e relatórios"],
+    keywords: "processamento de dados,gerenciamento de arquivos,gerenciamento de políticas,armazenamento em nuvem,monitoramento de uso,pagamento por uso,AWS,dados empresariais",
+    dashboard: "Painel de gerenciamento de dados"
   },
   id: {
-    description: "Manfaatkan data perusahaan untuk menciptakan bisnis masa depan dengan kekuatan AI",
-    features: ["Analisis Data", "Deteksi anomali real-time", "Prediksi AI kustom"],
-    keywords: "AI,analisis data,deteksi anomali,pembelajaran mesin,AWS,prediksi bisnis,analisis real-time",
-    dashboard: "Layar Dashboard"
+    description: "Platform cloud untuk pemrosesan dan pengelolaan data perusahaan yang efisien. Manajemen fleksibel berbasis kebijakan dengan harga bayar sesuai penggunaan untuk operasi data yang aman.",
+    features: ["Manajemen file berbasis kebijakan", "Pemantauan penggunaan dan pembatasan otomatis", "Riwayat pemrosesan terperinci dan laporan"],
+    keywords: "pemrosesan data,manajemen file,manajemen kebijakan,penyimpanan cloud,pemantauan penggunaan,bayar sesuai penggunaan,AWS,data perusahaan",
+    dashboard: "Dashboard manajemen data"
   }
 };
 
@@ -81,7 +81,7 @@ const getTranslation = (locale: string, key: keyof typeof translations.ja) => {
   return translations[lang as keyof typeof translations]?.[key] || translations['en-US'][key];
 };
 
-// siftbeam用の構造化データ生成関数（全言語対応）
+// siftbeam用の構造化データ生成関数(全言語対応)
 export function generateSiftbeamStructuredData(locale: string = 'ja') {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
@@ -138,24 +138,24 @@ export function generateSiftbeamStructuredData(locale: string = 'ja') {
     "isAccessibleForFree": true,
     "softwareRequirements": "Web browser with JavaScript enabled",
     "permissions": "Requires internet connection",
-    "releaseNotes": "Initial release with AI-powered data analysis capabilities"
+    "releaseNotes": "Initial release with data processing and management capabilities"
   };
 }
 
-// 組織情報の構造化データ（全言語対応）
+// 組織情報の構造化データ(全言語対応)
 export function generateOrganizationStructuredData(locale: string = 'ja') {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
   const orgTranslations = {
-    ja: "AIを活用した企業データ分析プラットフォーム",
-    'en-US': "AI-powered corporate data analysis platform",
-    'zh-CN': "AI驱动的企业数据分析平台",
-    ko: "AI 기반 기업 데이터 분석 플랫폼",
-    fr: "Plateforme d'analyse de données d'entreprise alimentée par l'IA",
-    de: "KI-gestützte Unternehmensdatenanalyse-Plattform",
-    es: "Plataforma de análisis de datos corporativos impulsada por IA",
-    pt: "Plataforma de análise de dados corporativos alimentada por IA",
-    id: "Platform analisis data perusahaan bertenaga AI"
+    ja: "企業データを効率的に処理・管理するクラウドプラットフォーム",
+    'en-US': "Cloud platform for efficient data processing and management",
+    'zh-CN': "高效处理和管理企业数据的云平台",
+    ko: "기업 데이터를 효율적으로 처리하고 관리하는 클라우드 플랫폼",
+    fr: "Plateforme cloud pour le traitement et la gestion efficaces des données",
+    de: "Cloud-Plattform für effiziente Datenverarbeitung und -verwaltung",
+    es: "Plataforma en la nube para el procesamiento y gestión eficiente de datos",
+    pt: "Plataforma em nuvem para processamento e gerenciamento eficiente de dados",
+    id: "Platform cloud untuk pemrosesan dan pengelolaan data yang efisien"
   };
   
   return {
@@ -178,64 +178,64 @@ export function generateOrganizationStructuredData(locale: string = 'ja') {
   };
 }
 
-// サービス情報の構造化データ（全言語対応）
+// サービス情報の構造化データ(全言語対応)
 export function generateServiceStructuredData(locale: string = 'ja') {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
   const serviceTranslations = {
     ja: {
-      name: "AIデータ分析サービス",
-      description: "企業データをAIで分析し、リアルタイム異常検知と予測分析を提供",
-      catalogName: "AI分析プラン",
-      services: ["データ分析", "異常検知", "AI予測"]
+      name: "データ処理・管理サービス",
+      description: "ポリシーベースで企業データを効率的に処理・管理。使用量監視と詳細レポートを提供",
+      catalogName: "データ管理プラン",
+      services: ["ファイル管理", "使用量監視", "処理履歴レポート"]
     },
     'en-US': {
-      name: "AI Data Analysis Service",
-      description: "AI-powered analysis of corporate data with real-time anomaly detection and predictive analytics",
-      catalogName: "AI Analysis Plans",
-      services: ["Data Analysis", "Anomaly Detection", "AI Predictions"]
+      name: "Data Processing and Management Service",
+      description: "Efficiently process and manage corporate data with policy-based controls. Provides usage monitoring and detailed reports",
+      catalogName: "Data Management Plans",
+      services: ["File Management", "Usage Monitoring", "Processing History Reports"]
     },
     'zh-CN': {
-      name: "AI数据分析服务",
-      description: "使用AI分析企业数据，提供实时异常检测和预测分析",
-      catalogName: "AI分析计划",
-      services: ["数据分析", "异常检测", "AI预测"]
+      name: "数据处理和管理服务",
+      description: "基于策略高效处理和管理企业数据。提供使用量监控和详细报告",
+      catalogName: "数据管理计划",
+      services: ["文件管理", "使用量监控", "处理历史报告"]
     },
     ko: {
-      name: "AI 데이터 분석 서비스",
-      description: "기업 데이터를 AI로 분석하여 실시간 이상 감지 및 예측 분석 제공",
-      catalogName: "AI 분석 계획",
-      services: ["데이터 분석", "이상 감지", "AI 예측"]
+      name: "데이터 처리 및 관리 서비스",
+      description: "정책 기반으로 기업 데이터를 효율적으로 처리하고 관리. 사용량 모니터링 및 상세 보고서 제공",
+      catalogName: "데이터 관리 계획",
+      services: ["파일 관리", "사용량 모니터링", "처리 이력 보고서"]
     },
     fr: {
-      name: "Service d'analyse de données IA",
-      description: "Analyse de données d'entreprise alimentée par l'IA avec détection d'anomalies en temps réel et analytique prédictive",
-      catalogName: "Plans d'analyse IA",
-      services: ["Analyse de données", "Détection d'anomalies", "Prédictions IA"]
+      name: "Service de traitement et gestion de données",
+      description: "Traiter et gérer efficacement les données d'entreprise avec des contrôles basés sur des politiques. Fournit une surveillance de l'utilisation et des rapports détaillés",
+      catalogName: "Plans de gestion de données",
+      services: ["Gestion de fichiers", "Surveillance de l'utilisation", "Rapports d'historique de traitement"]
     },
     de: {
-      name: "KI-Datenanalyse-Service",
-      description: "KI-gestützte Analyse von Unternehmensdaten mit Echtzeit-Anomalieerkennung und prädiktiver Analytik",
-      catalogName: "KI-Analysepläne",
-      services: ["Datenanalyse", "Anomalieerkennung", "KI-Vorhersagen"]
+      name: "Datenverarbeitungs- und Verwaltungsservice",
+      description: "Effiziente Verarbeitung und Verwaltung von Unternehmensdaten mit richtlinienbasierten Kontrollen. Bietet Nutzungsüberwachung und detaillierte Berichte",
+      catalogName: "Datenverwaltungspläne",
+      services: ["Dateiverwaltung", "Nutzungsüberwachung", "Verarbeitungshistorienberichte"]
     },
     es: {
-      name: "Servicio de análisis de datos IA",
-      description: "Análisis de datos corporativos impulsado por IA con detección de anomalías en tiempo real y analítica predictiva",
-      catalogName: "Planes de análisis IA",
-      services: ["Análisis de datos", "Detección de anomalías", "Predicciones IA"]
+      name: "Servicio de procesamiento y gestión de datos",
+      description: "Procesar y gestionar eficientemente datos corporativos con controles basados en políticas. Proporciona monitoreo de uso e informes detallados",
+      catalogName: "Planes de gestión de datos",
+      services: ["Gestión de archivos", "Monitoreo de uso", "Informes de historial de procesamiento"]
     },
     pt: {
-      name: "Serviço de análise de dados IA",
-      description: "Análise de dados corporativos alimentada por IA com detecção de anomalias em tempo real e analítica preditiva",
-      catalogName: "Planos de análise IA",
-      services: ["Análise de dados", "Detecção de anomalias", "Previsões IA"]
+      name: "Serviço de processamento e gerenciamento de dados",
+      description: "Processar e gerenciar eficientemente dados corporativos com controles baseados em políticas. Fornece monitoramento de uso e relatórios detalhados",
+      catalogName: "Planos de gerenciamento de dados",
+      services: ["Gerenciamento de arquivos", "Monitoramento de uso", "Relatórios de histórico de processamento"]
     },
     id: {
-      name: "Layanan Analisis Data AI",
-      description: "Analisis data perusahaan bertenaga AI dengan deteksi anomali real-time dan analitik prediktif",
-      catalogName: "Paket Analisis AI",
-      services: ["Analisis Data", "Deteksi Anomali", "Prediksi AI"]
+      name: "Layanan Pemrosesan dan Pengelolaan Data",
+      description: "Memproses dan mengelola data perusahaan secara efisien dengan kontrol berbasis kebijakan. Menyediakan pemantauan penggunaan dan laporan terperinci",
+      catalogName: "Paket Pengelolaan Data",
+      services: ["Manajemen File", "Pemantauan Penggunaan", "Laporan Riwayat Pemrosesan"]
     }
   };
   

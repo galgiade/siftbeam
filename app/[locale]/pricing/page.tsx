@@ -8,10 +8,23 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const resolvedParams = await params
   const dict = pickDictionary(pricingDictionaries, resolvedParams.locale, 'en-US')
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
+  
   return {
     title: `${dict.pricing.hero.titleSub} | siftbeam` || 'Pricing | siftbeam',
     description: dict.pricing.hero.subtitle || 'siftbeam pricing information',
+    keywords: ['料金', '価格', 'プラン', '従量課金', 'pay-as-you-go', 'pricing', 'plans', 'cost'],
+    alternates: {
+      canonical: `${baseUrl}/${resolvedParams.locale}/pricing`,
+    },
     openGraph: {
+      title: `${dict.pricing.hero.titleSub} | siftbeam` || 'Pricing | siftbeam',
+      description: dict.pricing.hero.subtitle || 'siftbeam pricing information',
+      url: `${baseUrl}/${resolvedParams.locale}/pricing`,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
       title: `${dict.pricing.hero.titleSub} | siftbeam` || 'Pricing | siftbeam',
       description: dict.pricing.hero.subtitle || 'siftbeam pricing information',
     },

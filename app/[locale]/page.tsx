@@ -7,18 +7,18 @@ import StructuredData, { generateSiftbeamStructuredData, generateOrganizationStr
 // 全言語対応のキーワード設定
 const getKeywordsByLocale = (locale: string): string[] => {
   const keywordMap = {
-    ja: ['AI', 'データ分析', '異常検知', '機械学習', 'AWS', 'ビジネス予測', 'リアルタイム分析', '企業データ活用'],
-    'en-US': ['AI', 'data analysis', 'anomaly detection', 'machine learning', 'AWS', 'business prediction', 'real-time analysis'],
-    'zh-CN': ['AI', '数据分析', '异常检测', '机器学习', 'AWS', '业务预测', '实时分析'],
-    ko: ['AI', '데이터분석', '이상감지', '머신러닝', 'AWS', '비즈니스예측', '실시간분석'],
-    fr: ['IA', 'analyse de données', 'détection d\'anomalies', 'apprentissage automatique', 'AWS', 'prédiction d\'entreprise', 'analyse en temps réel'],
-    de: ['KI', 'Datenanalyse', 'Anomalieerkennung', 'maschinelles Lernen', 'AWS', 'Geschäftsvorhersage', 'Echtzeitanalyse'],
-    es: ['IA', 'análisis de datos', 'detección de anomalías', 'aprendizaje automático', 'AWS', 'predicción de negocios', 'análisis en tiempo real'],
-    pt: ['IA', 'análise de dados', 'detecção de anomalias', 'aprendizado de máquina', 'AWS', 'previsão de negócios', 'análise em tempo real'],
-    id: ['AI', 'analisis data', 'deteksi anomali', 'pembelajaran mesin', 'AWS', 'prediksi bisnis', 'analisis real-time']
+    ja: ['データ処理', 'ファイル管理', 'ポリシー管理', 'クラウドストレージ', 'データアップロード', '使用量監視', '従量課金', 'セキュアデータ管理', 'AWS', 'エンタープライズデータ', '二要素認証', 'データ分析レポート'],
+    en: ['data processing', 'file management', 'policy management', 'cloud storage', 'data upload', 'usage monitoring', 'pay-as-you-go', 'secure data management', 'AWS', 'enterprise data', 'two-factor authentication', 'data analysis reports'],
+    'zh-CN': ['数据处理', '文件管理', '策略管理', '云存储', '数据上传', '使用量监控', '按量付费', '安全数据管理', 'AWS', '企业数据', '双因素认证', '数据分析报告'],
+    ko: ['데이터처리', '파일관리', '정책관리', '클라우드스토리지', '데이터업로드', '사용량모니터링', '종량제', '보안데이터관리', 'AWS', '기업데이터', '이중인증', '데이터분석리포트'],
+    fr: ['traitement de données', 'gestion de fichiers', 'gestion de politiques', 'stockage cloud', 'téléchargement de données', 'surveillance d\'utilisation', 'paiement à l\'usage', 'gestion sécurisée des données', 'AWS', 'données d\'entreprise', 'authentification à deux facteurs', 'rapports d\'analyse de données'],
+    de: ['Datenverarbeitung', 'Dateiverwaltung', 'Richtlinienverwaltung', 'Cloud-Speicher', 'Daten-Upload', 'Nutzungsüberwachung', 'nutzungsbasierte Abrechnung', 'sichere Datenverwaltung', 'AWS', 'Unternehmensdaten', 'Zwei-Faktor-Authentifizierung', 'Datenanalyseberichte'],
+    es: ['procesamiento de datos', 'gestión de archivos', 'gestión de políticas', 'almacenamiento en la nube', 'carga de datos', 'monitoreo de uso', 'pago por uso', 'gestión segura de datos', 'AWS', 'datos empresariales', 'autenticación de dos factores', 'informes de análisis de datos'],
+    pt: ['processamento de dados', 'gerenciamento de arquivos', 'gerenciamento de políticas', 'armazenamento em nuvem', 'upload de dados', 'monitoramento de uso', 'pagamento por uso', 'gerenciamento seguro de dados', 'AWS', 'dados empresariais', 'autenticação de dois fatores', 'relatórios de análise de dados'],
+    id: ['pemrosesan data', 'manajemen file', 'manajemen kebijakan', 'penyimpanan cloud', 'upload data', 'pemantauan penggunaan', 'bayar sesuai penggunaan', 'manajemen data aman', 'AWS', 'data perusahaan', 'autentikasi dua faktor', 'laporan analisis data']
   };
   
-  return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en-US'];
+  return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en'];
 };
 
 // 全言語対応のロケール設定

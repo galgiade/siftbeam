@@ -7,13 +7,23 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const resolvedParams = await params
   const dict = pickDictionary(signInDictionaries, resolvedParams.locale, 'en-US')
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
   
   return {
     title: dict.label.signInTitle || 'Sign In',
     description: dict.label.signInSubtitle || 'Sign in to your account',
+    alternates: {
+      canonical: `${baseUrl}/${resolvedParams.locale}/signin`,
+    },
     openGraph: {
       title: dict.label.signInTitle || 'Sign In',
       description: dict.label.signInSubtitle || 'Sign in to your account',
+      url: `${baseUrl}/${resolvedParams.locale}/signin`,
+      type: 'website',
+    },
+    robots: {
+      index: false, // ログインページは検索結果に表示しない
+      follow: true,
     },
   }
 }
