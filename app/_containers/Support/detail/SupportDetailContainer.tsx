@@ -46,7 +46,7 @@ export default async function SupportDetailContainer({ locale, supportRequestId 
     const [supportRequestResult, repliesResult] = await Promise.all([
       getSupportRequestById(supportRequestId),
       querySupportReplies({
-        'support-requestId': supportRequestId,
+        supportRequestId: supportRequestId,
         limit: 100
       })
     ]);

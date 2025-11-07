@@ -15,7 +15,7 @@ const client = new DynamoDBClient({
 });
 const docClient = DynamoDBDocumentClient.from(client);
 
-const POLICY_ANALYSIS_TABLE_NAME = process.env.POLICY_ANALYSIS_TABLE_NAME || 'siftbeam-policy-analysis';
+const POLICY_ANALYSIS_TABLE_NAME = process.env.POLICY_ANALYSIS_TABLE_NAME || 'siftbeam-policy-analyses';
 
 export type AnalysisStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 

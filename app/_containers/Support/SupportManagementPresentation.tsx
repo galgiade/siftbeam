@@ -237,7 +237,7 @@ export default function SupportManagementPresentation({
             <div className="space-y-4">
               {filteredSupportRequests.map((request) => (
                 <div
-                  key={request['support-requestId']}
+                  key={request.supportRequestId}
                   className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-white"
                 >
                   <div className="flex justify-between items-start mb-3">
@@ -278,7 +278,7 @@ export default function SupportManagementPresentation({
                         variant="flat"
                         size="sm"
                         as={Link}
-                        href={`/${userAttributes.locale}/account/support/request/${request['support-requestId']}`}
+                        href={`/${userAttributes.locale}/account/support/request/${request.supportRequestId}`}
                         startContent={<FaEye size={14} />}
                       >
                         {dictionary.label.viewDetails}
@@ -287,7 +287,7 @@ export default function SupportManagementPresentation({
                   </div>
                   
                   <div className="text-xs text-gray-500 border-t pt-2">
-                    {dictionary.label.requestId} {request['support-requestId']}
+                    {dictionary.label.requestId} {request.supportRequestId}
                   </div>
                 </div>
               ))}

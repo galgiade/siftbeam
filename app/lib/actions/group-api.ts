@@ -14,9 +14,9 @@ import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-
 import { getPolicyById } from '@/app/lib/actions/policy-api';
 import { getUserById } from '@/app/lib/actions/user-api';
 
-const GROUP_TABLE_NAME = process.env.GROUP_TABLE_NAME || 'siftbeam-group';
-const USER_GROUP_TABLE_NAME = process.env.USER_GROUP_TABLE_NAME || 'siftbeam-user-group';
-const POLICY_GROUP_TABLE_NAME = process.env.POLICY_GROUP_TABLE_NAME || 'siftbeam-policy-group';
+const GROUP_TABLE_NAME = process.env.GROUP_TABLE_NAME || 'siftbeam-groups';
+const USER_GROUP_TABLE_NAME = process.env.USER_GROUP_TABLE_NAME || 'siftbeam-user-groups';
+const POLICY_GROUP_TABLE_NAME = process.env.POLICY_GROUP_TABLE_NAME || 'siftbeam-policy-groups';
 
 /**
  * グループの型定義
@@ -35,7 +35,7 @@ export interface Group {
  * ユーザーグループの型定義
  */
 export interface UserGroup {
-  'user-groupId': string; // DynamoDBのPKに合わせる
+  userGroupId: string; // DynamoDBのPKに合わせる
   userId: string;
   groupId: string;
   customerId: string;
@@ -47,7 +47,7 @@ export interface UserGroup {
  * ポリシーグループの型定義
  */
 export interface PolicyGroup {
-  'policy-groupId': string; // DynamoDBのPKに合わせる
+  policyGroupId: string; // DynamoDBのPKに合わせる
   groupId: string;
   policyId: string;
   customerId: string;
@@ -645,7 +645,7 @@ export async function assignUsersToGroup(input: AssignUsersToGroupInput): Promis
 
       const userGroupId = generateId();
       const userGroup: UserGroup = {
-        'user-groupId': userGroupId, // DynamoDBのPKフィールド名に合わせる
+        userGroupId: userGroupId, // DynamoDBのPKフィールド名に合わせる
         userId,
         groupId: input.groupId,
         customerId: input.customerId,
@@ -758,7 +758,7 @@ export async function removeUsersFromGroup(groupId: string, userIds: string[]): 
         // レコードを削除
         const deleteCommand = new DeleteCommand({
           TableName: USER_GROUP_TABLE_NAME,
-          Key: { 'user-groupId': userGroup['user-groupId'] } // DynamoDBのPKフィールド名に合わせる
+          Key: { userGroupId: userGroup.userGroupId } // DynamoDBのPKフィールド名に合わせる
         });
 
         await dynamoDocClient.send(deleteCommand);
@@ -924,7 +924,7 @@ export async function assignPoliciesToGroup(input: AssignPoliciesToGroupInput): 
 
       const policyGroupId = generateId();
       const policyGroup: PolicyGroup = {
-        'policy-groupId': policyGroupId, // DynamoDBのPKフィールド名に合わせる
+        policyGroupId: policyGroupId, // DynamoDBのPKフィールド名に合わせる
         groupId: input.groupId,
         policyId,
         customerId: input.customerId,
@@ -1037,7 +1037,7 @@ export async function removePoliciesFromGroup(groupId: string, policyIds: string
         // レコードを削除
         const deleteCommand = new DeleteCommand({
           TableName: POLICY_GROUP_TABLE_NAME,
-          Key: { 'policy-groupId': policyGroup['policy-groupId'] } // DynamoDBのPKフィールド名に合わせる
+          Key: { policyGroupId: policyGroup.policyGroupId } // DynamoDBのPKフィールド名に合わせる
         });
 
         await dynamoDocClient.send(deleteCommand);

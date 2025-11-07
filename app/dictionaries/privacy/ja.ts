@@ -317,7 +317,7 @@ const ja: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "2025年11月6日",
+    lastUpdated: "2025年11月7日",
     company: {
       name: "株式会社コネクトテック",
       address: "静岡県浜松市中央区和合町315-1485 ディアス和合202号",

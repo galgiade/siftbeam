@@ -181,7 +181,7 @@ export default function ApiKeyManagementPresentation({
 
     try {
       const result = await updateAPIKeyAction({
-        'api-keysId': editForm.id,
+        apiKeyId: editForm.id,
         apiName: editForm.apiName.trim(),
         description: editForm.description.trim() || undefined
         // ステータスは編集モーダルから削除されたため、更新しない
@@ -189,7 +189,7 @@ export default function ApiKeyManagementPresentation({
 
       if (result.success && result.apiKey) {
         setApiKeys(prev => prev.map(apiKey => 
-          apiKey['api-keysId'] === editForm.id ? result.apiKey! : apiKey
+          apiKey.apiKeyId === editForm.id ? result.apiKey! : apiKey
         ));
         setSuccess(dictionary.messages.updateSuccess);
         onEditOpenChange();
@@ -212,10 +212,10 @@ export default function ApiKeyManagementPresentation({
     clearNotifications();
 
     try {
-      const result = await deleteAPIKeyAction(selectedApiKey['api-keysId']);
+      const result = await deleteAPIKeyAction(selectedApiKey.apiKeyId);
 
       if (result.success) {
-        setApiKeys(prev => prev.filter(apiKey => apiKey['api-keysId'] !== selectedApiKey['api-keysId']));
+        setApiKeys(prev => prev.filter(apiKey => apiKey.apiKeyId !== selectedApiKey.apiKeyId));
         setSuccess(dictionary.messages.deleteSuccess);
         onDeleteOpenChange();
       } else {
@@ -235,11 +235,11 @@ export default function ApiKeyManagementPresentation({
     clearNotifications();
 
     try {
-      const result = await toggleAPIKeyStatusAction(apiKey['api-keysId']);
+      const result = await toggleAPIKeyStatusAction(apiKey.apiKeyId);
 
       if (result.success && result.apiKey) {
         setApiKeys(prev => prev.map(key => 
-          key['api-keysId'] === apiKey['api-keysId'] ? result.apiKey! : key
+          key.apiKeyId === apiKey.apiKeyId ? result.apiKey! : key
         ));
         
         const statusLabel = result.apiKey.status === 'active' ? dictionary.messages.statusActive : dictionary.messages.statusInactive;
@@ -265,7 +265,7 @@ export default function ApiKeyManagementPresentation({
   // 編集モーダルを開く
   const openEditModal = (apiKey: APIKeyEntry) => {
     setEditForm({
-      id: apiKey['api-keysId'],
+      id: apiKey.apiKeyId,
       apiName: apiKey.apiName,
       description: apiKey.description || '',
       status: apiKey.status
@@ -406,18 +406,18 @@ export default function ApiKeyManagementPresentation({
               </TableHeader>
               <TableBody>
                 {sortedApiKeys.map((apiKey) => (
-                  <TableRow key={apiKey['api-keysId']}>
+                  <TableRow key={apiKey.apiKeyId}>
                     <TableCell>
                       <p className="font-medium">{apiKey.apiName}</p>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {loadingKeys[apiKey['api-keysId']] ? (
+                        {loadingKeys[apiKey.apiKeyId] ? (
                           <Spinner size="sm" />
-                        ) : visibleApiKeys[apiKey['api-keysId']] ? (
+                        ) : visibleApiKeys[apiKey.apiKeyId] ? (
                           <p className="text-xs font-mono text-gray-900 max-w-[200px] truncate" 
-                             title={visibleApiKeys[apiKey['api-keysId']]}>
-                            {visibleApiKeys[apiKey['api-keysId']]}
+                             title={visibleApiKeys[apiKey.apiKeyId]}>
+                            {visibleApiKeys[apiKey.apiKeyId]}
                           </p>
                         ) : (
                           <p className="text-xs font-mono text-gray-400">
@@ -429,12 +429,12 @@ export default function ApiKeyManagementPresentation({
                           isIconOnly
                           size="sm"
                           variant="light"
-                          onPress={() => handleShowApiKey(apiKey['api-keysId'])}
-                          isDisabled={loadingKeys[apiKey['api-keysId']]}
+                          onPress={() => handleShowApiKey(apiKey.apiKeyId)}
+                          isDisabled={loadingKeys[apiKey.apiKeyId]}
                           className="min-w-unit-8 w-8 h-8"
-                          title={visibleApiKeys[apiKey['api-keysId']] ? dictionary.messages.hideApiKey : dictionary.messages.showApiKey}
+                          title={visibleApiKeys[apiKey.apiKeyId] ? dictionary.messages.hideApiKey : dictionary.messages.showApiKey}
                         >
-                          {visibleApiKeys[apiKey['api-keysId']] ? (
+                          {visibleApiKeys[apiKey.apiKeyId] ? (
                             <EyeSlashIcon className="w-4 h-4 text-gray-500 hover:text-blue-600" />
                           ) : (
                             <EyeIcon className="w-4 h-4 text-gray-500 hover:text-blue-600" />
@@ -445,8 +445,8 @@ export default function ApiKeyManagementPresentation({
                           isIconOnly
                           size="sm"
                           variant="light"
-                          onPress={() => handleCopyApiKey(apiKey['api-keysId'])}
-                          isDisabled={loadingKeys[apiKey['api-keysId']]}
+                          onPress={() => handleCopyApiKey(apiKey.apiKeyId)}
+                          isDisabled={loadingKeys[apiKey.apiKeyId]}
                           className="min-w-unit-8 w-8 h-8"
                           title={dictionary.messages.copyApiKeyToClipboard}
                         >

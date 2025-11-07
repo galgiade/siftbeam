@@ -11,13 +11,13 @@ import {
 import { dynamoDocClient } from '@/app/lib/aws-clients';
 import { ApiResponse } from '@/app/lib/types/TypeAPIs';
 
-const PROCESSING_HISTORY_TABLE_NAME = process.env.PROCESSING_HISTORY_TABLE_NAME || 'siftbeam-processing-history';
+const PROCESSING_HISTORY_TABLE_NAME = process.env.PROCESSING_HISTORY_TABLE_NAME || 'siftbeam-processing-histories';
 
 /**
  * 処理履歴のインターフェース
  */
 export interface ProcessingHistory {
-  'processing-historyId': string;
+  processingHistoryId: string;
   userId: string;
   userName: string;
   customerId: string;
@@ -38,7 +38,7 @@ export interface ProcessingHistory {
  * 処理履歴作成用のインターフェース
  */
 export interface CreateProcessingHistoryInput {
-  'processing-historyId'?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
+  processingHistoryId?: string; // 事前生成されたUUID（オプション、未指定時は自動生成）
   userId: string;
   userName: string;
   customerId: string;
@@ -53,7 +53,7 @@ export interface CreateProcessingHistoryInput {
  * 処理履歴更新用のインターフェース
  */
 export interface UpdateProcessingHistoryInput {
-  'processing-historyId': string;
+  processingHistoryId: string;
   status?: 'in_progress' | 'success' | 'failed' | 'canceled' | 'deleted' | 'delete_failed';
   downloadS3Keys?: string[];
   usageAmountBytes?: number;
@@ -185,7 +185,7 @@ export async function getProcessingHistoryById(processingHistoryId: string): Pro
 
     const command = new GetCommand({
       TableName: PROCESSING_HISTORY_TABLE_NAME,
-      Key: { 'processing-historyId': processingHistoryId }
+      Key: { processingHistoryId: processingHistoryId }
     });
 
     const result = await dynamoDocClient.send(command);
@@ -358,11 +358,11 @@ export async function createProcessingHistory(input: CreateProcessingHistoryInpu
     }
 
     // 処理履歴IDを生成（事前生成されたIDがあればそれを使用）
-    const processingHistoryId = input['processing-historyId'] || generateId();
+    const processingHistoryId = input.processingHistoryId || generateId();
     const now = new Date().toISOString();
     
     const newProcessingHistory: ProcessingHistory = {
-      'processing-historyId': processingHistoryId,
+      processingHistoryId: processingHistoryId,
       userId: input.userId,
       userName: input.userName.trim(),
       customerId: input.customerId,
@@ -382,7 +382,7 @@ export async function createProcessingHistory(input: CreateProcessingHistoryInpu
       Item: newProcessingHistory,
       ConditionExpression: 'attribute_not_exists(#processingHistoryId)',
       ExpressionAttributeNames: {
-        '#processingHistoryId': 'processing-historyId'
+        '#processingHistoryId': 'processingHistoryId'
       }
     });
 
@@ -488,11 +488,11 @@ export async function updateProcessingHistory(input: UpdateProcessingHistoryInpu
     // DynamoDB更新
     const updateCommand = new UpdateCommand({
       TableName: PROCESSING_HISTORY_TABLE_NAME,
-      Key: { 'processing-historyId': input['processing-historyId'] },
+      Key: { processingHistoryId: input.processingHistoryId },
       UpdateExpression: `SET ${updateExpression.join(', ')}`,
       ExpressionAttributeNames: {
         ...expressionAttributeNames,
-        '#processingHistoryId': 'processing-historyId'
+        '#processingHistoryId': 'processingHistoryId'
       },
       ExpressionAttributeValues: expressionAttributeValues,
       ConditionExpression: 'attribute_exists(#processingHistoryId)',
@@ -502,7 +502,7 @@ export async function updateProcessingHistory(input: UpdateProcessingHistoryInpu
     const result = await dynamoDocClient.send(updateCommand);
 
     console.log('Processing history updated successfully:', {
-      processingHistoryId: input['processing-historyId'],
+      processingHistoryId: input.processingHistoryId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
 
@@ -536,10 +536,10 @@ export async function deleteProcessingHistory(
       // ソフト削除（ステータスをdeletedに変更）
       const updateCommand = new UpdateCommand({
         TableName: PROCESSING_HISTORY_TABLE_NAME,
-        Key: { 'processing-historyId': processingHistoryId },
+        Key: { processingHistoryId: processingHistoryId },
         UpdateExpression: 'SET #status = :status, #updatedAt = :updatedAt',
         ExpressionAttributeNames: {
-          '#processingHistoryId': 'processing-historyId',
+          '#processingHistoryId': 'processingHistoryId',
           '#status': 'status',
           '#updatedAt': 'updatedAt'
         },
@@ -555,10 +555,10 @@ export async function deleteProcessingHistory(
       // ハード削除
       const deleteCommand = new DeleteCommand({
         TableName: PROCESSING_HISTORY_TABLE_NAME,
-        Key: { 'processing-historyId': processingHistoryId },
+        Key: { processingHistoryId: processingHistoryId },
         ConditionExpression: 'attribute_exists(#processingHistoryId)',
         ExpressionAttributeNames: {
-          '#processingHistoryId': 'processing-historyId'
+          '#processingHistoryId': 'processingHistoryId'
         }
       });
 
@@ -688,7 +688,7 @@ export async function markProcessingAsCompleted(
 
     // 処理履歴を更新
     const result = await updateProcessingHistory({
-      'processing-historyId': processingHistoryId,
+      processingHistoryId: processingHistoryId,
       status,
       completedAt,
       downloadS3Keys,

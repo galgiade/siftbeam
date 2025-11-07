@@ -18,7 +18,7 @@ import {
 import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
 import { getGroupsByUserId, getPoliciesByGroupId } from './group-api';
 
-const POLICY_TABLE_NAME = process.env.POLICY_TABLE_NAME || 'siftbeam-policy';
+const POLICY_TABLE_NAME = process.env.POLICY_TABLE_NAME || 'siftbeam-policies';
 
 /**
  * ポリシーの型定義

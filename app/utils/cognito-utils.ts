@@ -51,79 +51,13 @@ export async function getUserCustomAttributes(): Promise<UserAttributes | null> 
         }
       });
 
-      console.log('getUserCustomAttributes - 取得した属性:', attributes);
-      console.log('getUserCustomAttributes - custom:customerId:', attributes['custom:customerId']);
-      console.log('getUserCustomAttributes - preferred_username:', attributes.preferred_username);
-      console.log('getUserCustomAttributes - custom:paymentMethodId:', attributes['custom:paymentMethodId']);
-
       return attributes;
     } catch (tokenError: any) {
-      // Access Tokenが期限切れの場合、Refresh Tokenで更新を試行
-      if (tokenError.name === 'NotAuthorizedException' && refreshToken) {
-        console.log('Access token expired, attempting to refresh...');
-        
-        try {
-          const refreshCommand = new InitiateAuthCommand({
-            AuthFlow: 'REFRESH_TOKEN_AUTH',
-            ClientId: process.env.COGNITO_CLIENT_ID!,
-            AuthParameters: {
-              REFRESH_TOKEN: refreshToken,
-            },
-          });
-
-          const refreshResponse = await cognitoClient.send(refreshCommand);
-          
-          if (refreshResponse.AuthenticationResult?.AccessToken) {
-            console.log('Token refreshed successfully');
-            
-            // 新しいトークンをCookieに保存
-            cookieStore.set('accessToken', refreshResponse.AuthenticationResult.AccessToken, {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === 'production',
-              sameSite: 'strict',
-              maxAge: 60 * 60 * 24 * 7, // 7 days
-            });
-            
-            if (refreshResponse.AuthenticationResult.RefreshToken) {
-              cookieStore.set('refreshToken', refreshResponse.AuthenticationResult.RefreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 30, // 30 days
-              });
-            }
-            
-            // 新しいトークンでユーザー属性を取得
-            const newCommand = new GetUserCommand({
-              AccessToken: refreshResponse.AuthenticationResult.AccessToken,
-            });
-
-            const newResponse = await cognitoClient.send(newCommand);
-            
-            if (!newResponse.UserAttributes) {
-              return null;
-            }
-
-            // UserAttributesを適切な形式に変換
-            const attributes: UserAttributes = {};
-            newResponse.UserAttributes.forEach(attr => {
-              if (attr.Name && attr.Value) {
-                attributes[attr.Name] = attr.Value;
-              }
-            });
-
-            console.log('getUserCustomAttributes (refresh) - 取得した属性:', attributes);
-            console.log('getUserCustomAttributes (refresh) - custom:customerId:', attributes['custom:customerId']);
-            console.log('getUserCustomAttributes (refresh) - preferred_username:', attributes.preferred_username);
-            console.log('getUserCustomAttributes (refresh) - custom:paymentMethodId:', attributes['custom:paymentMethodId']);
-
-            return attributes;
-          }
-        } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
-          // リフレッシュに失敗した場合はnullを返す
-          return null;
-        }
+      // Access Tokenが期限切れの場合
+      if (tokenError.name === 'NotAuthorizedException') {
+        console.log('Access token expired or invalid');
+        // トークンが無効な場合はnullを返す（ログイン画面にリダイレクトされる）
+        return null;
       }
       
       throw tokenError;
@@ -137,6 +71,71 @@ export async function getUserCustomAttributes(): Promise<UserAttributes | null> 
     }
     
     return null;
+  }
+}
+
+/**
+ * トークンをリフレッシュするServer Action
+ * Refresh Tokenを使用して新しいAccess Tokenを取得し、Cookieに保存
+ */
+export async function refreshAuthToken(): Promise<{ success: boolean; message?: string }> {
+  try {
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get('refreshToken')?.value;
+    
+    if (!refreshToken) {
+      return {
+        success: false,
+        message: 'No refresh token found'
+      };
+    }
+
+    const refreshCommand = new InitiateAuthCommand({
+      AuthFlow: 'REFRESH_TOKEN_AUTH',
+      ClientId: process.env.COGNITO_CLIENT_ID!,
+      AuthParameters: {
+        REFRESH_TOKEN: refreshToken,
+      },
+    });
+
+    const refreshResponse = await cognitoClient.send(refreshCommand);
+    
+    if (refreshResponse.AuthenticationResult?.AccessToken) {
+      console.log('Token refreshed successfully');
+      
+      // 新しいトークンをCookieに保存
+      cookieStore.set('accessToken', refreshResponse.AuthenticationResult.AccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+      });
+      
+      if (refreshResponse.AuthenticationResult.RefreshToken) {
+        cookieStore.set('refreshToken', refreshResponse.AuthenticationResult.RefreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 60 * 60 * 24 * 30, // 30 days
+        });
+      }
+      
+      return {
+        success: true,
+        message: 'Token refreshed successfully'
+      };
+    }
+    
+    return {
+      success: false,
+      message: 'Failed to refresh token'
+    };
+  } catch (error: any) {
+    console.error('Error refreshing token:', error);
+    return {
+      success: false,
+      message: error.message || 'Failed to refresh token'
+    };
   }
 }
 

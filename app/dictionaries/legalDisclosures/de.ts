@@ -32,7 +32,7 @@ const de: LegalDisclosuresLocale = {
         "Zahlungsmethode: Kreditkarte (über Stripe)",
         "Abrechnungszyklus: Monatlicher Abschluss am Monatsende (Nutzung vom 1. bis zum letzten Tag des Monats)",
         "Rechnungsdatum: 1. des Folgemonats",
-        "Zahlungsfrist: 15. des Folgemonats",
+        "Zahlungszeitpunkt: Automatische Belastung der registrierten Kreditkarte bei Rechnungsstellung",
         "Rundung: Kann basierend auf Stripes Währungspräzision und Mindestzahlungseinheiten auftreten",
         "Steuern: Zusätzliche Gebühren können gesetzlich erforderlich sein",
         "Zusätzliche Gebühren: Internetverbindungskosten (Kundenverantwortung)",
@@ -97,7 +97,7 @@ const de: LegalDisclosuresLocale = {
     },
   },
   appendix: {
-    lastUpdated: "6. November 2025",
+    lastUpdated: "7. November 2025",
     company: {
       name: "ConnectTech Inc.",
       address: "Dias Waigo 202, 315-1485 Waigo-cho, Naka-ku, Hamamatsu-shi, Shizuoka, Japan",

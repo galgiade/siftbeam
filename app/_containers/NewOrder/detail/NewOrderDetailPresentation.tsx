@@ -159,8 +159,8 @@ export default function NewOrderDetailPresentation({
     async (prevState: any, formData: FormData) => {
       try {
         const result = await createNewOrderReply({
-          'neworder-replyId': replyId, // 事前生成されたUUID
-          'neworder-requestId': newOrderRequest['neworder-requestId'],
+          newOrderReplyId: replyId, // 事前生成されたUUID
+          newOrderRequestId: newOrderRequest.newOrderRequestId,
           userId: userAttributes.sub,
           userName: userAttributes.preferred_username || dictionary.label.customer,
           senderType: 'customer' as const,
@@ -350,7 +350,7 @@ export default function NewOrderDetailPresentation({
           )}
           
           <div className="text-xs text-gray-500 border-t pt-3">
-            {dictionary.label.orderId} {newOrderRequest['neworder-requestId']}
+            {dictionary.label.orderId} {newOrderRequest.newOrderRequestId}
           </div>
         </Card>
 
@@ -367,7 +367,7 @@ export default function NewOrderDetailPresentation({
           ) : (
             <div className="space-y-6">
               {replies.map((reply) => (
-                <div key={reply['neworder-replyId']} className="flex gap-3">
+                <div key={reply.newOrderReplyId} className="flex gap-3">
                   <SenderIcon senderType={reply.senderType} />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -459,7 +459,7 @@ export default function NewOrderDetailPresentation({
                 <FileUploader
                   customerId={userAttributes.customerId}
                   userId={userAttributes.sub}
-                  supportRequestId={newOrderRequest['neworder-requestId']}
+                  supportRequestId={newOrderRequest.newOrderRequestId}
                   context="reply" // リプライファイル
                   replyId={replyId} // 事前生成されたリプライUUID
                   onFilesUploaded={handleReplyFilesUploaded}

@@ -435,7 +435,7 @@ export default function AuditLogPresentation({
               </TableHeader>
               <TableBody emptyContent={dictionary.label.noData}>
                 {sortedLogs.map((log) => (
-                  <TableRow key={log['audit-logsId']}>
+                  <TableRow key={log.auditLogId}>
                     <TableCell>
                       <div className="text-sm">
                         {formatDateTime(log.createdAt)}

@@ -32,7 +32,7 @@ const es: LegalDisclosuresLocale = {
         "Método de pago: Tarjeta de crédito (a través de Stripe)",
         "Ciclo de facturación: Cierre mensual a fin de mes (uso del día 1 al último día del mes)",
         "Fecha de emisión de factura: día 1 del mes siguiente",
-        "Fecha de vencimiento de pago: día 15 del mes siguiente",
+        "Momento del pago: Cargo automático a la tarjeta de crédito registrada al emitir la factura",
         "Redondeo: Puede ocurrir basado en la precisión de moneda de Stripe y unidades mínimas de pago",
         "Impuestos: Pueden aplicarse cargos adicionales según la ley",
         "Tarifas adicionales: Costos de conexión a Internet (responsabilidad del cliente)",
@@ -97,7 +97,7 @@ const es: LegalDisclosuresLocale = {
     },
   },
   appendix: {
-    lastUpdated: "6 de noviembre de 2025",
+    lastUpdated: "7 de noviembre de 2025",
     company: {
       name: "ConnectTech Inc.",
       address: "Dias Waigo 202, 315-1485 Waigo-cho, Naka-ku, Hamamatsu-shi, Shizuoka, Japón",

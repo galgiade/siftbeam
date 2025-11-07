@@ -257,7 +257,9 @@ export async function createAdminAction(
       currentUser.email,
       customerId,
       department,
-      position
+      position,
+      'admin', // role
+      locale   // locale
     );
 
     if (!profileResult.success) {

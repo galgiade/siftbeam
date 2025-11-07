@@ -83,8 +83,8 @@ const getSenderTypeConfig = (senderType: string, dictionary: SupportCenterLocale
 
 // ファイルキーからファイル名を抽出する関数
 const extractFileName = (fileKey: string): string => {
-  // support/${customerId}/${support-requestId}/request/${timestamp}_${fileName}
-  // support/${customerId}/${support-requestId}/reply/${support-replyId}/${timestamp}_${fileName}
+  // support/${customerId}/${supportRequestId}/request/${timestamp}_${fileName}
+  // support/${customerId}/${supportRequestId}/reply/${supportReplyId}/${timestamp}_${fileName}
   const parts = fileKey.split('/');
   const fileNameWithTimestamp = parts[parts.length - 1];
   
@@ -155,7 +155,7 @@ export default function SupportDetailPresentation({
       const newStatus: SupportRequest['status'] = currentStatus === 'open' ? 'closed' : 'open';
       
       const result = await updateSupportRequest({
-        'support-requestId': supportRequest['support-requestId'],
+        supportRequestId: supportRequest.supportRequestId,
         status: newStatus
       });
       
@@ -176,8 +176,8 @@ export default function SupportDetailPresentation({
     async (prevState: any, formData: FormData) => {
       try {
         const result = await createSupportReply({
-          'support-replyId': replyId, // 事前生成されたUUID
-          'support-requestId': supportRequest['support-requestId'],
+          supportReplyId: replyId, // 事前生成されたUUID
+          supportRequestId: supportRequest.supportRequestId,
           userId: userAttributes.sub,
           userName: userAttributes.preferred_username || dictionary.label.customer,
           senderType: 'customer' as const,
@@ -381,7 +381,7 @@ export default function SupportDetailPresentation({
           )}
           
           <div className="text-xs text-gray-500 border-t pt-3">
-            {dictionary.label.requestId} {supportRequest['support-requestId']}
+            {dictionary.label.requestId} {supportRequest.supportRequestId}
           </div>
         </Card>
 
@@ -398,7 +398,7 @@ export default function SupportDetailPresentation({
           ) : (
             <div className="space-y-6">
               {replies.map((reply) => (
-                <div key={reply['support-replyId']} className="flex gap-3">
+                <div key={reply.supportReplyId} className="flex gap-3">
                   <SenderIcon senderType={reply.senderType} />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -490,7 +490,7 @@ export default function SupportDetailPresentation({
                 <FileUploader
                   customerId={userAttributes.customerId}
                   userId={userAttributes.sub}
-                  supportRequestId={supportRequest['support-requestId']}
+                  supportRequestId={supportRequest.supportRequestId}
                   context="reply" // リプライファイル
                   replyId={replyId} // 事前生成されたリプライUUID
                   onFilesUploaded={handleReplyFilesUploaded}

@@ -176,7 +176,7 @@ export default function UsageLimitPresentation({
       } else if (editingLimit) {
         // 更新
         const result = await updateUsageLimit({
-          'usage-limitsId': editingLimit['usage-limitsId'],
+          usageLimitId: editingLimit.usageLimitId,
           usageLimitValue: formData.limitType === 'usage' ? formData.usageLimitValue : undefined,
           usageUnit: formData.limitType === 'usage' ? formData.usageUnit : undefined,
           amountLimitValue: formData.limitType === 'amount' ? formData.amountLimitValue : undefined,
@@ -207,7 +207,7 @@ export default function UsageLimitPresentation({
     }
 
     try {
-      const result = await deleteUsageLimit(limit['usage-limitsId']);
+      const result = await deleteUsageLimit(limit.usageLimitId);
       if (result.success) {
         alert(dictionary.alert.deleteSuccess);
         window.location.reload(); // ページをリロードして最新データを取得
@@ -276,7 +276,7 @@ export default function UsageLimitPresentation({
             ) : (
               <div className="space-y-4">
                 {usageLimits.notifyLimits.map((limit) => (
-                  <div key={limit['usage-limitsId']} className="flex items-center justify-between p-4 bg-warning-50 rounded-lg border border-warning-200">
+                  <div key={limit.usageLimitId} className="flex items-center justify-between p-4 bg-warning-50 rounded-lg border border-warning-200">
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
                         <div>
@@ -332,7 +332,7 @@ export default function UsageLimitPresentation({
             ) : (
               <div className="space-y-4">
                 {usageLimits.restrictLimits.map((limit) => (
-                  <div key={limit['usage-limitsId']} className="flex items-center justify-between p-4 bg-danger-50 rounded-lg border border-danger-200">
+                  <div key={limit.usageLimitId} className="flex items-center justify-between p-4 bg-danger-50 rounded-lg border border-danger-200">
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
                         <div>

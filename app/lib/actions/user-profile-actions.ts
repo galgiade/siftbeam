@@ -13,6 +13,8 @@ export interface UserProfile {
   customerId: string; // インデックス用
   department: string;
   position: string;
+  role: 'admin' | 'user';
+  locale: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -24,7 +26,9 @@ export async function createUserProfile(
   email: string,
   customerId: string,
   department: string,
-  position: string
+  position: string,
+  role: 'admin' | 'user' = 'admin',
+  locale: string = 'ja'
 ): Promise<{ success: boolean; message: string }> {
   try {
     const now = new Date().toISOString();
@@ -36,6 +40,8 @@ export async function createUserProfile(
       customerId,
       department,
       position,
+      role,
+      locale,
       createdAt: now,
       updatedAt: now,
     };
