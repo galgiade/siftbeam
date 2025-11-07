@@ -1,17 +1,18 @@
 import CreateApiKeyManagementContainer from '@/app/_containers/ApiKeys/create/CreateApiKeyManagementContainer'
 
 interface CreateApiKeyPageProps {
-  params: {
+  params: Promise<{
     locale: string;
-  };
+  }>;
 }
 
 /**
  * APIキー作成ページ
  * 管理者が新しいAPIキーを作成するためのページ
  */
-export default function CreateApiKeyPage({ params }: CreateApiKeyPageProps) {
-  return <CreateApiKeyManagementContainer locale={params.locale} />;
+export default async function CreateApiKeyPage({ params }: CreateApiKeyPageProps) {
+  const { locale } = await params;
+  return <CreateApiKeyManagementContainer locale={locale} />;
 }
 
 export const metadata = {
