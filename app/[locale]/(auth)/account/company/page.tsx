@@ -17,7 +17,8 @@ export async function generateMetadata(
   }
 }
 
-export default function ProfilePage() {
+export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   return <UpdateCompanyInfoContainer  />
 }
 

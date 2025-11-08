@@ -330,7 +330,7 @@ export default function ApiKeyManagementPresentation({
         </div>
         <Button
           as={Link}
-          href={`/${userAttributes.locale}/account/api-keys/create`}
+          href={`/${userAttributes.locale}/account/api-management/create`}
           color="primary"
           startContent={<PlusIcon className="w-4 h-4" />}
         >
