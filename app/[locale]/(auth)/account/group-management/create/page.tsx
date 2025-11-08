@@ -1,15 +1,16 @@
 import CreateGroupManagementContainer from '@/app/_containers/GroupManagement/create/CreateGroupManagementContainer';
 
 interface CreateGroupManagementPageProps {
-  params: {
+  params: Promise<{
     locale: string;
-  };
+  }>;
 }
 
 /**
  * グループ作成ページ
  * 管理者が新しいグループを作成するページ
  */
-export default function CreateGroupManagementPage({ params }: CreateGroupManagementPageProps) {
-  return <CreateGroupManagementContainer locale={params.locale} />;
+export default async function CreateGroupManagementPage({ params }: CreateGroupManagementPageProps) {
+  const { locale } = await params;
+  return <CreateGroupManagementContainer locale={locale} />;
 }
