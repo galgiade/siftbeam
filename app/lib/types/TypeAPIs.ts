@@ -136,4 +136,6 @@ export interface ApiResponse<T = any> {
   verificationId?: string; // 2段階認証用
   email?: string; // 2段階認証用
   debugMessage?: string; // 開発者向けメッセージ（本番では非表示推奨）
+  messageKey?: 'rateLimitExceeded' | 'rateLimitBlocked' | 'rateLimitSendExceeded' | 'rateLimitCheckExceeded'; // レート制限用
+  resetAt?: Date; // レート制限リセット時刻
 }

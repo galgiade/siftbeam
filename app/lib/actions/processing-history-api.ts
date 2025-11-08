@@ -1,5 +1,6 @@
 'use server'
 
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 import { 
   GetCommand, 
   PutCommand, 
@@ -78,7 +79,7 @@ export interface QueryProcessingHistoryInput {
  * エラーハンドリング用のヘルパー関数
  */
 function handleError(error: any, operation: string): ApiResponse<any> {
-  console.error(`Error in ${operation}:`, {
+  errorLog(`Error in ${operation}:`, {
     name: error.name,
     message: error.message,
     code: error.code,
@@ -197,7 +198,7 @@ export async function getProcessingHistoryById(processingHistoryId: string): Pro
       };
     }
 
-    console.log('Processing history retrieved successfully:', { processingHistoryId });
+    debugLog('Processing history retrieved successfully:', { processingHistoryId });
 
     return {
       success: true,
@@ -284,7 +285,7 @@ export async function queryProcessingHistory(
     const result = await dynamoDocClient.send(command);
     const processingHistory = result.Items as ProcessingHistory[];
 
-    console.log('Processing history queried successfully:', { 
+    debugLog('Processing history queried successfully:', { 
       count: processingHistory.length, 
       userId: input.userId,
       customerId: input.customerId,
@@ -311,7 +312,7 @@ export async function queryProcessingHistory(
  */
 export async function createProcessingHistory(input: CreateProcessingHistoryInput): Promise<ApiResponse<ProcessingHistory>> {
   try {
-    console.log('createProcessingHistory called with input:', input);
+    debugLog('createProcessingHistory called with input:', input);
     
     // 入力バリデーション
     const errors: Record<string, string[]> = {};
@@ -349,7 +350,7 @@ export async function createProcessingHistory(input: CreateProcessingHistoryInpu
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -388,7 +389,7 @@ export async function createProcessingHistory(input: CreateProcessingHistoryInpu
 
     await dynamoDocClient.send(putCommand);
 
-    console.log('Processing history created successfully:', { 
+    debugLog('Processing history created successfully:', { 
       processingHistoryId,
       policyName: input.policyName,
       customerId: input.customerId 
@@ -410,7 +411,7 @@ export async function createProcessingHistory(input: CreateProcessingHistoryInpu
  */
 export async function updateProcessingHistory(input: UpdateProcessingHistoryInput): Promise<ApiResponse<ProcessingHistory>> {
   try {
-    console.log('updateProcessingHistory called with:', input);
+    debugLog('updateProcessingHistory called with:', input);
     
     // 個別フィールドバリデーション（提供されたフィールドのみ）
     const errors: Record<string, string[]> = {};
@@ -424,7 +425,7 @@ export async function updateProcessingHistory(input: UpdateProcessingHistoryInpu
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -501,7 +502,7 @@ export async function updateProcessingHistory(input: UpdateProcessingHistoryInpu
 
     const result = await dynamoDocClient.send(updateCommand);
 
-    console.log('Processing history updated successfully:', {
+    debugLog('Processing history updated successfully:', {
       processingHistoryId: input.processingHistoryId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
@@ -565,7 +566,7 @@ export async function deleteProcessingHistory(
       await dynamoDocClient.send(deleteCommand);
     }
 
-    console.log('Processing history deleted successfully:', { 
+    debugLog('Processing history deleted successfully:', { 
       processingHistoryId, 
       softDelete 
     });
@@ -676,7 +677,7 @@ export async function markProcessingAsCompleted(
   errorDetail?: string
 ): Promise<ApiResponse<ProcessingHistory>> {
   try {
-    console.log('markProcessingAsCompleted called with:', {
+    debugLog('markProcessingAsCompleted called with:', {
       processingHistoryId,
       status,
       downloadS3Keys,
@@ -706,7 +707,7 @@ export async function markProcessingAsCompleted(
       const processingTimeMs = endTime - startTime;
       const processingTimeSec = (processingTimeMs / 1000).toFixed(2);
       
-      console.log('処理完了:', {
+      debugLog('処理完了:', {
         processingHistoryId,
         status,
         startTime: result.data.createdAt,

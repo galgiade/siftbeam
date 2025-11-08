@@ -1,5 +1,6 @@
 'use server'
 
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 import { 
   GetCommand, 
   PutCommand, 
@@ -121,7 +122,7 @@ export interface QueryNewOrderRepliesInput {
  * エラーハンドリング用のヘルパー関数
  */
 function handleError(error: any, operation: string): ApiResponse<any> {
-  console.error(`Error in ${operation}:`, {
+  errorLog(`Error in ${operation}:`, {
     name: error.name,
     message: error.message,
     code: error.code,
@@ -238,7 +239,7 @@ export async function getNewOrderRequestById(newOrderRequestId: string): Promise
       };
     }
 
-    console.log('New order request retrieved successfully:', { newOrderRequestId });
+    debugLog('New order request retrieved successfully:', { newOrderRequestId });
 
     return {
       success: true,
@@ -299,7 +300,7 @@ export async function queryNewOrderRequests(
     const result = await dynamoDocClient.send(command);
     const newOrderRequests = result.Items as NewOrderRequest[];
 
-    console.log('New order requests queried successfully:', { 
+    debugLog('New order requests queried successfully:', { 
       count: newOrderRequests.length, 
       customerId: input.customerId,
       status: input.status
@@ -324,7 +325,7 @@ export async function queryNewOrderRequests(
  */
 export async function createNewOrderRequest(input: CreateNewOrderRequestInput): Promise<ApiResponse<NewOrderRequest>> {
   try {
-    console.log('createNewOrderRequest called with input:', input);
+    debugLog('createNewOrderRequest called with input:', input);
     
     // 入力バリデーション
     const errors: Record<string, string[]> = {};
@@ -358,7 +359,7 @@ export async function createNewOrderRequest(input: CreateNewOrderRequestInput): 
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -396,7 +397,7 @@ export async function createNewOrderRequest(input: CreateNewOrderRequestInput): 
 
     await dynamoDocClient.send(putCommand);
 
-    console.log('New order request created successfully:', { 
+    debugLog('New order request created successfully:', { 
       newOrderRequestId,
       subject: input.subject,
       customerId: input.customerId 
@@ -424,7 +425,7 @@ export async function createNewOrderRequest(input: CreateNewOrderRequestInput): 
  */
 export async function updateNewOrderRequest(input: UpdateNewOrderRequestInput): Promise<ApiResponse<NewOrderRequest>> {
   try {
-    console.log('updateNewOrderRequest called with:', input);
+    debugLog('updateNewOrderRequest called with:', input);
     
     // 個別フィールドバリデーション（提供されたフィールドのみ）
     const errors: Record<string, string[]> = {};
@@ -450,7 +451,7 @@ export async function updateNewOrderRequest(input: UpdateNewOrderRequestInput): 
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -527,7 +528,7 @@ export async function updateNewOrderRequest(input: UpdateNewOrderRequestInput): 
 
     const result = await dynamoDocClient.send(updateCommand);
 
-    console.log('New order request updated successfully:', {
+    debugLog('New order request updated successfully:', {
       newOrderRequestId: input.newOrderRequestId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
@@ -598,7 +599,7 @@ export async function deleteNewOrderRequest(
       await dynamoDocClient.send(deleteCommand);
     }
 
-    console.log('New order request deleted successfully:', { 
+    debugLog('New order request deleted successfully:', { 
       newOrderRequestId, 
       softDelete 
     });
@@ -641,7 +642,7 @@ export async function getNewOrderReplyById(newOrderReplyId: string): Promise<Api
       };
     }
 
-    console.log('New order reply retrieved successfully:', { newOrderReplyId });
+    debugLog('New order reply retrieved successfully:', { newOrderReplyId });
 
     return {
       success: true,
@@ -679,7 +680,7 @@ export async function queryNewOrderReplies(
     const result = await dynamoDocClient.send(command);
     const newOrderReplies = result.Items as NewOrderReply[];
 
-    console.log('New order replies queried successfully:', { 
+    debugLog('New order replies queried successfully:', { 
       newOrderRequestId: input.newOrderRequestId,
       count: newOrderReplies.length
     });
@@ -728,7 +729,7 @@ export async function createNewOrderReply(input: CreateNewOrderReplyInput): Prom
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -763,7 +764,7 @@ export async function createNewOrderReply(input: CreateNewOrderReplyInput): Prom
 
     await dynamoDocClient.send(putCommand);
 
-    console.log('New order reply created successfully:', { 
+    debugLog('New order reply created successfully:', { 
       newOrderReplyId,
       newOrderRequestId: input.newOrderRequestId,
       senderType: input.senderType
@@ -785,7 +786,7 @@ export async function createNewOrderReply(input: CreateNewOrderReplyInput): Prom
  */
 export async function updateNewOrderReply(input: UpdateNewOrderReplyInput): Promise<ApiResponse<NewOrderReply>> {
   try {
-    console.log('updateNewOrderReply called with:', input);
+    debugLog('updateNewOrderReply called with:', input);
     
     // 個別フィールドバリデーション（提供されたフィールドのみ）
     const errors: Record<string, string[]> = {};
@@ -795,7 +796,7 @@ export async function updateNewOrderReply(input: UpdateNewOrderReplyInput): Prom
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -848,7 +849,7 @@ export async function updateNewOrderReply(input: UpdateNewOrderReplyInput): Prom
 
     const result = await dynamoDocClient.send(updateCommand);
 
-    console.log('New order reply updated successfully:', {
+    debugLog('New order reply updated successfully:', {
       newOrderReplyId: input.newOrderReplyId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
@@ -891,7 +892,7 @@ export async function deleteNewOrderReply(
 
     await dynamoDocClient.send(deleteCommand);
 
-    console.log('New order reply deleted successfully:', { 
+    debugLog('New order reply deleted successfully:', { 
       newOrderReplyId, 
       softDelete 
     });

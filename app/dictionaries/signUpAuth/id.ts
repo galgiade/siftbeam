@@ -54,7 +54,11 @@ const id: SignUpAuthLocale = {
     verificationCodeNotFound: "Kode verifikasi tidak ditemukan atau kedaluwarsa",
     remainingAttempts: "Percobaan tersisa",
     verificationCodeExpired: "Kode verifikasi telah kedaluwarsa",
-    maxAttemptsReached: "Jumlah percobaan maksimum tercapai"
+    maxAttemptsReached: "Jumlah percobaan maksimum tercapai",
+    rateLimitExceeded: "Jumlah percobaan maksimum tercapai. Silakan coba lagi nanti.",
+    rateLimitBlocked: "Sementara diblokir. Silakan coba lagi nanti.",
+    rateLimitSendExceeded: "Jumlah pengiriman kode verifikasi maksimum tercapai. Silakan coba lagi nanti.",
+    rateLimitCheckExceeded: "Jumlah verifikasi kode maksimum tercapai. Silakan coba lagi nanti."
   },
   modal: {
     emailVerificationTitle: "Verifikasi Email",

@@ -17,19 +17,14 @@ import {
 import { dynamoDocClient, cognitoClient } from '@/app/lib/aws-clients';
 import { ApiResponse, User, UserAttributesDTO } from '@/app/lib/types/TypeAPIs';
 import { validationSchema } from '@/app/lib/validations/validation';
+import { debugLog, errorLog } from '@/app/lib/utils/logger';
 import { 
-  storeVerificationCodeAction, 
   sendVerificationEmailAction 
 } from '@/app/lib/actions/user-verification-actions';
 import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
 
 const USER_TABLE_NAME = process.env.USER_TABLE_NAME || 'User';
 const USER_POOL_ID = process.env.COGNITO_USER_POOL_ID!;
-
-// 認証コード生成関数
-function generateVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
 
 /**
  * 管理者のpaymentMethodIdを取得する関数
@@ -56,7 +51,7 @@ async function getAdminPaymentMethodId(customerId: string): Promise<string | nul
     
     if (result.Items && result.Items.length > 0) {
       const adminUser = result.Items[0] as User;
-      console.log('Admin user found for paymentMethodId:', { userId: adminUser.userId });
+      debugLog('Admin user found for paymentMethodId:', { userId: adminUser.userId });
       
       // Cognitoから管理者のpaymentMethodIdを取得
       const getUserCommand = new AdminGetUserCommand({
@@ -69,14 +64,14 @@ async function getAdminPaymentMethodId(customerId: string): Promise<string | nul
         attr => attr.Name === 'custom:paymentMethodId'
       )?.Value;
       
-      console.log('Admin paymentMethodId found:', paymentMethodId);
+      debugLog('Admin paymentMethodId found:', paymentMethodId);
       return paymentMethodId || null;
     }
     
-    console.log('No admin user found for customerId:', customerId);
+    debugLog('No admin user found for customerId:', customerId);
     return null;
   } catch (error) {
-    console.error('Error getting admin paymentMethodId:', error);
+    errorLog('Error getting admin paymentMethodId:', error);
     return null;
   }
 }
@@ -123,7 +118,7 @@ interface QueryUsersInput {
  * エラーハンドリング用のヘルパー関数
  */
 function handleError(error: any, operation: string): ApiResponse<any> {
-  console.error(`Error in ${operation}:`, {
+  errorLog(`Error in ${operation}:`, {
     name: error.name,
     message: error.message,
     code: error.code,
@@ -263,7 +258,7 @@ export async function getUserById(
       };
     }
 
-    console.log('User retrieved successfully:', { userId });
+    debugLog('User retrieved successfully:', { userId });
 
     return {
       success: true,
@@ -313,7 +308,7 @@ export async function queryUsers(
       users = users.filter(user => user.role === input.role);
     }
 
-    console.log('Users queried successfully:', { 
+    debugLog('Users queried successfully:', { 
       count: users.length, 
       customerId: input.customerId,
       userName: input.userName,
@@ -346,11 +341,11 @@ export async function createUser(
   let cognitoUserId: string | undefined;
   
   try {
-    console.log('createUser called with input:', input);
+    debugLog('createUser called with input:', input);
     
     // 入力バリデーション
     if (!input.email || !input.userName || !input.customerId) {
-      console.log('Missing required fields:', {
+      debugLog('Missing required fields:', {
         email: !!input.email,
         userName: !!input.userName,
         customerId: !!input.customerId
@@ -365,8 +360,6 @@ export async function createUser(
     }
 
     // Step 1: Cognitoユーザーを作成
-    console.log('Creating Cognito user:', { email: input.email, userName: input.userName });
-    
     // 作成者のpaymentMethodIdを取得（管理者から継承）
     const adminPaymentMethodId = await getAdminPaymentMethodId(input.customerId);
     
@@ -379,7 +372,7 @@ export async function createUser(
         { Name: 'preferred_username', Value: input.userName },
         { Name: 'custom:customerId', Value: input.customerId },
         { Name: 'custom:role', Value: input.role },
-        { Name: 'locale', Value: input.locale || 'ja' },
+        { Name: 'locale', Value: input.locale || 'en' },
         { Name: 'custom:paymentMethodId', Value: adminPaymentMethodId || '' }
       ],
       TemporaryPassword: input.password || 'TempPass123!',
@@ -395,8 +388,6 @@ export async function createUser(
 
     // パスワードが提供されている場合、永続的なパスワードとして設定
     if (input.password) {
-      console.log('Setting permanent password for user:', { cognitoUserId });
-      
       const setPasswordCommand = new AdminSetUserPasswordCommand({
         UserPoolId: USER_POOL_ID,
         Username: cognitoUserId,
@@ -405,12 +396,9 @@ export async function createUser(
       });
 
       await cognitoClient.send(setPasswordCommand);
-      console.log('Permanent password set successfully');
     }
 
     // Step 2: Cognitoユーザーを検証（subを取得）
-    console.log('Verifying Cognito user:', { cognitoUserId });
-    
     const verifyCommand = new AdminGetUserCommand({
       UserPoolId: USER_POOL_ID,
       Username: cognitoUserId
@@ -426,7 +414,7 @@ export async function createUser(
     }
 
     // Step 3: バリデーション
-    const schemas = validationSchema(input.locale || 'ja');
+    const schemas = validationSchema(input.locale || 'en');
     const userData = {
       id: cognitoSub, // バリデーションスキーマではidフィールドを期待
       userName: input.userName,
@@ -437,13 +425,13 @@ export async function createUser(
       role: input.role,
     };
 
-    console.log('Validating user data:', userData);
+    debugLog('Validating user data:', userData);
     
     // updateUserSchemaを使用（idフィールドに合わせて）
     const validationResult = schemas.updateUserSchema.safeParse(userData);
     
     if (!validationResult.success) {
-      console.log('Validation failed:', validationResult.error.issues);
+      debugLog('Validation failed:', validationResult.error.issues);
       
       const errors: Record<string, string[]> = {};
       validationResult.error.issues.forEach((issue) => {
@@ -452,7 +440,7 @@ export async function createUser(
         errors[field].push(issue.message);
       });
       
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       
       // バリデーション失敗時はCognitoユーザーを削除
       await cognitoClient.send(new AdminDeleteUserCommand({
@@ -468,46 +456,29 @@ export async function createUser(
     }
 
     // Step 4: 2段階認証コードの送信
-    console.log('Sending verification code for new user:', { email: input.email });
+    const locale = input.locale || 'en';
     
-    const verificationCode = generateVerificationCode();
-    const locale = input.locale || 'ja';
-    
-    // DynamoDBに認証コードを保存
-    const storeResult = await storeVerificationCodeAction(
-      cognitoSub,
-      input.email,
-      verificationCode,
-      locale
-    );
-    
-    if (!storeResult.success) {
-      console.error('DynamoDB保存失敗:', storeResult.error);
-      // 認証コード保存失敗時はCognitoユーザーを削除
-      await cognitoClient.send(new AdminDeleteUserCommand({
-        UserPoolId: USER_POOL_ID,
-        Username: cognitoUserId
-      }));
-      
-      return {
-        success: false,
-        message: '認証コードの保存に失敗しました。',
-        errors: { general: ['認証コードの保存でエラーが発生しました。'] }
-      };
-    }
-    
-    // SESテンプレートメールで認証コードを送信
+    // 認証コード生成・保存・送信を一括で実行
     const emailResult = await sendVerificationEmailAction(
       input.email,
-      verificationCode,
+      cognitoSub,
       locale
     );
     
-    console.log('SES認証コードメール送信結果:', emailResult);
-    
     if (!emailResult.success) {
-      console.error('SESメール送信失敗:', emailResult.error);
-      // メール送信失敗時もCognitoユーザーを削除
+      // ✅ 新しいAPI: messageKey を使用（ロケール対応）
+      let errorMessage = 'メール送信に失敗しました。';
+      
+      if (emailResult.messageKey) {
+        // レート制限エラーの場合
+        errorMessage = emailResult.error || 'メール送信に失敗しました。';
+      } else if (emailResult.error) {
+        errorMessage = emailResult.error;
+      }
+      
+      errorLog('SESメール送信失敗:', errorMessage);
+      
+      // メール送信失敗時はCognitoユーザーを削除
       await cognitoClient.send(new AdminDeleteUserCommand({
         UserPoolId: USER_POOL_ID,
         Username: cognitoUserId
@@ -515,13 +486,15 @@ export async function createUser(
       
       return {
         success: false,
-        message: 'メール送信に失敗しました。',
-        errors: { general: ['認証コードの送信でエラーが発生しました。'] }
+        message: errorMessage,
+        errors: { general: [errorMessage] },
+        messageKey: emailResult.messageKey,
+        resetAt: emailResult.resetAt
       };
     }
 
     // Step 5: DynamoDBにユーザー情報を保存
-    console.log('Saving user to DynamoDB:', { userId: cognitoSub, customerId: input.customerId });
+    debugLog('Saving user to DynamoDB:', { userId: cognitoSub, customerId: input.customerId });
     
     const now = new Date().toISOString();
     const newUser: User = {
@@ -532,7 +505,7 @@ export async function createUser(
       department: input.department,
       position: input.position,
       role: input.role,
-      locale: input.locale || 'ja', // localeをDynamoDBに保存
+      locale: input.locale || 'en', // localeをDynamoDBに保存
       createdAt: now,
       updatedAt: now
     };
@@ -545,7 +518,7 @@ export async function createUser(
 
     await dynamoDocClient.send(putCommand);
 
-    console.log('User created successfully:', { 
+    debugLog('User created successfully:', { 
       userId: cognitoSub,
       cognitoUserId,
       email: input.email,
@@ -571,9 +544,9 @@ export async function createUser(
           UserPoolId: USER_POOL_ID,
           Username: cognitoUserId
         }));
-        console.log('Cleaned up Cognito user due to error:', { cognitoUserId });
+        debugLog('Cleaned up Cognito user due to error:', { cognitoUserId });
       } catch (cleanupError) {
-        console.error('Failed to cleanup Cognito user:', cleanupError);
+        errorLog('Failed to cleanup Cognito user:', cleanupError);
       }
     }
     
@@ -592,7 +565,7 @@ export async function updateUser(
   userAttributes?: UserAttributesDTO
 ): Promise<ApiResponse<User>> {
   try {
-    console.log('updateUser called with:', { input, userAttributes });
+    debugLog('updateUser called with:', { input, userAttributes });
     
     // 更新前の値を取得（監査ログ用）
     const existingUserResult = await getUserById(input.userId, userAttributes);
@@ -606,7 +579,7 @@ export async function updateUser(
     
     // ロール変更の場合、最後の管理者かチェック
     if (input.role === 'user' && userAttributes) {
-      console.log('Checking if this is the last admin...');
+      debugLog('Checking if this is the last admin...');
       
       const currentUser = existingUser;
       
@@ -620,7 +593,7 @@ export async function updateUser(
         
         if (adminsResult.success && adminsResult.data) {
           const adminCount = adminsResult.data.users.length;
-          console.log('Admin count for customerId:', { 
+          debugLog('Admin count for customerId:', { 
             customerId: currentUser.customerId, 
             adminCount 
           });
@@ -684,7 +657,7 @@ export async function updateUser(
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -779,7 +752,7 @@ export async function updateUser(
         cognitoAttributes.push({ Name: 'locale', Value: input.locale });
       }
 
-      console.log('Updating Cognito attributes:', cognitoAttributes);
+      debugLog('Updating Cognito attributes:', cognitoAttributes);
 
       if (cognitoAttributes.length > 0) {
         const cognitoUpdateCommand = new AdminUpdateUserAttributesCommand({
@@ -789,11 +762,11 @@ export async function updateUser(
         });
 
         await cognitoClient.send(cognitoUpdateCommand);
-        console.log('Cognito attributes updated successfully');
+        debugLog('Cognito attributes updated successfully');
       }
     }
 
-    console.log('User updated successfully:', {
+    debugLog('User updated successfully:', {
       userId: input.userId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
@@ -849,7 +822,7 @@ export async function deleteUser(
     }
 
     // Step 0: 最後の管理者かチェック
-    console.log('Checking if this is the last admin before deletion...');
+    debugLog('Checking if this is the last admin before deletion...');
     
     // 削除対象のユーザー情報を取得
     const targetUserResult = await getUserById(userId);
@@ -871,7 +844,7 @@ export async function deleteUser(
       
       if (adminsResult.success && adminsResult.data) {
         const adminCount = adminsResult.data.users.length;
-        console.log('Admin count for customerId:', { 
+        debugLog('Admin count for customerId:', { 
           customerId: targetUser.customerId, 
           adminCount 
         });
@@ -894,7 +867,7 @@ export async function deleteUser(
     const userGroupsResult = await getGroupsByUserId(userId);
     
     if (!userGroupsResult.success) {
-      console.error('Failed to get user groups:', userGroupsResult.message);
+      errorLog('Failed to get user groups:', userGroupsResult.message);
       return {
         success: false,
         message: 'ユーザーのグループ情報取得に失敗しました。',
@@ -917,7 +890,7 @@ export async function deleteUser(
         
         // このユーザーが唯一のメンバーの場合、グループも削除
         if (groupUsers.length === 1 && groupUsers[0].userId === userId) {
-          console.log('Deleting group with single user:', { 
+          debugLog('Deleting group with single user:', { 
             groupId: userGroup.groupId, 
             userId 
           });
@@ -926,7 +899,7 @@ export async function deleteUser(
           if (deleteGroupResult.success) {
             deletedGroupIds.push(userGroup.groupId);
           } else {
-            console.error('Failed to delete group:', deleteGroupResult.message);
+            errorLog('Failed to delete group:', deleteGroupResult.message);
           }
         }
       }
@@ -941,7 +914,7 @@ export async function deleteUser(
         if (!deletedGroupIds.includes(userGroup.groupId)) {
           const removeResult = await removeUsersFromGroup(userGroup.groupId, [userId]);
           if (!removeResult.success) {
-            console.error('Failed to remove user from group:', {
+            errorLog('Failed to remove user from group:', {
               groupId: userGroup.groupId,
               userId,
               error: removeResult.message
@@ -989,7 +962,7 @@ export async function deleteUser(
       await cognitoClient.send(cognitoDeleteCommand);
     }
 
-    console.log('User deleted successfully:', { 
+    debugLog('User deleted successfully:', { 
       userId, 
       softDelete,
       deletedGroupIds,
@@ -1050,7 +1023,7 @@ export async function restoreUser(userId: string): Promise<ApiResponse<User>> {
 
     const result = await dynamoDocClient.send(updateCommand);
 
-    console.log('User restored successfully:', { userId });
+    debugLog('User restored successfully:', { userId });
 
     // 監査ログ記録（成功）
     await logSuccessAction('UPDATE', 'User', 'restore', 'deleted', 'active');

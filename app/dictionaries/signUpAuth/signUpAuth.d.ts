@@ -53,6 +53,10 @@ export interface SignUpAuthLocale {
     remainingAttempts: string;
     verificationCodeExpired: string;
     maxAttemptsReached: string;
+    rateLimitExceeded: string;
+    rateLimitBlocked: string;
+    rateLimitSendExceeded: string;
+    rateLimitCheckExceeded: string;
   };
   modal: {
     emailVerificationTitle: string;

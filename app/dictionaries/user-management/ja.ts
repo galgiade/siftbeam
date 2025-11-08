@@ -177,7 +177,8 @@ const ja: UserManagementLocale = {
     executeDelete: "削除実行",
     close: "閉じる",
     roleUser: "ユーザー",
-    roleAdmin: "管理者"
+    roleAdmin: "管理者",
+    retryAfter: "以降に再試行可能"
   },
   modal: {
     emailVerificationTitle: "メールアドレス確認",

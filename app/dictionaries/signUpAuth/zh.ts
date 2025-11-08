@@ -54,7 +54,11 @@ const zh: SignUpAuthLocale = {
     verificationCodeNotFound: "验证码未找到或已过期",
     remainingAttempts: "剩余尝试次数",
     verificationCodeExpired: "验证码已过期",
-    maxAttemptsReached: "已达到最大尝试次数"
+    maxAttemptsReached: "已达到最大尝试次数",
+    rateLimitExceeded: "已达到最大尝试次数。请稍后再试。",
+    rateLimitBlocked: "暂时被阻止。请稍后再试。",
+    rateLimitSendExceeded: "验证码发送次数已达上限。请稍后再试。",
+    rateLimitCheckExceeded: "验证码确认次数已达上限。请稍后再试。"
   },
   modal: {
     emailVerificationTitle: "邮箱验证",

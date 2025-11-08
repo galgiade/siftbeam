@@ -51,7 +51,8 @@ const zh: UserProfileLocale = {
     generalUserPermission: "普通用户权限",
     adminPermission: "管理员权限",
     verifyAndUpdate: "验证并更新",
-    verificationCodePlaceholder: "验证码（6位数字）"
+    verificationCodePlaceholder: "验证码（6位数字）",
+    retryAfter: "后可重试"
   },
   modal: {
     modalTitle: "邮箱确认",

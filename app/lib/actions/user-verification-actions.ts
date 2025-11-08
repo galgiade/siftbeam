@@ -4,6 +4,7 @@ import { DynamoDBClient, PutItemCommand, GetItemCommand, DeleteItemCommand, Quer
 import { SESClient, SendTemplatedEmailCommand } from '@aws-sdk/client-ses';
 import { CognitoIdentityProviderClient, AdminUpdateUserAttributesCommand, AdminConfirmSignUpCommand, InitiateAuthCommand, RespondToAuthChallengeCommand, AdminInitiateAuthCommand, AdminRespondToAuthChallengeCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { v4 as uuidv4 } from 'uuid';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const dynamoClient = new DynamoDBClient({ 
   region: process.env.REGION,
@@ -30,7 +31,7 @@ const cognitoClient = new CognitoIdentityProviderClient({
 const VERIFICATION_TABLE = process.env.VERIFICATION_CODES_TABLE_NAME;
 
 // 環境変数の確認
-console.log('Environment variables check:', {
+debugLog('Environment variables check:', {
   VERIFICATION_CODES_TABLE_NAME: process.env.VERIFICATION_CODES_TABLE_NAME,
   VERIFICATION_TABLE,
   REGION: process.env.REGION,
@@ -40,9 +41,9 @@ console.log('Environment variables check:', {
 
 // 環境変数が未設定の場合の警告
 if (!VERIFICATION_TABLE) {
-  console.error('🚨 VERIFICATION_CODES_TABLE_NAME環境変数が設定されていません！');
-  console.error('📋 .env.localファイルに以下を追加してください:');
-  console.error('VERIFICATION_CODES_TABLE_NAME=siftbeam-verification-codes');
+  errorLog('🚨 VERIFICATION_CODES_TABLE_NAME環境変数が設定されていません！');
+  errorLog('📋 .env.localファイルに以下を追加してください:');
+  errorLog('VERIFICATION_CODES_TABLE_NAME=siftbeam-verification-codes');
 }
 
 // URLのlocaleとCognitoのlocaleを同期する関数
@@ -52,16 +53,11 @@ async function syncUserLocaleWithUrl(
   userPoolId: string
 ): Promise<void> {
   try {
-    console.log('=== Locale同期開始 ===');
-    console.log('Email:', email);
-    console.log('URLのlocale:', urlLocale);
-    
     // サポートされている言語のリスト
     const SUPPORTED_LOCALES = ['ja', 'en', 'ko', 'zh', 'es', 'fr', 'de', 'pt', 'id'];
     
     // URLのlocaleが有効な言語でない場合はスキップ
     if (!SUPPORTED_LOCALES.includes(urlLocale)) {
-      console.log('URLのlocaleがサポート外のため同期をスキップ:', urlLocale);
       return;
     }
     
@@ -78,13 +74,12 @@ async function syncUserLocaleWithUrl(
     });
     
     await cognitoClient.send(updateCommand);
-    console.log('✅ Cognitoのlocale属性を同期しました:', urlLocale);
     
     // 2. DynamoDBのユーザーテーブルのlocaleも更新
     try {
       const usersTableName = process.env.USERS_TABLE_NAME;
       if (!usersTableName) {
-        console.warn('⚠️ USERS_TABLE_NAME環境変数が未設定のため、DynamoDBの更新をスキップ');
+        warnLog('⚠️ USERS_TABLE_NAME環境変数が未設定のため、DynamoDBの更新をスキップ');
         return;
       }
       
@@ -116,15 +111,14 @@ async function syncUserLocaleWithUrl(
           });
           
           await dynamoClient.send(updateUserCommand);
-          console.log('✅ DynamoDBのlocale属性を同期しました:', { userId, urlLocale });
         }
       }
     } catch (dbError: any) {
-      console.error('❌ DynamoDB locale同期エラー:', dbError);
+      errorLog('❌ DynamoDB locale同期エラー:', dbError);
       // DynamoDBの更新に失敗してもCognitoは更新済みなので継続
     }
   } catch (error: any) {
-    console.error('❌ Locale同期エラー:', error);
+    errorLog('❌ Locale同期エラー:', error);
     // エラーが発生してもサインインは継続
   }
 }
@@ -132,8 +126,6 @@ async function syncUserLocaleWithUrl(
 // emailに基づいて全ての認証コードアイテムを削除
 async function deleteAllVerificationCodesByEmail(email: string): Promise<void> {
   try {
-    console.log('全認証コードアイテム削除開始:', email);
-
     // GSI email-createdAt-indexを使用してemailで検索
     const queryCommand = new QueryCommand({
       TableName: VERIFICATION_TABLE,
@@ -147,11 +139,8 @@ async function deleteAllVerificationCodesByEmail(email: string): Promise<void> {
     const result = await dynamoClient.send(queryCommand);
     
     if (!result.Items || result.Items.length === 0) {
-      console.log('削除対象のアイテムが見つかりません:', email);
       return;
     }
-
-    console.log(`削除対象アイテム数: ${result.Items.length}件`);
 
     // BatchWriteItemの代わりに個別削除を実行（権限問題回避）
     let deletedCount = 0;
@@ -166,18 +155,18 @@ async function deleteAllVerificationCodesByEmail(email: string): Promise<void> {
 
         await dynamoClient.send(deleteCommand);
         deletedCount++;
-        console.log(`個別削除完了: ${item.verificationId?.S}`);
+        debugLog(`個別削除完了: ${item.verificationId?.S}`);
       } catch (deleteError) {
-        console.error(`個別削除エラー (${item.verificationId?.S}):`, deleteError);
+        errorLog(`個別削除エラー (${item.verificationId?.S}):`, deleteError);
         // 個別削除エラーは継続（他のアイテムの削除を試行）
       }
     }
 
-    console.log(`全認証コードアイテム削除完了: ${deletedCount}/${result.Items.length}件`);
+    debugLog(`全認証コードアイテム削除完了: ${deletedCount}/${result.Items.length}件`);
   } catch (error) {
-    console.error('全認証コードアイテム削除エラー:', error);
+    errorLog('全認証コードアイテム削除エラー:', error);
     // エラーが発生してもthrowしない（認証処理を継続）
-    console.log('認証コード削除に失敗しましたが、処理を継続します');
+    debugLog('認証コード削除に失敗しましたが、処理を継続します');
   }
 }
 
@@ -188,6 +177,8 @@ export interface VerificationResponse {
   remainingAttempts?: number;
   redirectUrl?: string;
   autoSignIn?: boolean;
+  messageKey?: 'rateLimitExceeded' | 'rateLimitBlocked' | 'rateLimitSendExceeded' | 'rateLimitCheckExceeded';
+  resetAt?: Date;
 }
 
 export interface AutoSignInResponse {
@@ -207,7 +198,6 @@ export async function performAutoSignInAction(
   urlLocale?: string  // URLから取得したlocaleを渡す
 ): Promise<AutoSignInResponse> {
   try {
-    console.log('自動サインイン試行:', { email, userPoolId, clientId, urlLocale });
 
     // 1. 管理者フローを優先（より安定）
     try {
@@ -221,7 +211,6 @@ export async function performAutoSignInAction(
         }
       });
       const adminResult = await cognitoClient.send(adminInit);
-      console.log('Admin認証結果:', { ChallengeName: adminResult.ChallengeName, Session: !!adminResult.Session });
 
       if (adminResult.ChallengeName === 'NEW_PASSWORD_REQUIRED') {
         const adminRespond = new AdminRespondToAuthChallengeCommand({
@@ -264,7 +253,7 @@ export async function performAutoSignInAction(
         };
       }
     } catch (adminError) {
-      console.log('Admin認証失敗のためユーザーフローにフォールバック');
+      debugLog('Admin認証失敗のためユーザーフローにフォールバック');
     }
 
     // 2. 一般フロー（フォールバック）
@@ -277,7 +266,6 @@ export async function performAutoSignInAction(
       }
     });
     const authResult = await cognitoClient.send(initiateAuthCommand);
-    console.log('一般認証結果:', { ChallengeName: authResult.ChallengeName, Session: !!authResult.Session });
 
     if (authResult.ChallengeName === 'NEW_PASSWORD_REQUIRED') {
       const respondCommand = new RespondToAuthChallengeCommand({
@@ -322,7 +310,7 @@ export async function performAutoSignInAction(
     return { success: false, error: 'Authentication failed' };
 
   } catch (error: any) {
-    console.error('自動サインインエラー:', error);
+    errorLog('自動サインインエラー:', error);
     return { success: false, error: `Auto sign-in failed: ${error.message}` };
   }
 }
@@ -330,18 +318,80 @@ export async function performAutoSignInAction(
 // 認証コードを送信
 export async function sendVerificationEmailAction(
   email: string,
-  code: string,
+  userId: string,
   locale: string
 ): Promise<VerificationResponse> {
   try {
-    const templateName = `SiftbeamVerificationCode_${locale}`;
-    
-    console.log('SESメール送信試行:', {
-      email,
-      templateName,
-      code,
-      fromEmail: process.env.SES_FROM_EMAIL
+    // 認証コードを生成
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationId = uuidv4();
+    const ttl = Math.floor(Date.now() / 1000) + 300; // 5分後
+    const createdAt = new Date().toISOString();
+    const now = Math.floor(Date.now() / 1000);
+
+    // 既存の認証コードレコードを取得してレート制限をチェック
+    const queryCommand = new QueryCommand({
+      TableName: VERIFICATION_TABLE,
+      IndexName: 'email-createdAt-index',
+      KeyConditionExpression: 'email = :email',
+      ExpressionAttributeValues: {
+        ':email': { S: email }
+      },
+      ScanIndexForward: false // 最新を先頭に
     });
+
+    const result = await dynamoClient.send(queryCommand);
+    const verificationItems = result.Items?.filter(item => item.code?.S !== 'RATE_LIMIT') || [];
+    
+    let newSendCount = 1;
+    let newWindowStart = now;
+    
+    // レート制限チェック（1分間に3回まで）
+    if (verificationItems.length > 0) {
+      const latestItem = verificationItems[0];
+      const sendCount = parseInt(latestItem.sendCount?.N || '0');
+      const windowStart = parseInt(latestItem.windowStart?.N || '0');
+      
+      // 時間枠内かチェック（60秒）
+      if (now - windowStart < 60) {
+        if (sendCount >= 3) {
+          const resetAt = new Date((windowStart + 60) * 1000);
+          return {
+            success: false,
+            error: `認証コードの送信回数が上限に達しました。${resetAt.toLocaleString('ja-JP')}以降に再試行してください。`,
+            remainingAttempts: 0,
+            messageKey: 'rateLimitSendExceeded',
+            resetAt
+          };
+        }
+        // 時間枠内なのでカウントをインクリメント
+        newSendCount = sendCount + 1;
+        newWindowStart = windowStart;
+      }
+      // 時間枠外の場合は新しい時間枠でカウントリセット（newSendCount = 1, newWindowStart = now）
+    }
+
+    // DynamoDBに認証コードを保存
+    const putCommand = new PutItemCommand({
+      TableName: VERIFICATION_TABLE,
+      Item: {
+        verificationId: { S: verificationId },
+        userId: { S: userId },
+        email: { S: email },
+        code: { S: code },
+        failedVerifyCount: { N: '0' },
+        TTL: { N: ttl.toString() },
+        locale: { S: locale },
+        createdAt: { S: createdAt },
+        sendCount: { N: newSendCount.toString() },
+        windowStart: { N: newWindowStart.toString() }
+      }
+    });
+
+    await dynamoClient.send(putCommand);
+
+    // メール送信
+    const templateName = `SiftbeamVerificationCode_${locale}`;
 
     const command = new SendTemplatedEmailCommand({
       Source: process.env.SES_FROM_EMAIL || 'noreply@siftbeam.com',
@@ -350,24 +400,20 @@ export async function sendVerificationEmailAction(
       },
       Template: templateName,
       TemplateData: JSON.stringify({
-        verificationCode: code, // テンプレートで使用される変数名に合わせる
-        code: code // 念のため両方設定
+        verificationCode: code,
+        code: code
       })
     });
 
-    const result = await sesClient.send(command);
-    
-    console.log('SESメール送信成功:', {
-      messageId: result.MessageId,
-      email
-    });
+    await sesClient.send(command);
     
     return {
       success: true,
-      message: 'Verification email sent successfully'
+      message: 'Verification email sent successfully',
+      remainingAttempts: Math.max(0, 3 - newSendCount)
     };
   } catch (error: any) {
-    console.error('SESメール送信エラー詳細:', {
+    errorLog('SESメール送信エラー詳細:', {
       error: error.message,
       name: error.name,
       code: error.$metadata?.httpStatusCode,
@@ -392,41 +438,77 @@ export async function storeVerificationCodeAction(
     const verificationId = uuidv4();
     const ttl = Math.floor(Date.now() / 1000) + 300; // 5分後
     const createdAt = new Date().toISOString();
+    const now = Math.floor(Date.now() / 1000);
 
-    console.log('DynamoDB保存試行:', {
+    // 既存の認証コードレコードを取得
+    const queryCommand = new QueryCommand({
+      TableName: VERIFICATION_TABLE,
+      IndexName: 'email-createdAt-index',
+      KeyConditionExpression: 'email = :email',
+      ExpressionAttributeValues: {
+        ':email': { S: email }
+      },
+      ScanIndexForward: false
+    });
+
+    const result = await dynamoClient.send(queryCommand);
+    const verificationItems = result.Items?.filter(item => item.code?.S !== 'RATE_LIMIT') || [];
+    
+    // sendCountとwindowStartを計算
+    let sendCount = 1;
+    let windowStart = now;
+    
+    if (verificationItems.length > 0) {
+      const latestItem = verificationItems[0];
+      const existingSendCount = parseInt(latestItem.sendCount?.N || '0');
+      const existingWindowStart = parseInt(latestItem.windowStart?.N || '0');
+      
+      // 時間枠内（60秒以内）なら送信回数を増やす
+      if (now - existingWindowStart < 60) {
+        sendCount = existingSendCount + 1;
+        windowStart = existingWindowStart;
+      }
+      // 時間枠外ならリセット
+    }
+
+    debugLog('DynamoDB保存試行:', {
       tableName: VERIFICATION_TABLE,
       verificationId,
       userId,
       email,
       code,
       ttl,
-      createdAt
+      createdAt,
+      sendCount,
+      windowStart
     });
 
     const command = new PutItemCommand({
       TableName: VERIFICATION_TABLE,
       Item: {
-        verificationId: { S: verificationId }, // プライマリキー
+        verificationId: { S: verificationId },
         userId: { S: userId },
         email: { S: email },
         code: { S: code },
-        attempts: { N: '0' },
+        failedVerifyCount: { N: '0' },
         TTL: { N: ttl.toString() },
         locale: { S: locale },
-        createdAt: { S: createdAt }
+        createdAt: { S: createdAt },
+        sendCount: { N: sendCount.toString() },
+        windowStart: { N: windowStart.toString() }
       }
     });
 
     await dynamoClient.send(command);
     
-    console.log('DynamoDB保存成功:', userId);
+    debugLog('DynamoDB保存成功:', userId);
     
     return {
       success: true,
       message: 'Verification code stored successfully'
     };
   } catch (error: any) {
-    console.error('DynamoDB保存エラー詳細:', {
+    errorLog('DynamoDB保存エラー詳細:', {
       error: error.message,
       name: error.name,
       code: error.$metadata?.httpStatusCode,
@@ -454,8 +536,6 @@ export async function verifyEmailCodeAction(
   }
 ): Promise<VerificationResponse> {
   try {
-    console.log('認証コード検証試行:', { userId, email, code });
-
     // GSI email-createdAt-indexを使用してemailで検索
     const queryCommand = new QueryCommand({
       TableName: VERIFICATION_TABLE,
@@ -469,65 +549,69 @@ export async function verifyEmailCodeAction(
 
     const result = await dynamoClient.send(queryCommand);
     
-    if (!result.Items || result.Items.length === 0) {
-      console.log('認証コードが見つかりません:', email);
+    // レート制限レコードを除外（code !== "RATE_LIMIT"）
+    const verificationItems = result.Items?.filter(item => item.code?.S !== 'RATE_LIMIT') || [];
+    
+    if (verificationItems.length === 0) {
       return {
         success: false,
-        error: 'Verification code not found or expired'
+        error: 'Verification code not found or expired',
+        remainingAttempts: 0
       };
     }
 
     // 最新の認証コードを取得（既に降順ソートされている）
-    const item = result.Items[0];
+    const item = verificationItems[0];
     const storedCode = item.code?.S;
-    const attempts = parseInt(item.attempts?.N || '0');
+    const failedVerifyCount = parseInt(item.failedVerifyCount?.N || '0');
     const ttl = parseInt(item.TTL?.N || '0');
     const verificationId = item.verificationId?.S;
     const createdAt = item.createdAt?.S;
 
-    console.log('検証データ:', { 
+    debugLog('検証データ:', { 
       storedCode, 
-      attempts, 
+      failedVerifyCount, 
       ttl, 
       verificationId, 
       createdAt,
-      totalItems: result.Items.length,
+      totalItems: result.Items?.length || 0,
+      verificationItemsCount: verificationItems.length,
       isLatest: true // 最新のアイテムであることを明示
     });
 
     // 複数の認証コードがある場合の警告
-    if (result.Items.length > 1) {
-      console.log(`⚠️ 複数の認証コードが存在します (${result.Items.length}件)。最新のコードのみを検証します。`);
-      console.log('他の認証コード:', result.Items.slice(1).map(item => ({
+    if (verificationItems.length > 1) {
+      debugLog(`⚠️ 複数の認証コードが存在します (${verificationItems.length}件)。最新のコードのみを検証します。`);
+      debugLog('他の認証コード:', verificationItems.slice(1).map(item => ({
         verificationId: item.verificationId?.S,
         createdAt: item.createdAt?.S,
-        attempts: item.attempts?.N
+        failedVerifyCount: item.failedVerifyCount?.N
       })));
     }
 
     // TTLチェック
     if (Date.now() / 1000 > ttl) {
-      console.log('認証コードが期限切れです');
       // 期限切れの場合、該当emailの全アイテムを削除
       await deleteAllVerificationCodesByEmail(email);
+      
       return {
         success: false,
-        error: 'Verification code expired'
+        error: 'Verification code expired',
+        remainingAttempts: 0
       };
     }
 
     // コード検証
     if (storedCode !== code) {
-      const newAttempts = attempts + 1;
-      console.log(`認証コードが間違っています。試行回数: ${newAttempts}/5`);
+      const newFailedCount = failedVerifyCount + 1;
 
-      if (newAttempts >= 5) {
+      if (newFailedCount >= 5) {
         // 5回目の失敗 - 該当emailの全アイテムを削除
-        console.log('最大試行回数に達しました。全アイテムを削除します。');
         await deleteAllVerificationCodesByEmail(email);
         return {
           success: false,
-          error: 'Too many failed attempts. Please request a new verification code.'
+          error: 'Too many failed attempts. Please request a new verification code.',
+          remainingAttempts: 0
         };
       } else {
         // 試行回数を増加
@@ -535,7 +619,7 @@ export async function verifyEmailCodeAction(
           TableName: VERIFICATION_TABLE,
           Item: {
             ...item,
-            attempts: { N: newAttempts.toString() }
+            failedVerifyCount: { N: newFailedCount.toString() }
           }
         });
         await dynamoClient.send(updateCommand);
@@ -543,13 +627,10 @@ export async function verifyEmailCodeAction(
         return {
           success: false,
           error: 'Invalid verification code',
-          remainingAttempts: 5 - newAttempts
+          remainingAttempts: 5 - newFailedCount
         };
       }
     }
-
-    // 認証成功
-    console.log('認証コード検証成功');
 
     // Cognitoユーザーの確認ステータスとメール確認を更新
     try {
@@ -559,7 +640,7 @@ export async function verifyEmailCodeAction(
         Username: email
       });
       await cognitoClient.send(confirmCommand);
-      console.log('Cognitoユーザー確認完了');
+      debugLog('Cognitoユーザー確認完了');
 
       // 2. メール確認済みに設定
       const updateUserCommand = new AdminUpdateUserAttributesCommand({
@@ -573,10 +654,10 @@ export async function verifyEmailCodeAction(
         ]
       });
       await cognitoClient.send(updateUserCommand);
-      console.log('Cognitoメール確認完了');
+      debugLog('Cognitoメール確認完了');
 
     } catch (cognitoError: any) {
-      console.error('Cognito更新エラー:', cognitoError);
+      errorLog('Cognito更新エラー:', cognitoError);
       // Cognitoエラーがあっても認証は成功とする
     }
 
@@ -585,11 +666,10 @@ export async function verifyEmailCodeAction(
 
     // 自動サインインが有効な場合
     if (options?.autoSignIn && options?.password) {
-      console.log('自動サインインを実行します');
+      debugLog('自動サインインを実行します');
       
       // URLからlocaleを抽出（redirectUrlから取得）
       const urlLocale = options.redirectUrl ? options.redirectUrl.split('/')[1] : locale;
-      console.log('自動サインイン時のlocale:', { urlLocale, locale });
       
       const autoSignInResult = await performAutoSignInAction(
         email,
@@ -600,7 +680,6 @@ export async function verifyEmailCodeAction(
       );
 
       if (autoSignInResult.success) {
-        console.log('自動サインイン成功');
         
         // Cognitoドキュメントに従ってセッションを作成
         try {
@@ -635,9 +714,9 @@ export async function verifyEmailCodeAction(
             });
           }
           
-          console.log('Cognitoセッション作成完了');
+          debugLog('Cognitoセッション作成完了');
         } catch (sessionError) {
-          console.error('セッション作成エラー:', sessionError);
+          errorLog('セッション作成エラー:', sessionError);
         }
         
         return {
@@ -647,7 +726,7 @@ export async function verifyEmailCodeAction(
           redirectUrl: options.redirectUrl || 'reload'
         };
       } else {
-        console.log('自動サインイン失敗:', autoSignInResult.error);
+        debugLog('自動サインイン失敗:', autoSignInResult.error);
         // 自動サインインに失敗しても認証は成功とする
         return {
           success: true,
@@ -665,7 +744,7 @@ export async function verifyEmailCodeAction(
       redirectUrl: options?.redirectUrl || 'reload'
     };
   } catch (error) {
-    console.error('Error verifying email code:', error);
+    errorLog('Error verifying email code:', error);
     return {
       success: false,
       error: 'Failed to verify email code'
@@ -682,8 +761,6 @@ export async function verifyEmailCodeForAdminAction(
   locale: string,
   redirectUrl?: string
 ): Promise<VerificationResponse> {
-  console.log('管理者用認証コード検証:', { userId, email, userPoolId, redirectUrl });
-  
   return await verifyEmailCodeAction(
     userId,
     email,
@@ -705,8 +782,6 @@ export async function verifyEmailCodeForUpdateAction(
   locale: string
 ): Promise<VerificationResponse> {
   try {
-    console.log('メール更新用認証コード検証:', { userId, newEmail, code });
-
     // GSI email-createdAt-indexを使用してnewEmailで検索
     const queryCommand = new QueryCommand({
       TableName: VERIFICATION_TABLE,
@@ -720,8 +795,10 @@ export async function verifyEmailCodeForUpdateAction(
 
     const result = await dynamoClient.send(queryCommand);
     
-    if (!result.Items || result.Items.length === 0) {
-      console.log('認証コードが見つかりません:', newEmail);
+    // レート制限レコードを除外（code !== "RATE_LIMIT"）
+    const verificationItems = result.Items?.filter(item => item.code?.S !== 'RATE_LIMIT') || [];
+    
+    if (verificationItems.length === 0) {
       return {
         success: false,
         error: 'Verification code not found or expired'
@@ -729,17 +806,14 @@ export async function verifyEmailCodeForUpdateAction(
     }
 
     // 最新の認証コードを取得
-    const item = result.Items[0];
+    const item = verificationItems[0];
     const storedCode = item.code?.S;
-    const attempts = parseInt(item.attempts?.N || '0');
+    const failedVerifyCount = parseInt(item.failedVerifyCount?.N || '0');
     const ttl = parseInt(item.TTL?.N || '0');
     const verificationId = item.verificationId?.S;
 
-    console.log('検証データ:', { storedCode, attempts, ttl, verificationId });
-
     // TTLチェック
     if (Date.now() / 1000 > ttl) {
-      console.log('認証コードが期限切れです');
       await deleteAllVerificationCodesByEmail(newEmail);
       return {
         success: false,
@@ -749,11 +823,11 @@ export async function verifyEmailCodeForUpdateAction(
 
     // コード検証
     if (storedCode !== code) {
-      const newAttempts = attempts + 1;
-      console.log(`認証コードが間違っています。試行回数: ${newAttempts}/5`);
+      const newFailedCount = failedVerifyCount + 1;
+      debugLog(`認証コードが間違っています。試行回数: ${newFailedCount}/5`);
 
-      if (newAttempts >= 5) {
-        console.log('最大試行回数に達しました。全アイテムを削除します。');
+      if (newFailedCount >= 5) {
+        debugLog('最大試行回数に達しました。全アイテムを削除します。');
         await deleteAllVerificationCodesByEmail(newEmail);
         return {
           success: false,
@@ -765,7 +839,7 @@ export async function verifyEmailCodeForUpdateAction(
           TableName: VERIFICATION_TABLE,
           Item: {
             ...item,
-            attempts: { N: newAttempts.toString() }
+            failedVerifyCount: { N: newFailedCount.toString() }
           }
         });
         await dynamoClient.send(updateCommand);
@@ -773,13 +847,13 @@ export async function verifyEmailCodeForUpdateAction(
         return {
           success: false,
           error: 'Invalid verification code',
-          remainingAttempts: 5 - newAttempts
+          remainingAttempts: 5 - newFailedCount
         };
       }
     }
 
     // 認証成功 - 認証コードを削除（Cognitoユーザー確認は行わない）
-    console.log('メール更新用認証コード検証成功');
+    debugLog('メール更新用認証コード検証成功');
     await deleteAllVerificationCodesByEmail(newEmail);
 
     return {
@@ -787,7 +861,7 @@ export async function verifyEmailCodeForUpdateAction(
       message: 'Email verification successful for update'
     };
   } catch (error) {
-    console.error('Error verifying email code for update:', error);
+    errorLog('Error verifying email code for update:', error);
     return {
       success: false,
       error: 'Failed to verify email code'
@@ -821,7 +895,7 @@ export async function updateCognitoUsernameAction(
       message: 'Username updated successfully'
     };
   } catch (error) {
-    console.error('Error updating username:', error);
+    errorLog('Error updating username:', error);
     return {
       success: false,
       error: 'Failed to update username'

@@ -13,6 +13,7 @@ import { ApiResponse } from '@/app/lib/types/TypeAPIs';
 import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
 import { getPolicyById } from '@/app/lib/actions/policy-api';
 import { getUserById } from '@/app/lib/actions/user-api';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const GROUP_TABLE_NAME = process.env.GROUP_TABLE_NAME || 'siftbeam-groups';
 const USER_GROUP_TABLE_NAME = process.env.USER_GROUP_TABLE_NAME || 'siftbeam-user-groups';
@@ -105,7 +106,7 @@ export interface AssignPoliciesToGroupInput {
  * エラーハンドリング用のヘルパー関数
  */
 function handleError(error: any, operation: string): ApiResponse<any> {
-  console.error(`Error in ${operation}:`, {
+  errorLog(`Error in ${operation}:`, {
     name: error.name,
     message: error.message,
     code: error.code,
@@ -231,7 +232,7 @@ export async function getGroupById(groupId: string): Promise<ApiResponse<Group>>
       };
     }
 
-    console.log('Group retrieved successfully:', { groupId });
+    debugLog('Group retrieved successfully:', { groupId });
 
     return {
       success: true,
@@ -276,7 +277,7 @@ export async function queryGroups(
     const result = await dynamoDocClient.send(command);
     const groups = result.Items as Group[];
 
-    console.log('Groups queried successfully:', { 
+    debugLog('Groups queried successfully:', { 
       count: groups.length, 
       customerId: input.customerId,
       groupName: input.groupName
@@ -301,7 +302,7 @@ export async function queryGroups(
  */
 export async function createGroup(input: CreateGroupInput): Promise<ApiResponse<Group>> {
   try {
-    console.log('createGroup called with input:', input);
+    debugLog('createGroup called with input:', input);
     
     // 入力バリデーション
     const errors: Record<string, string[]> = {};
@@ -315,7 +316,7 @@ export async function createGroup(input: CreateGroupInput): Promise<ApiResponse<
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -344,7 +345,7 @@ export async function createGroup(input: CreateGroupInput): Promise<ApiResponse<
 
     await dynamoDocClient.send(putCommand);
 
-    console.log('Group created successfully:', { 
+    debugLog('Group created successfully:', { 
       groupId,
       groupName: input.groupName,
       customerId: input.customerId 
@@ -372,7 +373,7 @@ export async function createGroup(input: CreateGroupInput): Promise<ApiResponse<
  */
 export async function updateGroup(input: UpdateGroupInput): Promise<ApiResponse<Group>> {
   try {
-    console.log('updateGroup called with:', input);
+    debugLog('updateGroup called with:', input);
     
     // 個別フィールドバリデーション（提供されたフィールドのみ）
     const errors: Record<string, string[]> = {};
@@ -386,7 +387,7 @@ export async function updateGroup(input: UpdateGroupInput): Promise<ApiResponse<
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -452,7 +453,7 @@ export async function updateGroup(input: UpdateGroupInput): Promise<ApiResponse<
 
     const result = await dynamoDocClient.send(updateCommand);
 
-    console.log('Group updated successfully:', {
+    debugLog('Group updated successfully:', {
       groupId: input.groupId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
@@ -525,18 +526,18 @@ export async function deleteGroup(
 
     // ハード削除の場合はリレーションも削除
     if (!softDelete) {
-      console.log('Deleting group relations for:', { groupId });
+      debugLog('Deleting group relations for:', { groupId });
       
       // Step 1: ユーザーグループリレーションを削除
       try {
         const userGroupsResult = await getUsersByGroupId(groupId);
         if (userGroupsResult.success && userGroupsResult.data && userGroupsResult.data.length > 0) {
           const userIds = userGroupsResult.data.map(ug => ug.userId);
-          console.log('Removing users from group:', { groupId, userIds });
+          debugLog('Removing users from group:', { groupId, userIds });
           await removeUsersFromGroup(groupId, userIds);
         }
       } catch (error) {
-        console.error('Error removing users from group:', error);
+        errorLog('Error removing users from group:', error);
       }
 
       // Step 2: ポリシーグループリレーションを削除
@@ -544,11 +545,11 @@ export async function deleteGroup(
         const policyGroupsResult = await getPoliciesByGroupId(groupId);
         if (policyGroupsResult.success && policyGroupsResult.data && policyGroupsResult.data.length > 0) {
           const policyIds = policyGroupsResult.data.map(pg => pg.policyId);
-          console.log('Removing policies from group:', { groupId, policyIds });
+          debugLog('Removing policies from group:', { groupId, policyIds });
           await removePoliciesFromGroup(groupId, policyIds);
         }
       } catch (error) {
-        console.error('Error removing policies from group:', error);
+        errorLog('Error removing policies from group:', error);
       }
     }
 
@@ -581,7 +582,7 @@ export async function deleteGroup(
       await dynamoDocClient.send(deleteCommand);
     }
 
-    console.log('Group deleted successfully:', { 
+    debugLog('Group deleted successfully:', { 
       groupId, 
       softDelete 
     });
@@ -609,7 +610,7 @@ export async function deleteGroup(
  */
 export async function assignUsersToGroup(input: AssignUsersToGroupInput): Promise<ApiResponse<UserGroup[]>> {
   try {
-    console.log('assignUsersToGroup called with:', input);
+    debugLog('assignUsersToGroup called with:', input);
     
     if (!input.groupId || !input.userIds || input.userIds.length === 0) {
       return {
@@ -672,7 +673,7 @@ export async function assignUsersToGroup(input: AssignUsersToGroupInput): Promis
       await dynamoDocClient.send(batchCommand);
     }
 
-    console.log('Users assigned to group successfully:', { 
+    debugLog('Users assigned to group successfully:', { 
       groupId: input.groupId,
       newUserCount: userGroups.length,
       skippedUserCount: skippedUsers.length
@@ -695,7 +696,7 @@ export async function assignUsersToGroup(input: AssignUsersToGroupInput): Promis
             userNames.push(userId);
           }
         } catch (error) {
-          console.error('Error getting user name:', error);
+          errorLog('Error getting user name:', error);
           userNames.push(userId);
         }
       }
@@ -728,7 +729,7 @@ export async function assignUsersToGroup(input: AssignUsersToGroupInput): Promis
  */
 export async function removeUsersFromGroup(groupId: string, userIds: string[]): Promise<ApiResponse<void>> {
   try {
-    console.log('removeUsersFromGroup called with:', { groupId, userIds });
+    debugLog('removeUsersFromGroup called with:', { groupId, userIds });
     
     if (!groupId || !userIds || userIds.length === 0) {
       return {
@@ -765,7 +766,7 @@ export async function removeUsersFromGroup(groupId: string, userIds: string[]): 
       }
     }
 
-    console.log('Users removed from group successfully:', { 
+    debugLog('Users removed from group successfully:', { 
       groupId,
       userCount: userIds.length
     });
@@ -781,7 +782,7 @@ export async function removeUsersFromGroup(groupId: string, userIds: string[]): 
           userNames.push(userId);
         }
       } catch (error) {
-        console.error('Error getting user name:', error);
+        errorLog('Error getting user name:', error);
         userNames.push(userId);
       }
     }
@@ -825,7 +826,7 @@ export async function getUsersByGroupId(groupId: string): Promise<ApiResponse<Us
     const result = await dynamoDocClient.send(command);
     const userGroups = result.Items as UserGroup[];
 
-    console.log('Users in group retrieved successfully:', { 
+    debugLog('Users in group retrieved successfully:', { 
       groupId,
       userCount: userGroups.length
     });
@@ -865,7 +866,7 @@ export async function getGroupsByUserId(userId: string): Promise<ApiResponse<Use
     const result = await dynamoDocClient.send(command);
     const userGroups = result.Items as UserGroup[];
 
-    console.log('Groups for user retrieved successfully:', { 
+    debugLog('Groups for user retrieved successfully:', { 
       userId,
       groupCount: userGroups.length
     });
@@ -888,7 +889,7 @@ export async function getGroupsByUserId(userId: string): Promise<ApiResponse<Use
  */
 export async function assignPoliciesToGroup(input: AssignPoliciesToGroupInput): Promise<ApiResponse<PolicyGroup[]>> {
   try {
-    console.log('assignPoliciesToGroup called with:', input);
+    debugLog('assignPoliciesToGroup called with:', input);
     
     if (!input.groupId || !input.policyIds || input.policyIds.length === 0) {
       return {
@@ -951,7 +952,7 @@ export async function assignPoliciesToGroup(input: AssignPoliciesToGroupInput): 
       await dynamoDocClient.send(batchCommand);
     }
 
-    console.log('Policies assigned to group successfully:', { 
+    debugLog('Policies assigned to group successfully:', { 
       groupId: input.groupId,
       newPolicyCount: policyGroups.length,
       skippedPolicyCount: skippedPolicies.length
@@ -974,7 +975,7 @@ export async function assignPoliciesToGroup(input: AssignPoliciesToGroupInput): 
             policyNames.push(policyId);
           }
         } catch (error) {
-          console.error('Error getting policy name:', error);
+          errorLog('Error getting policy name:', error);
           policyNames.push(policyId);
         }
       }
@@ -1007,7 +1008,7 @@ export async function assignPoliciesToGroup(input: AssignPoliciesToGroupInput): 
  */
 export async function removePoliciesFromGroup(groupId: string, policyIds: string[]): Promise<ApiResponse<void>> {
   try {
-    console.log('removePoliciesFromGroup called with:', { groupId, policyIds });
+    debugLog('removePoliciesFromGroup called with:', { groupId, policyIds });
     
     if (!groupId || !policyIds || policyIds.length === 0) {
       return {
@@ -1044,7 +1045,7 @@ export async function removePoliciesFromGroup(groupId: string, policyIds: string
       }
     }
 
-    console.log('Policies removed from group successfully:', { 
+    debugLog('Policies removed from group successfully:', { 
       groupId,
       policyCount: policyIds.length
     });
@@ -1060,7 +1061,7 @@ export async function removePoliciesFromGroup(groupId: string, policyIds: string
           policyNames.push(policyId);
         }
       } catch (error) {
-        console.error('Error getting policy name:', error);
+        errorLog('Error getting policy name:', error);
         policyNames.push(policyId);
       }
     }
@@ -1104,7 +1105,7 @@ export async function getPoliciesByGroupId(groupId: string): Promise<ApiResponse
     const result = await dynamoDocClient.send(command);
     const policyGroups = result.Items as PolicyGroup[];
 
-    console.log('Policies in group retrieved successfully:', { 
+    debugLog('Policies in group retrieved successfully:', { 
       groupId,
       policyCount: policyGroups.length
     });

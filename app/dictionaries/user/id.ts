@@ -51,7 +51,8 @@ const id: UserProfileLocale = {
     generalUserPermission: "Izin Pengguna Umum",
     adminPermission: "Izin Administrator",
     verifyAndUpdate: "Verifikasi dan Perbarui",
-    verificationCodePlaceholder: "Kode verifikasi (6 digit)"
+    verificationCodePlaceholder: "Kode verifikasi (6 digit)",
+    retryAfter: "Coba lagi tersedia setelah"
   },
   modal: {
     modalTitle: "Konfirmasi Email",

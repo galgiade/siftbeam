@@ -4,6 +4,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, QueryCommand, ScanCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import { getUserCustomAttributes } from '@/app/utils/cognito-utils';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 // DynamoDB設定
 const client = new DynamoDBClient({
@@ -116,7 +117,7 @@ export async function createAuditLogAction(params: CreateAuditLogParams): Promis
       auditLogId,
     };
   } catch (error) {
-    console.error('Error creating audit log:', error);
+    errorLog('Error creating audit log:', error);
     return {
       success: false,
       message: 'Failed to create audit log',
@@ -168,7 +169,7 @@ export async function getAuditLogsByCustomerIdAction(
       nextToken: result.LastEvaluatedKey ? JSON.stringify(result.LastEvaluatedKey) : undefined,
     };
   } catch (error) {
-    console.error('Error getting audit logs:', error);
+    errorLog('Error getting audit logs:', error);
     return {
       success: false,
       message: 'Failed to get audit logs',
@@ -230,7 +231,7 @@ export async function getAuditLogsByUserIdAction(
       nextToken: result.LastEvaluatedKey ? JSON.stringify(result.LastEvaluatedKey) : undefined,
     };
   } catch (error) {
-    console.error('Error getting audit logs by user ID:', error);
+    errorLog('Error getting audit logs by user ID:', error);
     return {
       success: false,
       message: 'Failed to get audit logs',
@@ -298,7 +299,7 @@ export async function getAuditLogsByActionAction(
       nextToken: result.LastEvaluatedKey ? JSON.stringify(result.LastEvaluatedKey) : undefined,
     };
   } catch (error) {
-    console.error('Error getting audit logs by action:', error);
+    errorLog('Error getting audit logs by action:', error);
     return {
       success: false,
       message: 'Failed to get audit logs',
@@ -358,7 +359,7 @@ export async function getAuditLogByIdAction(auditLogId: string): Promise<GetAudi
       data: [auditLog],
     };
   } catch (error) {
-    console.error('Error getting audit log by ID:', error);
+    errorLog('Error getting audit log by ID:', error);
     return {
       success: false,
       message: 'Failed to get audit log',

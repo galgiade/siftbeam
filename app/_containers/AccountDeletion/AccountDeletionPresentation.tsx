@@ -31,7 +31,7 @@ export default function AccountDeletionPresentation({
   const isAdmin = userAttributes.role === 'admin';
   const isDeleted = deletionStatus.isDeleted;
   const deletionRequestedAt = deletionStatus.deletionRequestedAt;
-  const userLocale = locale || userAttributes.locale || 'ja';
+  const userLocale = locale || userAttributes.locale || 'en';
 
   // 削除リクエスト実行
   const handleRequestDeletion = async () => {

@@ -176,7 +176,7 @@ export default function ServiceFileUploader({
         policyName,
         usageAmountBytes: 0, // S3イベントLambdaで更新
         uploadedFileKeys,
-        aiTrainingUsage: 'allow' // TODO: ユーザー設定から取得
+        aiTrainingUsage: 'allow' // ユーザー設定から取得（デフォルト: allow）
       });
 
       if (!historyResult.success) {

@@ -1,5 +1,6 @@
 'use server'
 
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 import { 
   GetCommand, 
   PutCommand, 
@@ -125,7 +126,7 @@ export async function createUsageLimit(input: CreateUsageLimitInput): Promise<Ap
     };
 
   } catch (error: any) {
-    console.error('Error creating usage limit:', error);
+    errorLog('Error creating usage limit:', error);
     
     if (error.name === 'ConditionalCheckFailedException') {
       return {
@@ -172,7 +173,7 @@ export async function getUsageLimit(usageLimitsId: string): Promise<ApiResponse<
     };
 
   } catch (error: any) {
-    console.error('Error getting usage limit:', error);
+    errorLog('Error getting usage limit:', error);
     return {
       success: false,
       message: `使用量制限の取得に失敗しました: ${error.message}`
@@ -256,7 +257,7 @@ export async function updateUsageLimit(input: UpdateUsageLimitInput): Promise<Ap
     };
 
   } catch (error: any) {
-    console.error('Error updating usage limit:', error);
+    errorLog('Error updating usage limit:', error);
     
     if (error.name === 'ConditionalCheckFailedException') {
       return {
@@ -302,7 +303,7 @@ export async function deleteUsageLimit(usageLimitsId: string): Promise<ApiRespon
     };
 
   } catch (error: any) {
-    console.error('Error deleting usage limit:', error);
+    errorLog('Error deleting usage limit:', error);
     
     if (error.name === 'ConditionalCheckFailedException') {
       return {
@@ -368,7 +369,7 @@ export async function queryUsageLimits(input: QueryUsageLimitsInput): Promise<Ap
     };
 
   } catch (error: any) {
-    console.error('Error querying usage limits:', error);
+    errorLog('Error querying usage limits:', error);
     return {
       success: false,
       message: `使用量制限のクエリに失敗しました: ${error.message}`
@@ -406,7 +407,7 @@ export async function getCustomerUsageLimits(customerId: string): Promise<ApiRes
     };
 
   } catch (error: any) {
-    console.error('Error getting customer usage limits:', error);
+    errorLog('Error getting customer usage limits:', error);
     return {
       success: false,
       message: `企業の使用量制限の取得に失敗しました: ${error.message}`
@@ -470,7 +471,7 @@ export async function createMultipleUsageLimits(inputs: CreateUsageLimitInput[])
     };
 
   } catch (error: any) {
-    console.error('Error creating multiple usage limits:', error);
+    errorLog('Error creating multiple usage limits:', error);
     
     // 監査ログ記録（失敗）
     await logFailureAction('CREATE', 'UsageLimit', error?.message || '複数使用量制限作成に失敗しました', 'batchCreate', '', inputs[0]?.customerId || 'unknown');

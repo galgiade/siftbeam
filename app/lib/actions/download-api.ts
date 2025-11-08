@@ -2,6 +2,7 @@
 
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import JSZip from 'jszip';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 // S3クライアントの設定（環境変数から認証情報を取得）
 const s3Client = new S3Client({
@@ -46,7 +47,7 @@ export async function downloadFiles(s3Keys: string[]): Promise<{
     return await downloadMultipleFilesAsZip(s3Keys);
 
   } catch (error: any) {
-    console.error('Download error:', error);
+    errorLog('Download error:', error);
     
     if (error.name === 'NoSuchKey') {
       return {
@@ -111,7 +112,7 @@ async function downloadSingleFile(s3Key: string): Promise<{
       }
     };
   } catch (error: any) {
-    console.error('Single file download error:', error);
+    errorLog('Single file download error:', error);
     throw error;
   }
 }
@@ -142,7 +143,7 @@ async function downloadMultipleFilesAsZip(s3Keys: string[]): Promise<{
         const response = await s3Client.send(command);
 
         if (!response.Body) {
-          console.warn(`ファイルの内容が取得できませんでした: ${s3Key}`);
+          warnLog(`ファイルの内容が取得できませんでした: ${s3Key}`);
           continue;
         }
 
@@ -156,20 +157,20 @@ async function downloadMultipleFilesAsZip(s3Keys: string[]): Promise<{
         // ファイル名を抽出（パスの最後の部分）
         const fileName = s3Key.split('/').pop() || 'file';
 
-        console.log(`Adding file to ZIP: ${fileName}, size: ${buffer.length} bytes`);
+        debugLog(`Adding file to ZIP: ${fileName}, size: ${buffer.length} bytes`);
 
         // ZIPに追加（Uint8Arrayとして渡す）
         zip.file(fileName, new Uint8Array(buffer), { binary: true });
 
       } catch (error: any) {
-        console.error(`ファイルの取得に失敗しました: ${s3Key}`, error);
+        errorLog(`ファイルの取得に失敗しました: ${s3Key}`, error);
         // エラーが発生したファイルはスキップして続行
       }
     }
 
     // ZIPの内容を確認
     const fileNames = Object.keys(zip.files);
-    console.log(`ZIP contains ${fileNames.length} files:`, fileNames);
+    debugLog(`ZIP contains ${fileNames.length} files:`, fileNames);
 
     if (fileNames.length === 0) {
       return {
@@ -187,7 +188,7 @@ async function downloadMultipleFilesAsZip(s3Keys: string[]): Promise<{
       }
     });
 
-    console.log(`Generated ZIP size: ${zipBuffer.length} bytes`);
+    debugLog(`Generated ZIP size: ${zipBuffer.length} bytes`);
 
     // Base64エンコード
     const base64Content = zipBuffer.toString('base64');
@@ -204,7 +205,7 @@ async function downloadMultipleFilesAsZip(s3Keys: string[]): Promise<{
       }
     };
   } catch (error: any) {
-    console.error('Multiple files download error:', error);
+    errorLog('Multiple files download error:', error);
     throw error;
   }
 }

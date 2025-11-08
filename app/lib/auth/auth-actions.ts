@@ -6,17 +6,13 @@ import { getUserCustomAttributes, type UserAttributes } from '@/app/utils/cognit
 import { InitiateAuthCommand, GetUserCommand, SignUpCommand, ConfirmSignUpCommand, ResendConfirmationCodeCommand, ForgotPasswordCommand, ConfirmForgotPasswordCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { cognitoClient } from '@/app/lib/aws-clients';
 import { sendVerificationCodeEmailAction } from '@/app/lib/actions/email-actions';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 import { 
-  storeVerificationCodeAction, 
   verifyEmailCodeAction,
   sendVerificationEmailAction 
 } from '@/app/lib/actions/user-verification-actions';
 import { z } from 'zod';
-
-// 認証コード生成関数
-function generateVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+import { validatePassword, validatePasswordComplete } from '@/app/lib/utils/password-validation';
 
 export interface AuthUser {
   sub: string;
@@ -45,7 +41,7 @@ export async function getCurrentUserAction(): Promise<AuthUser | null> {
       attributes: userAttributes
     };
   } catch (error) {
-    console.error('Error getting current user:', error);
+    errorLog('Error getting current user:', error);
     return null;
   }
 }
@@ -58,6 +54,8 @@ export interface SignInActionState {
   redirectTo?: string;
   verificationId?: string;
   email?: string;
+  messageKey?: 'rateLimitExceeded' | 'rateLimitBlocked' | 'rateLimitSendExceeded' | 'rateLimitCheckExceeded';
+  resetAt?: Date;
 }
 
 // サインインフォームのスキーマ
@@ -70,8 +68,8 @@ export async function signInAction(
   prevState: SignInActionState,
   formData: FormData
 ): Promise<SignInActionState> {
-  // ロケールを取得（デフォルトは'ja'）
-  const locale = (formData.get('locale') as string) || 'ja';
+  // ロケールを取得（デフォルトは'en'）
+  const locale = (formData.get('locale') as string) || 'en';
   
   try {
     // フォームデータの検証
@@ -90,22 +88,6 @@ export async function signInAction(
 
     const { email, password } = validatedFields.data;
 
-    // デバッグ情報を追加
-    console.log('=== サインイン試行 ===');
-    console.log('Email:', email);
-    console.log('Password length:', password.length);
-    console.log('Environment check:');
-    console.log('REGION:', process.env.REGION);
-    console.log('COGNITO_CLIENT_ID exists:', !!process.env.COGNITO_CLIENT_ID);
-    console.log('ACCESS_KEY_ID exists:', !!process.env.ACCESS_KEY_ID);
-    console.log('COGNITO_CLIENT_ID:', process.env.COGNITO_CLIENT_ID);
-    console.log('COGNITO_USER_POOL_ID:', process.env.COGNITO_USER_POOL_ID);
-
-    // ユーザー存在確認のためのデバッグ
-    console.log('=== ユーザー存在確認 ===');
-    console.log('COGNITO_USER_POOL_ID:', process.env.COGNITO_USER_POOL_ID);
-    console.log('検索対象メール:', email);
-
     // Cognito でサインイン
     const command = new InitiateAuthCommand({
       AuthFlow: 'USER_PASSWORD_AUTH',
@@ -121,35 +103,28 @@ export async function signInAction(
     if (response.AuthenticationResult) {
       // 2段階認証を必須化: トークン保存は行わず、認証コードを発行・送信
 
-      // 認証コード生成・保存
-      const verificationCode = generateVerificationCode();
-      const storeResult = await storeVerificationCodeAction(
-        email, // 既存ユーザーはemailをuserIdとして扱う
-        email,
-        verificationCode,
-        locale
-      );
-
-      if (!storeResult.success) {
-        return {
-          success: false,
-          message: 'Failed to start two-factor verification',
-          errors: { general: storeResult.error || 'verification_store_failed' },
-        };
-      }
-
-      // 認証コード送信
+      // 認証コード生成・保存・送信を一括で実行
       const emailResult = await sendVerificationEmailAction(
         email,
-        verificationCode,
+        email, // 既存ユーザーはemailをuserIdとして扱う
         locale
       );
 
       if (!emailResult.success) {
+        // ✅ 新しいAPI: messageKey を使用（ロケール対応）
+        let errorMessage = emailResult.error || 'verification_email_failed';
+        
+        // レート制限の場合、messageKeyを含める
+        if (emailResult.messageKey) {
+          errorMessage = emailResult.messageKey;
+        }
+        
         return {
           success: false,
           message: 'Failed to send verification code',
-          errors: { general: emailResult.error || 'verification_email_failed' },
+          errors: { general: errorMessage },
+          messageKey: emailResult.messageKey,
+          resetAt: emailResult.resetAt,
         };
       }
 
@@ -170,7 +145,7 @@ export async function signInAction(
     };
 
   } catch (error: any) {
-    console.error('Sign in error:', error);
+    errorLog('Sign in error:', error);
     
     // エラーコードをそのまま返す（フロント側で辞書を使って表示）
     let errorCode = 'signInFailed';
@@ -204,7 +179,7 @@ export async function clearInvalidTokensAction() {
     cookieStore.delete('idToken');
     return { success: true };
   } catch (error) {
-    console.error('Error clearing tokens:', error);
+    errorLog('Error clearing tokens:', error);
     return { success: false };
   }
 }
@@ -219,8 +194,13 @@ export async function signOutAction(locale: string = 'ja') {
     
     // ホームページにリダイレクト
     redirect(`/${locale}`);
-  } catch (error) {
-    console.error('Error signing out:', error);
+  } catch (error: any) {
+    // NEXT_REDIRECTエラーの場合は再スロー（Next.jsの正常な動作）
+    if (error.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error;
+    }
+    
+    errorLog('Error signing out:', error);
     redirect(`/${locale}`);
   }
 }
@@ -234,9 +214,6 @@ export interface SignUpData {
 
 // サーバーアクション: Cognitoユーザーを作成
 export async function signUpAction(prevState: any, formData: FormData) {
-  console.log('=== サインアップ試行 ===');
-  console.log('FormData entries:', Array.from(formData.entries()));
-  
   // FormDataから値を取得（tryブロック外で定義してcatchブロックでもアクセス可能にする）
   const signUpData: SignUpData = {
     email: formData.get('email') as string,
@@ -245,12 +222,6 @@ export async function signUpAction(prevState: any, formData: FormData) {
   };
 
   try {
-    console.log('SignUp data:', {
-      email: signUpData.email,
-      passwordLength: signUpData.password?.length || 0,
-      confirmPasswordLength: signUpData.confirmPassword?.length || 0
-    });
-
     // バリデーション
     if (!signUpData.email || !signUpData.password || !signUpData.confirmPassword) {
       return {
@@ -272,46 +243,12 @@ export async function signUpAction(prevState: any, formData: FormData) {
       };
     }
 
-    // パスワードの一致チェック
-    if (signUpData.password !== signUpData.confirmPassword) {
+    // パスワードの検証（共通関数を使用）
+    const passwordValidation = validatePasswordComplete(signUpData.password, signUpData.confirmPassword);
+    if (!passwordValidation.valid) {
       return {
         success: false,
-        errors: { password: 'パスワードが一致しません' },
-        message: '',
-        verificationId: undefined
-      };
-    }
-
-    // パスワードの強度チェック（最低8文字、大文字、小文字、数字を含む）
-    // 特殊文字は不要
-    if (signUpData.password.length < 8) {
-      return {
-        success: false,
-        errors: { password: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' },
-        message: '',
-        verificationId: undefined
-      };
-    }
-    if (!/[a-z]/.test(signUpData.password)) {
-      return {
-        success: false,
-        errors: { password: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' },
-        message: '',
-        verificationId: undefined
-      };
-    }
-    if (!/[A-Z]/.test(signUpData.password)) {
-      return {
-        success: false,
-        errors: { password: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' },
-        message: '',
-        verificationId: undefined
-      };
-    }
-    if (!/\d/.test(signUpData.password)) {
-      return {
-        success: false,
-        errors: { password: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' },
+        errors: { password: passwordValidation.error },
         message: '',
         verificationId: undefined
       };
@@ -332,49 +269,18 @@ export async function signUpAction(prevState: any, formData: FormData) {
     });
 
     const result = await cognitoClient.send(signUpCommand);
-    
-    console.log('Cognito SignUp result:', {
-      UserSub: result.UserSub,
-      CodeDeliveryDetails: result.CodeDeliveryDetails
-    });
 
     // ユーザー作成成功
     if (result.UserSub) {
-      console.log('サインアップ成功 - UserSub:', result.UserSub);
       
-      // 認証コードを生成
-      const verificationCode = generateVerificationCode();
-      const locale = formData.get('locale') as string || 'ja';
+      const locale = formData.get('locale') as string || 'en';
       
-        // DynamoDBに認証コードを保存
-        const storeResult = await storeVerificationCodeAction(
-          result.UserSub,
-          signUpData.email,
-          verificationCode,
-          locale
-        );
-      
-      if (!storeResult.success) {
-        console.error('DynamoDB保存失敗:', storeResult.error);
-        // DynamoDB保存に失敗してもユーザー作成は成功しているので、
-        // 2段階認証フォームを表示して再送信を促す
-        return {
-          success: true,
-          message: 'ユーザーが作成されました。認証コードの保存でエラーが発生しましたが、再送信をお試しください。',
-          errors: {},
-          verificationId: result.UserSub,
-          email: signUpData.email
-        };
-      }
-      
-      // SESテンプレートメールで認証コードを送信
+      // 認証コード生成・保存・送信を一括で実行
       const emailResult = await sendVerificationEmailAction(
         signUpData.email,
-        verificationCode,
+        result.UserSub,
         locale
       );
-      
-      console.log('SES認証コードメール送信結果:', emailResult);
       
       if (emailResult.success) {
         return {
@@ -385,17 +291,18 @@ export async function signUpAction(prevState: any, formData: FormData) {
           email: signUpData.email
         };
       } else {
-        console.error('SESメール送信失敗:', emailResult.error);
+        // ✅ 新しいAPI: messageKey を使用（ロケール対応）
         return {
           success: true,
           message: 'ユーザーが正常に作成されました。メール送信でエラーが発生しましたが、再送信をお試しください。',
           errors: {},
           verificationId: result.UserSub,
-          email: signUpData.email
+          email: signUpData.email,
+          messageKey: emailResult.messageKey,
+          resetAt: emailResult.resetAt
         };
       }
     } else {
-      console.log('サインアップ失敗 - UserSubが取得できませんでした');
       return {
         success: false,
         errors: { general: 'ユーザーの作成に失敗しました' },
@@ -405,7 +312,7 @@ export async function signUpAction(prevState: any, formData: FormData) {
     }
 
   } catch (error: any) {
-    console.error('Cognitoユーザー作成エラー:', error);
+    errorLog('Cognitoユーザー作成エラー:', error);
     
     // Cognitoのエラーメッセージを日本語に変換
     let errorMessage = 'ユーザーの作成に失敗しました';
@@ -413,47 +320,27 @@ export async function signUpAction(prevState: any, formData: FormData) {
     if (error.name === 'UsernameExistsException') {
       // 既存ユーザーの場合、SESで認証コードを送信
       try {
-        console.log('既存ユーザーにSES認証コードを送信します:', signUpData.email);
+        const locale = formData.get('locale') as string || 'en';
         
-        // 認証コードを生成
-        const verificationCode = generateVerificationCode();
-        const locale = formData.get('locale') as string || 'ja';
+        // 認証コード生成・保存・送信を一括で実行（既存ユーザーの場合はメールアドレスをuserIdとして使用）
+        const emailResult = await sendVerificationEmailAction(
+          signUpData.email,
+          signUpData.email, // 既存ユーザーの場合はメールアドレスをuserIdとして使用
+          locale
+        );
         
-            // DynamoDBに認証コードを保存（既存ユーザーの場合はメールアドレスをuserIdとして使用）
-            const storeResult = await storeVerificationCodeAction(
-              signUpData.email, // 既存ユーザーの場合はメールアドレスをuserIdとして使用
-              signUpData.email,
-              verificationCode,
-              locale
-            );
-        
-        if (!storeResult.success) {
-          console.error('既存ユーザーDynamoDB保存失敗:', storeResult.error);
-          errorMessage = 'このメールアドレスは既に登録されています。認証コードの保存に失敗しました。';
+        if (emailResult.success) {
+          return {
+            success: true,
+            message: '既存のアカウントに認証コードを再送信しました。',
+            errors: {},
+            verificationId: signUpData.email, // メールアドレスをverificationIdとして使用
+            email: signUpData.email
+          };
         } else {
-          // SESテンプレートメールで認証コードを送信
-          const emailResult = await sendVerificationEmailAction(
-            signUpData.email,
-            verificationCode,
-            locale
-          );
-          
-          console.log('既存ユーザーSESメール送信結果:', emailResult);
-          
-          if (emailResult.success) {
-            return {
-              success: true,
-              message: '既存のアカウントに認証コードを再送信しました。',
-              errors: {},
-              verificationId: signUpData.email, // メールアドレスをverificationIdとして使用
-              email: signUpData.email
-            };
-          } else {
-            errorMessage = 'このメールアドレスは既に登録されています。メール送信でエラーが発生しました。';
-          }
+          errorMessage = 'このメールアドレスは既に登録されています。メール送信でエラーが発生しました。';
         }
       } catch (resendError) {
-        console.error('既存ユーザー認証コード送信エラー:', resendError);
         errorMessage = 'このメールアドレスは既に登録されています。サインインページからログインしてください。';
       }
     } else if (error.name === 'InvalidPasswordException') {
@@ -479,10 +366,6 @@ export async function confirmSignUpAction(prevState: any, formData: FormData) {
     const email = formData.get('email') as string;
     const confirmationCode = formData.get('confirmationCode') as string;
 
-    console.log('=== 認証コード検証試行 ===');
-    console.log('Email:', email);
-    console.log('Code:', confirmationCode);
-
     // バリデーション
     if (!email || !confirmationCode) {
       return {
@@ -496,8 +379,6 @@ export async function confirmSignUpAction(prevState: any, formData: FormData) {
     const password = formData.get('password') as string;
     const autoSignIn = formData.get('autoSignIn') === 'true';
     const locale = formData.get('locale') as string || 'ja';
-
-    console.log('認証オプション:', { autoSignIn, hasPassword: !!password, locale });
 
     // DynamoDBから認証コードを検証
     // まず、emailをuserIdとして検索（既存ユーザー対応）
@@ -514,12 +395,9 @@ export async function confirmSignUpAction(prevState: any, formData: FormData) {
       }
     );
     
-    console.log('既存ユーザー認証コード検証結果:', verificationResult);
-    
     // 既存ユーザーで見つからない場合、新規ユーザーとして検索
     // 実際の実装では、UserSubとemailのマッピングテーブルが必要
     if (!verificationResult.success) {
-      console.log('既存ユーザーとして見つからないため、新規ユーザーとして検索');
       // 新規ユーザーの場合、UserSubが必要だが、ここではemailから推測できないため
       // 一時的な対応として、認証コードが見つからないエラーを返す
       return {
@@ -540,9 +418,7 @@ export async function confirmSignUpAction(prevState: any, formData: FormData) {
       });
 
       await cognitoClient.send(confirmCommand);
-      console.log('Cognito ConfirmSignUp成功');
     } catch (cognitoError: any) {
-      console.log('Cognito ConfirmSignUp エラー（無視）:', cognitoError.name);
       // MessageAction: SUPPRESSの場合、ConfirmSignUpは失敗する可能性があるが、
       // カスタム認証コードが正しければ成功とする
     }
@@ -565,7 +441,7 @@ export async function confirmSignUpAction(prevState: any, formData: FormData) {
     }
 
   } catch (error: any) {
-    console.error('確認コード検証エラー:', error);
+    errorLog('確認コード検証エラー:', error);
     
     let errorMessage = '確認コードの検証に失敗しました';
     
@@ -591,10 +467,6 @@ export async function confirmSignInAction(prevState: any, formData: FormData) {
     const email = formData.get('email') as string;
     const confirmationCode = formData.get('confirmationCode') as string;
 
-    console.log('=== サインイン認証コード検証試行 ===');
-    console.log('Email:', email);
-    console.log('Code:', confirmationCode);
-
     // バリデーション
     if (!email || !confirmationCode) {
       return {
@@ -607,8 +479,6 @@ export async function confirmSignInAction(prevState: any, formData: FormData) {
     // パスワードを取得（自動サインイン用）
     const password = formData.get('password') as string;
     const locale = formData.get('locale') as string || 'ja';
-
-    console.log('サインイン認証オプション:', { hasPassword: !!password, locale });
 
     // DynamoDBから認証コードを検証（サインイン用なのでCognito確認は不要）
     const verificationResult = await verifyEmailCodeAction(
@@ -624,8 +494,6 @@ export async function confirmSignInAction(prevState: any, formData: FormData) {
       }
     );
     
-    console.log('サインイン認証コード検証結果:', verificationResult);
-    
     if (!verificationResult.success) {
       return {
         success: false,
@@ -637,25 +505,14 @@ export async function confirmSignInAction(prevState: any, formData: FormData) {
     }
 
     // 認証成功のレスポンス
-    if (verificationResult.autoSignIn) {
-      return {
-        success: true,
-        message: '認証が完了し、自動サインインしました。',
-        errors: {},
-        redirectUrl: verificationResult.redirectUrl || `/${locale}/account/user`
-      };
-    } else {
-      return {
-        success: true,
-        message: '認証が完了しました。',
-        errors: {},
-        redirectUrl: verificationResult.redirectUrl || `/${locale}/account/user`
-      };
-    }
+    return {
+      success: true,
+      message: verificationResult.autoSignIn ? '認証が完了し、自動サインインしました。' : '認証が完了しました。',
+      errors: {},
+      redirectUrl: verificationResult.redirectUrl || `/${locale}/account/user`
+    };
 
   } catch (error: any) {
-    console.error('サインイン認証コード検証エラー:', error);
-    
     let errorMessage = '確認コードの検証に失敗しました';
     
     if (error.name === 'CodeMismatchException') {
@@ -680,44 +537,21 @@ export async function resendVerificationCodeAction(
   success: boolean;
   message: string;
   newVerificationId?: string;
+  messageKey?: 'rateLimitExceeded' | 'rateLimitBlocked' | 'rateLimitSendExceeded' | 'rateLimitCheckExceeded';
+  resetAt?: Date;
 }> {
   try {
-    console.log('=== 認証コード再送信試行 ===');
-    console.log('VerificationId:', verificationId);
-    console.log('Locale:', locale);
-
-    // 新しい認証コードを生成
-    const newVerificationCode = generateVerificationCode();
-
     // verificationIdがemailの形式かUserSubの形式かを判定
     const isEmail = verificationId.includes('@');
     const userId = verificationId; // 既存・新規ユーザー共にverificationIdをuserIdとして使用
     const email = isEmail ? verificationId : verificationId; // 簡易実装
 
-    // DynamoDBに新しい認証コードを保存
-    const storeResult = await storeVerificationCodeAction(
-      userId,
-      email,
-      newVerificationCode,
-      locale
-    );
-
-    if (!storeResult.success) {
-      console.error('認証コード再送信DynamoDB保存失敗:', storeResult.error);
-      return {
-        success: false,
-        message: '認証コードの保存に失敗しました',
-      };
-    }
-
-    // SESテンプレートメールで認証コードを送信
+    // 認証コード生成・保存・送信を一括で実行
     const emailResult = await sendVerificationEmailAction(
       email,
-      newVerificationCode,
+      userId,
       locale
     );
-
-    console.log('認証コード再送信結果:', emailResult);
 
     if (emailResult.success) {
       return {
@@ -726,14 +560,17 @@ export async function resendVerificationCodeAction(
         newVerificationId: userId,
       };
     } else {
+      // ✅ 新しいAPI: messageKey を使用（ロケール対応）
       return {
         success: false,
         message: '認証コードの再送信に失敗しました',
+        messageKey: emailResult.messageKey,
+        resetAt: emailResult.resetAt
       };
     }
 
   } catch (error: any) {
-    console.error('認証コード再送信エラー:', error);
+    errorLog('認証コード再送信エラー:', error);
     return {
       success: false,
       message: '認証コードの再送信に失敗しました',
@@ -745,15 +582,10 @@ export async function resendVerificationCodeAction(
  * パスワードリセット: 認証コード送信（カスタムメール使用）
  */
 export async function forgotPasswordAction(prevState: any, formData: FormData) {
-  console.log('=== パスワードリセット: 認証コード送信 ===');
-  
   const email = formData.get('email') as string;
   const locale = formData.get('locale') as string || 'ja';
   
   try {
-    console.log('Email:', email);
-    console.log('Locale:', locale);
-    
     // バリデーション
     if (!email) {
       return {
@@ -783,33 +615,12 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
       // ユーザーが存在しない場合でもセキュリティのため同じメッセージを返す
     }
     
-    // 認証コード生成（6桁）
-    const verificationCode = generateVerificationCode();
-    
-    // DynamoDBに認証コードを保存（パスワードリセット用）
-    const storeResult = await storeVerificationCodeAction(
-      email, // userIdの代わりにemailを使用
-      email,
-      verificationCode,
-      locale
-    );
-    
-    if (!storeResult.success) {
-      return {
-        success: false,
-        message: '認証コードの保存に失敗しました',
-        errors: { general: storeResult.error || '認証コードの保存に失敗しました' }
-      };
-    }
-    
-    // カスタムメールで認証コードを送信（ログイン時と同じメール）
+    // 認証コード生成・保存・送信を一括で実行（パスワードリセット用）
     const emailResult = await sendVerificationEmailAction(
       email,
-      verificationCode,
+      email, // userIdの代わりにemailを使用
       locale
     );
-    
-    console.log('パスワードリセット認証コードメール送信結果:', emailResult);
     
     if (emailResult.success) {
       return {
@@ -818,15 +629,25 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
         email: email
       };
     } else {
+      // ✅ 新しいAPI: messageKey を使用（ロケール対応）
+      let errorMessage = emailResult.error || '認証コードの送信に失敗しました';
+      
+      // レート制限の場合、messageKeyを含める
+      if (emailResult.messageKey) {
+        errorMessage = emailResult.messageKey;
+      }
+      
       return {
         success: false,
         message: '認証コードの送信に失敗しました',
-        errors: { general: emailResult.error || '認証コードの送信に失敗しました' }
+        errors: { general: errorMessage },
+        messageKey: emailResult.messageKey,
+        resetAt: emailResult.resetAt
       };
     }
     
   } catch (error: any) {
-    console.error('ForgotPassword error:', error);
+    errorLog('ForgotPassword error:', error);
     
     return {
       success: false,
@@ -840,18 +661,12 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
  * パスワードリセット: 認証コード確認とパスワード更新（カスタム認証コード使用）
  */
 export async function confirmForgotPasswordAction(prevState: any, formData: FormData) {
-  console.log('=== パスワードリセット: 認証コード確認とパスワード更新 ===');
-  
   const email = formData.get('email') as string;
   const code = formData.get('code') as string;
   const newPassword = formData.get('newPassword') as string;
   const confirmPassword = formData.get('confirmPassword') as string;
   
   try {
-    console.log('Email:', email);
-    console.log('Code length:', code?.length);
-    console.log('Password length:', newPassword?.length);
-    
     // バリデーション
     if (!email || !code || !newPassword || !confirmPassword) {
       return {
@@ -866,42 +681,13 @@ export async function confirmForgotPasswordAction(prevState: any, formData: Form
       };
     }
     
-    // パスワード一致チェック
-    if (newPassword !== confirmPassword) {
+    // パスワードの検証（共通関数を使用）
+    const passwordValidation = validatePasswordComplete(newPassword, confirmPassword);
+    if (!passwordValidation.valid) {
       return {
         success: false,
-        message: 'パスワードが一致しません',
-        errors: { confirmPassword: 'パスワードが一致しません' }
-      };
-    }
-    
-    // パスワードの強度チェック（最低8文字、大文字、小文字、数字を含む）
-    if (newPassword.length < 8) {
-      return {
-        success: false,
-        message: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります',
-        errors: { newPassword: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります' }
-      };
-    }
-    if (!/[a-z]/.test(newPassword)) {
-      return {
-        success: false,
-        message: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります',
-        errors: { newPassword: 'パスワードには小文字を1文字以上含めてください' }
-      };
-    }
-    if (!/[A-Z]/.test(newPassword)) {
-      return {
-        success: false,
-        message: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります',
-        errors: { newPassword: 'パスワードには大文字を1文字以上含めてください' }
-      };
-    }
-    if (!/\d/.test(newPassword)) {
-      return {
-        success: false,
-        message: 'パスワードは8文字以上で、大文字、小文字、数字を含む必要があります',
-        errors: { newPassword: 'パスワードには数字を1文字以上含めてください' }
+        message: passwordValidation.error!,
+        errors: { newPassword: passwordValidation.error! }
       };
     }
     
@@ -933,7 +719,6 @@ export async function confirmForgotPasswordAction(prevState: any, formData: Form
     });
     
     await cognitoClient.send(setPasswordCommand);
-    console.log('パスワード更新成功');
     
     return {
       success: true,
@@ -941,7 +726,7 @@ export async function confirmForgotPasswordAction(prevState: any, formData: Form
     };
     
   } catch (error: any) {
-    console.error('ConfirmForgotPassword error:', error);
+    errorLog('ConfirmForgotPassword error:', error);
     
     // エラーハンドリング
     if (error.name === 'InvalidPasswordException') {

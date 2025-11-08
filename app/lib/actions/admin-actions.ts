@@ -6,6 +6,7 @@ import { getCurrentUserAction } from '@/app/lib/auth/auth-actions';
 import { createUserProfile } from './user-profile-actions';
 import Stripe from 'stripe';
 import { ApiResponse } from '@/app/lib/types/TypeAPIs';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const USER_POOL_ID = process.env.COGNITO_USER_POOL_ID!;
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -51,7 +52,7 @@ interface CustomerUpdateInput {
 // Stripe顧客情報を取得
 export async function getCustomerInfo(customerId: string): Promise<ApiResponse<StripeCustomer>> {
   try {
-    console.log('Retrieving Stripe customer:', customerId);
+    debugLog('Retrieving Stripe customer:', customerId);
     
     const customer = await stripe.customers.retrieve(customerId);
     
@@ -73,7 +74,7 @@ export async function getCustomerInfo(customerId: string): Promise<ApiResponse<S
       metadata: customer.metadata,
     };
     
-    console.log('Customer retrieved successfully:', customer.id);
+    debugLog('Customer retrieved successfully:', customer.id);
     
     return {
       success: true,
@@ -81,7 +82,7 @@ export async function getCustomerInfo(customerId: string): Promise<ApiResponse<S
       data: customerData,
     };
   } catch (error: any) {
-    console.error('Error retrieving customer:', error);
+    errorLog('Error retrieving customer:', error);
     return {
       success: false,
       message: error?.message || '顧客情報の取得に失敗しました。',
@@ -120,11 +121,10 @@ function convertCountryNameToCode(countryName: string): string {
   
   // 日本語名からの変換を試行
   if (countryMapping[countryName]) {
-    console.log(`Country name "${countryName}" converted to code "${countryMapping[countryName]}"`);
     return countryMapping[countryName];
   }
   
-  console.warn(`Could not convert country name "${countryName}" to country code`);
+  warnLog(`Could not convert country name "${countryName}" to country code`);
   return countryName; // 変換できない場合はそのまま返す
 }
 
@@ -134,13 +134,13 @@ export async function updateCustomerInfo(
   updateData: CustomerUpdateInput
 ): Promise<ApiResponse<StripeCustomer>> {
   try {
-    console.log('Updating Stripe customer:', { customerId, updateData });
+    debugLog('Updating Stripe customer:', { customerId, updateData });
     
     // 住所の国フィールドを国コードに変換
     if (updateData.address?.country) {
       const originalCountry = updateData.address.country;
       updateData.address.country = convertCountryNameToCode(originalCountry);
-      console.log('Country field converted:', { original: originalCountry, converted: updateData.address.country });
+      debugLog('Country field converted:', { original: originalCountry, converted: updateData.address.country });
     }
     
     // バリデーション
@@ -184,7 +184,7 @@ export async function updateCustomerInfo(
       metadata: updatedCustomer.metadata,
     };
     
-    console.log('Customer updated successfully:', updatedCustomer.id);
+    debugLog('Customer updated successfully:', updatedCustomer.id);
     
     return {
       success: true,
@@ -192,7 +192,7 @@ export async function updateCustomerInfo(
       data: customerData,
     };
   } catch (error: any) {
-    console.error('Error updating customer:', error);
+    errorLog('Error updating customer:', error);
     return {
       success: false,
       message: error?.message || '顧客情報の更新に失敗しました。',
@@ -263,17 +263,15 @@ export async function createAdminAction(
     );
 
     if (!profileResult.success) {
-      console.warn('Failed to create user profile in DynamoDB, but Cognito update succeeded');
+      warnLog('Failed to create user profile in DynamoDB, but Cognito update succeeded');
     }
-
-    console.log(`Admin user created: ${userName} for user: ${currentUser.email}`);
 
     return {
       success: true,
       message: '管理者アカウントが正常に作成されました。',
     };
   } catch (error: any) {
-    console.error('Admin creation error:', error);
+    errorLog('Admin creation error:', error);
     return {
       success: false,
       message: 'アカウント作成中にエラーが発生しました。もう一度お試しください。',

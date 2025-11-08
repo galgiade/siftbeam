@@ -54,7 +54,11 @@ const fr: SignUpAuthLocale = {
     verificationCodeNotFound: "Code de vérification introuvable ou expiré",
     remainingAttempts: "Tentatives restantes",
     verificationCodeExpired: "Le code de vérification a expiré",
-    maxAttemptsReached: "Nombre maximum de tentatives atteint"
+    maxAttemptsReached: "Nombre maximum de tentatives atteint",
+    rateLimitExceeded: "Nombre maximum de tentatives atteint. Veuillez réessayer plus tard.",
+    rateLimitBlocked: "Temporairement bloqué. Veuillez réessayer plus tard.",
+    rateLimitSendExceeded: "Nombre maximum d'envois de code de vérification atteint. Veuillez réessayer plus tard.",
+    rateLimitCheckExceeded: "Nombre maximum de vérifications de code atteint. Veuillez réessayer plus tard."
   },
   modal: {
     emailVerificationTitle: "Vérification de l'e-mail",

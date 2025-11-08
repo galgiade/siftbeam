@@ -238,7 +238,7 @@ export default function CreateUserManagementPresentation({
           <VerificationForm
             verificationId={verificationData.verificationId}
             email={verificationData.email}
-            locale={userAttributes.locale || "ja"}
+            locale={userAttributes.locale || "en"}
             onVerificationSuccess={{ type: 'reload' }}
           />
         </div>

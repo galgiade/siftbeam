@@ -4,6 +4,7 @@ import { UsageLimit } from '@/app/lib/actions/usage-limits-api';
 import { queryProcessingHistory } from '@/app/lib/actions/processing-history-api';
 import { ApiResponse } from '@/app/lib/types/TypeAPIs';
 import { convertLimitToBytes } from '@/app/lib/utils/usage-limit-utils';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 /**
  * 利用制限チェック結果のインターフェース
@@ -36,7 +37,7 @@ export async function checkUsageLimits(
   restrictLimits: UsageLimit[]
 ): Promise<ApiResponse<UsageLimitCheckResult>> {
   try {
-    console.log('checkUsageLimits called with:', {
+    debugLog('checkUsageLimits called with:', {
       customerId,
       additionalBytes,
       notifyLimitsCount: notifyLimits.length,
@@ -73,7 +74,7 @@ export async function checkUsageLimits(
     );
     const projectedUsageBytes = currentUsageBytes + additionalBytes;
 
-    console.log('Usage check:', {
+    debugLog('Usage check:', {
       currentUsageBytes,
       additionalBytes,
       projectedUsageBytes
@@ -136,7 +137,7 @@ export async function checkUsageLimits(
     const shouldNotify = exceedingNotifyLimits.length > 0;
     const notifyEmails = Array.from(notifyEmailsSet);
 
-    console.log('Usage limit check result:', {
+    debugLog('Usage limit check result:', {
       canUpload: true,
       shouldNotify,
       notifyEmailsCount: notifyEmails.length,
@@ -159,7 +160,7 @@ export async function checkUsageLimits(
     };
 
   } catch (error: any) {
-    console.error('Error checking usage limits:', error);
+    errorLog('Error checking usage limits:', error);
     return {
       success: false,
       message: `利用制限チェックに失敗しました: ${error.message}`,

@@ -2,6 +2,7 @@
 
 import { SendTemplatedEmailCommand } from '@aws-sdk/client-ses';
 import { sesClient } from '@/app/lib/aws-clients';
+import { debugLog, errorLog } from '@/app/lib/utils/logger';
 
 // SESテンプレート送信用のインターface
 interface SendTemplatedEmailParams {
@@ -34,7 +35,7 @@ export async function sendTemplatedEmailAction({
 
     const response = await sesClient.send(command);
 
-    console.log(`Email sent successfully to ${to} using template ${templateName}:`, response.MessageId);
+    debugLog(`Email sent successfully to ${to} using template ${templateName}:`, response.MessageId);
 
     return {
       success: true,
@@ -42,7 +43,7 @@ export async function sendTemplatedEmailAction({
       messageId: response.MessageId,
     };
   } catch (error: any) {
-    console.error('Error sending templated email:', error);
+    errorLog('Error sending templated email:', error);
 
     let message = 'メールの送信に失敗しました';
     if (error.name === 'MessageRejected') {
@@ -85,7 +86,7 @@ export async function sendVerificationCodeEmailAction(
       supportEmail: process.env.SES_FROM_EMAIL || 'support@siftbeam.com',
     };
 
-    console.log(`Sending verification code email to ${email} using template ${templateName}`);
+    debugLog(`Sending verification code email to ${email} using template ${templateName}`);
 
     return await sendTemplatedEmailAction({
       to: email,
@@ -93,7 +94,7 @@ export async function sendVerificationCodeEmailAction(
       templateData,
     });
   } catch (error: any) {
-    console.error('Error sending verification code email:', error);
+    errorLog('Error sending verification code email:', error);
     return {
       success: false,
       message: '認証コードメールの送信に失敗しました',
@@ -128,7 +129,7 @@ export async function sendPasswordResetEmailAction(
       templateData,
     });
   } catch (error: any) {
-    console.error('Error sending password reset email:', error);
+    errorLog('Error sending password reset email:', error);
     return {
       success: false,
       message: 'パスワードリセットメールの送信に失敗しました',
@@ -163,7 +164,7 @@ export async function sendWelcomeEmailAction(
       templateData,
     });
   } catch (error: any) {
-    console.error('Error sending welcome email:', error);
+    errorLog('Error sending welcome email:', error);
     return {
       success: false,
       message: 'ウェルカムメールの送信に失敗しました',
@@ -185,7 +186,7 @@ export async function sendUsageLimitNotificationEmailAction(
   failedEmails: string[];
 }> {
   try {
-    console.log('Sending usage limit notification emails to:', emails);
+    debugLog('Sending usage limit notification emails to:', emails);
     
     const templateName = `SiftbeamUsageNotice_${locale}`;
     
@@ -235,9 +236,9 @@ export async function sendUsageLimitNotificationEmailAction(
     const failedEmails: string[] = [];
 
     // デバッグログ: テンプレートデータを出力
-    console.log('Template data:', JSON.stringify(templateData, null, 2));
-    console.log('Template name:', templateName);
-    console.log('Recipients:', emails);
+    debugLog('Template data:', JSON.stringify(templateData, null, 2));
+    debugLog('Template name:', templateName);
+    debugLog('Recipients:', emails);
 
     // 各メールアドレスに送信
     for (const email of emails) {
@@ -271,7 +272,7 @@ export async function sendUsageLimitNotificationEmailAction(
     }
 
   } catch (error: any) {
-    console.error('Error sending usage limit notification emails:', error);
+    errorLog('Error sending usage limit notification emails:', error);
     return {
       success: false,
       message: '使用量通知メールの送信に失敗しました',

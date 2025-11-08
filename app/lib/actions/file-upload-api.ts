@@ -4,6 +4,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { s3Client } from '@/app/lib/aws-clients';
 import { ApiResponse } from '@/app/lib/types/TypeAPIs';
 import { sanitizeFileName } from '@/app/lib/utils/s3-utils';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || 'siftbeam';
 
@@ -49,7 +50,7 @@ export interface UploadFileResult {
  * エラーハンドリング用のヘルパー関数
  */
 function handleError(error: any, operation: string): ApiResponse<any> {
-  console.error(`Error in ${operation}:`, {
+  errorLog(`Error in ${operation}:`, {
     name: error.name,
     message: error.message,
     code: error.code,
@@ -152,7 +153,7 @@ function generateServiceS3Metadata(input: ServiceUploadFileInput): Record<string
  */
 export async function uploadFileToS3(input: UploadFileInput): Promise<ApiResponse<UploadFileResult>> {
   try {
-    console.log('uploadFileToS3 called with:', {
+    debugLog('uploadFileToS3 called with:', {
       fileName: input.file.name,
       fileSize: input.file.size,
       contentType: input.file.type,
@@ -183,7 +184,7 @@ export async function uploadFileToS3(input: UploadFileInput): Promise<ApiRespons
     const uploadType = input.uploadType; // 必須パラメータ
     
     if (!uploadType) {
-      console.error('❌ uploadType is missing!');
+      errorLog('❌ uploadType is missing!');
       return {
         success: false,
         message: 'アップロード先の種類（uploadType）が指定されていません。',
@@ -193,7 +194,7 @@ export async function uploadFileToS3(input: UploadFileInput): Promise<ApiRespons
       };
     }
     
-    console.log('🔍 Upload path generation:', {
+    debugLog('🔍 Upload path generation:', {
       uploadType,
       inputUploadType: input.uploadType,
       context: input.context,
@@ -207,7 +208,7 @@ export async function uploadFileToS3(input: UploadFileInput): Promise<ApiRespons
       fileKey = `${uploadType}/${input.customerId}/${supportRequestId}/request/${sanitizedFileName}`;
     }
     
-    console.log('📁 Generated fileKey:', fileKey);
+    debugLog('📁 Generated fileKey:', fileKey);
     
     // ファイルをArrayBufferに変換
     const arrayBuffer = await input.file.arrayBuffer();
@@ -239,7 +240,7 @@ export async function uploadFileToS3(input: UploadFileInput): Promise<ApiRespons
       uploadedAt: new Date().toISOString()
     };
 
-    console.log('File uploaded successfully:', {
+    debugLog('File uploaded successfully:', {
       fileKey,
       fileName: input.file.name,
       fileSize: input.file.size
@@ -261,7 +262,7 @@ export async function uploadFileToS3(input: UploadFileInput): Promise<ApiRespons
  */
 export async function uploadServiceFileToS3(input: ServiceUploadFileInput): Promise<ApiResponse<UploadFileResult>> {
   try {
-    console.log('uploadServiceFileToS3 called with:', {
+    debugLog('uploadServiceFileToS3 called with:', {
       fileName: input.file.name,
       fileSize: input.file.size,
       contentType: input.file.type,
@@ -347,7 +348,7 @@ export async function uploadServiceFileToS3(input: ServiceUploadFileInput): Prom
       uploadedAt: new Date().toISOString()
     };
 
-    console.log('Service file uploaded successfully:', {
+    debugLog('Service file uploaded successfully:', {
       fileKey,
       fileName: input.file.name,
       fileSize: input.file.size,
@@ -378,7 +379,7 @@ export async function uploadMultipleFiles(
   replyId?: string
 ): Promise<ApiResponse<UploadFileResult[]>> {
   try {
-    console.log('uploadMultipleFiles called with:', {
+    debugLog('uploadMultipleFiles called with:', {
       fileCount: files.length,
       customerId,
       userId,
@@ -389,7 +390,7 @@ export async function uploadMultipleFiles(
     });
 
     if (!uploadType) {
-      console.error('❌ uploadType is missing in uploadMultipleFiles!');
+      errorLog('❌ uploadType is missing in uploadMultipleFiles!');
       return {
         success: false,
         message: 'アップロード先の種類（uploadType）が指定されていません。',
@@ -449,7 +450,7 @@ export async function uploadMultipleFiles(
       };
     }
 
-    console.log('Multiple files uploaded successfully:', {
+    debugLog('Multiple files uploaded successfully:', {
       successCount: results.length,
       totalSize: results.reduce((sum, r) => sum + r.fileSize, 0)
     });
@@ -479,7 +480,7 @@ export async function uploadMultipleServiceFiles(
   stepName?: string
 ): Promise<ApiResponse<UploadFileResult[]>> {
   try {
-    console.log('uploadMultipleServiceFiles called with:', {
+    debugLog('uploadMultipleServiceFiles called with:', {
       fileCount: files.length,
       customerId,
       userId,
@@ -539,7 +540,7 @@ export async function uploadMultipleServiceFiles(
       };
     }
 
-    console.log('Multiple service files uploaded successfully:', {
+    debugLog('Multiple service files uploaded successfully:', {
       successCount: results.length,
       totalSize: results.reduce((sum, r) => sum + r.fileSize, 0)
     });

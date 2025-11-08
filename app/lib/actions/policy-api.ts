@@ -1,5 +1,6 @@
 'use server'
 
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 import { 
   GetCommand, 
   PutCommand, 
@@ -68,7 +69,7 @@ export interface QueryPoliciesInput {
  * エラーハンドリング用のヘルパー関数
  */
 function handleError(error: any, operation: string): ApiResponse<any> {
-  console.error(`Error in ${operation}:`, {
+  errorLog(`Error in ${operation}:`, {
     name: error.name,
     message: error.message,
     code: error.code,
@@ -188,7 +189,7 @@ export async function getPolicyById(policyId: string): Promise<ApiResponse<Polic
       };
     }
 
-    console.log('Policy retrieved successfully:', { policyId });
+    debugLog('Policy retrieved successfully:', { policyId });
 
     return {
       success: true,
@@ -210,15 +211,15 @@ export async function getPoliciesForUser(
   customerId: string
 ): Promise<ApiResponse<{ policies: Policy[] }>> {
   try {
-    console.log('=== getPoliciesForUser開始 ===');
-    console.log('userId:', userId);
-    console.log('customerId:', customerId);
+    debugLog('=== getPoliciesForUser開始 ===');
+    debugLog('userId:', userId);
+    debugLog('customerId:', customerId);
 
     // 1. ユーザーが所属するグループを取得
     const userGroupsResult = await getGroupsByUserId(userId);
     
     if (!userGroupsResult.success) {
-      console.log('⚠️ ユーザーグループの取得に失敗:', userGroupsResult.message);
+      debugLog('⚠️ ユーザーグループの取得に失敗:', userGroupsResult.message);
       return {
         success: true,
         message: 'ユーザーはグループに所属していません。',
@@ -229,11 +230,11 @@ export async function getPoliciesForUser(
     const userGroups = userGroupsResult.data || [];
     const groupIds = userGroups.map(ug => ug.groupId);
     
-    console.log('ユーザーが所属するグループ数:', groupIds.length);
-    console.log('グループID一覧:', groupIds);
+    debugLog('ユーザーが所属するグループ数:', groupIds.length);
+    debugLog('グループID一覧:', groupIds);
 
     if (groupIds.length === 0) {
-      console.log('✅ ユーザーはグループに所属していません');
+      debugLog('✅ ユーザーはグループに所属していません');
       return {
         success: true,
         message: 'ユーザーはグループに所属していません。',
@@ -254,11 +255,11 @@ export async function getPoliciesForUser(
     // 重複を排除してポリシーIDの配列を作成
     const uniquePolicyIds = Array.from(new Set(allPolicyGroups.map(pg => pg.policyId)));
     
-    console.log('グループに紐づくポリシー数（重複除外後）:', uniquePolicyIds.length);
-    console.log('ポリシーID一覧:', uniquePolicyIds);
+    debugLog('グループに紐づくポリシー数（重複除外後）:', uniquePolicyIds.length);
+    debugLog('ポリシーID一覧:', uniquePolicyIds);
 
     if (uniquePolicyIds.length === 0) {
-      console.log('✅ グループにポリシーが紐づいていません');
+      debugLog('✅ グループにポリシーが紐づいていません');
       return {
         success: true,
         message: 'グループにポリシーが紐づいていません。',
@@ -276,8 +277,8 @@ export async function getPoliciesForUser(
       .filter(result => result.success && result.data)
       .map(result => result.data!);
 
-    console.log('✅ 取得成功したポリシー数:', validPolicies.length);
-    console.log('=== getPoliciesForUser完了 ===');
+    debugLog('✅ 取得成功したポリシー数:', validPolicies.length);
+    debugLog('=== getPoliciesForUser完了 ===');
 
     // 監査ログ記録（成功）
     await logSuccessAction('READ', 'Policy', 'policies', '', `${validPolicies.length} policies for user ${userId}`);
@@ -289,7 +290,7 @@ export async function getPoliciesForUser(
     };
 
   } catch (error: any) {
-    console.error('❌ getPoliciesForUserエラー:', error);
+    errorLog('❌ getPoliciesForUserエラー:', error);
     
     // 監査ログ記録（失敗）
     await logFailureAction('READ', 'Policy', error?.message || 'ユーザーポリシー取得に失敗しました', 'policies', '', userId);
@@ -330,7 +331,7 @@ export async function queryPolicies(
     const result = await dynamoDocClient.send(command);
     const policies = result.Items as Policy[];
 
-    console.log('Policies queried successfully:', { 
+    debugLog('Policies queried successfully:', { 
       count: policies.length, 
       customerId: input.customerId,
       policyName: input.policyName
@@ -355,7 +356,7 @@ export async function queryPolicies(
  */
 export async function createPolicy(input: CreatePolicyInput): Promise<ApiResponse<Policy>> {
   try {
-    console.log('createPolicy called with input:', input);
+    debugLog('createPolicy called with input:', input);
     
     // 入力バリデーション
     const errors: Record<string, string[]> = {};
@@ -377,7 +378,7 @@ export async function createPolicy(input: CreatePolicyInput): Promise<ApiRespons
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -407,7 +408,7 @@ export async function createPolicy(input: CreatePolicyInput): Promise<ApiRespons
 
     await dynamoDocClient.send(putCommand);
 
-    console.log('Policy created successfully:', { 
+    debugLog('Policy created successfully:', { 
       policyId,
       policyName: input.policyName,
       customerId: input.customerId 
@@ -435,7 +436,7 @@ export async function createPolicy(input: CreatePolicyInput): Promise<ApiRespons
  */
 export async function updatePolicy(input: UpdatePolicyInput): Promise<ApiResponse<Policy>> {
   try {
-    console.log('updatePolicy called with:', input);
+    debugLog('updatePolicy called with:', input);
     
     // 更新前の値を取得（監査ログ用）
     const existingResult = await getPolicyById(input.policyId);
@@ -449,7 +450,7 @@ export async function updatePolicy(input: UpdatePolicyInput): Promise<ApiRespons
     
     // acceptedFileTypesの更新を禁止（会社が決定するため）
     if (input.acceptedFileTypes !== undefined) {
-      console.warn('⚠️ acceptedFileTypesの更新が試みられましたが、拒否されました:', input.policyId);
+      warnLog('⚠️ acceptedFileTypesの更新が試みられましたが、拒否されました:', input.policyId);
       return {
         success: false,
         message: '許可するファイル形式は変更できません。',
@@ -471,7 +472,7 @@ export async function updatePolicy(input: UpdatePolicyInput): Promise<ApiRespons
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -521,7 +522,7 @@ export async function updatePolicy(input: UpdatePolicyInput): Promise<ApiRespons
 
     const result = await dynamoDocClient.send(updateCommand);
 
-    console.log('Policy updated successfully:', {
+    debugLog('Policy updated successfully:', {
       policyId: input.policyId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
@@ -602,7 +603,7 @@ export async function deletePolicy(
       await dynamoDocClient.send(deleteCommand);
     }
 
-    console.log('Policy deleted successfully:', { 
+    debugLog('Policy deleted successfully:', { 
       policyId, 
       softDelete 
     });
@@ -652,7 +653,7 @@ export async function restorePolicy(policyId: string): Promise<ApiResponse<Polic
 
     const result = await dynamoDocClient.send(updateCommand);
 
-    console.log('Policy restored successfully:', { policyId });
+    debugLog('Policy restored successfully:', { policyId });
 
     return {
       success: true,
@@ -670,7 +671,7 @@ export async function restorePolicy(policyId: string): Promise<ApiResponse<Polic
  */
 export async function getPolicyAnalysesForPolicy(policyId: string): Promise<ApiResponse<{ analyses: PolicyAnalysisEntry[] }>> {
   try {
-    console.log('Getting policy analyses for policy:', { policyId });
+    debugLog('Getting policy analyses for policy:', { policyId });
 
     const result = await getPolicyAnalysesByPolicyIdAction(policyId, 50);
 
@@ -701,7 +702,7 @@ export async function startPolicyAnalysis(
   model: string
 ): Promise<ApiResponse<PolicyAnalysisEntry>> {
   try {
-    console.log('Starting policy analysis:', { policyId, model });
+    debugLog('Starting policy analysis:', { policyId, model });
 
     const result = await createPolicyAnalysisAction({
       policyId,

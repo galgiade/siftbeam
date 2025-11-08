@@ -135,6 +135,11 @@ export default async function ServiceContainer({ locale }: ServiceContainerProps
     );
     
   } catch (error: any) {
+    // NEXT_REDIRECTエラーの場合は再スロー（Next.jsの正常なリダイレクト動作）
+    if (error?.digest?.startsWith('NEXT_REDIRECT') || error?.message === 'NEXT_REDIRECT') {
+      throw error;
+    }
+    
     console.error('Service container error:', error);
     
     // フォールバック辞書を使用

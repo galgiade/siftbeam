@@ -177,7 +177,8 @@ const en: UserManagementLocale = {
     executeDelete: "Execute Deletion",
     close: "Close",
     roleUser: "User",
-    roleAdmin: "Administrator"
+    roleAdmin: "Administrator",
+    retryAfter: "Retry available after"
   },
   modal: {
     emailVerificationTitle: "Email Address Verification",

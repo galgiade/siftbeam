@@ -6,6 +6,7 @@ import { getUserCustomAttributes } from '@/app/utils/cognito-utils';
 import { ApiResponse, UserAttributesDTO } from '@/app/lib/types/TypeAPIs';
 import { UpdateUserAttributesCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { cognitoClient } from '@/app/lib/aws-clients';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -82,11 +83,11 @@ export default async function createPaymentSubscription(
       });
 
       await cognitoClient.send(updateCommand);
-      console.log('Cognito attributes updated successfully');
+      debugLog('Cognito attributes updated successfully');
     } catch (cognitoError) {
-      console.error('Error updating Cognito attributes:', cognitoError);
+      errorLog('Error updating Cognito attributes:', cognitoError);
       // Cognito更新に失敗した場合でもStripeは成功しているので、警告として記録
-      console.warn('Stripe payment method set successfully, but Cognito update failed');
+      warnLog('Stripe payment method set successfully, but Cognito update failed');
       
       // 必要に応じて、Cognito更新の失敗をユーザーに通知
       // ただし、Stripeの設定は成功しているので、エラーとして返さない
@@ -99,7 +100,7 @@ export default async function createPaymentSubscription(
       throw new Error('Stripe price ID is not configured. Please check environment variables.');
     }
 
-    console.log('Creating subscription with price:', { processingPriceId });
+    debugLog('Creating subscription with price:', { processingPriceId });
 
     // 5. 請求サイクル設定（締め日: 月末、請求日: 翌月1日、支払期日: 翌月5日）
     const now = new Date();
@@ -117,12 +118,12 @@ export default async function createPaymentSubscription(
     // UTCタイムスタンプに変換（JST -> UTC）
     const billingCycleAnchor = Math.floor((billingDate.getTime() - jstOffset) / 1000);
     
-    console.log('Current JST:', nowJST.toISOString());
-    console.log('請求サイクル: 月末締め（当月1日〜末日）');
-    console.log('請求書発行日: 翌月1日');
-    console.log('支払方法: カード自動決済（請求書発行時に即座に決済）');
-    console.log('Next billing cycle start (JST):', billingDate.toISOString());
-    console.log('Billing cycle anchor (UTC timestamp):', billingCycleAnchor);
+    debugLog('Current JST:', nowJST.toISOString());
+    debugLog('請求サイクル: 月末締め（当月1日〜末日）');
+    debugLog('請求書発行日: 翌月1日');
+    debugLog('支払方法: カード自動決済（請求書発行時に即座に決済）');
+    debugLog('Next billing cycle start (JST):', billingDate.toISOString());
+    debugLog('Billing cycle anchor (UTC timestamp):', billingCycleAnchor);
 
     // 6. 従量課金対応のサブスクリプションを作成（月末締め）
     const subscription = await stripe.subscriptions.create({
@@ -149,12 +150,12 @@ export default async function createPaymentSubscription(
     // Next.js 15のServer Actionでのリダイレクト
     redirect(`/${userLocale}/account/user`);
   } catch (error: any) {
-    console.error('Error creating payment subscription:', error);
-    
     // NEXT_REDIRECTエラーの場合は再スロー（Next.jsの正常な動作）
     if (error.digest?.startsWith('NEXT_REDIRECT')) {
       throw error;
     }
+    
+    errorLog('Error creating payment subscription:', error);
     
     // Stripeエラーの詳細を取得
     let errorMessage = '支払い設定の作成に失敗しました';

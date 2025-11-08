@@ -54,7 +54,11 @@ const ja: SignUpAuthLocale = {
     verificationCodeNotFound: "認証コードが見つからないか期限切れです",
     remainingAttempts: "残り試行回数",
     verificationCodeExpired: "認証コードの有効期限が切れています",
-    maxAttemptsReached: "試行回数が上限に達しました"
+    maxAttemptsReached: "試行回数が上限に達しました",
+    rateLimitExceeded: "試行回数の上限に達しました。しばらく待ってから再試行してください。",
+    rateLimitBlocked: "一時的にブロックされています。しばらく待ってから再試行してください。",
+    rateLimitSendExceeded: "認証コードの送信回数が上限に達しました。しばらく待ってから再試行してください。",
+    rateLimitCheckExceeded: "認証コードの確認回数が上限に達しました。しばらく待ってから再試行してください。"
   },
   modal: {
     emailVerificationTitle: "メールアドレス確認",

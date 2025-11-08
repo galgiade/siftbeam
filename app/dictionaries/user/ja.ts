@@ -50,7 +50,8 @@ const ja: UserProfileLocale = {
     generalUserPermission: "一般ユーザー権限",
     adminPermission: "管理者権限",
     verifyAndUpdate: "認証して更新",
-    verificationCodePlaceholder: "認証コード（6桁）"
+    verificationCodePlaceholder: "認証コード（6桁）",
+    retryAfter: "以降に再試行可能"
   },
   modal: {
     modalTitle: "メールアドレス確認",

@@ -177,7 +177,8 @@ const zh: UserManagementLocale = {
     executeDelete: "执行删除",
     close: "关闭",
     roleUser: "用户",
-    roleAdmin: "管理员"
+    roleAdmin: "管理员",
+    retryAfter: "后可重试"
   },
   modal: {
     emailVerificationTitle: "邮箱地址验证",
