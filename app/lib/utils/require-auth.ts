@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getUserCustomAttributes, type UserAttributes } from '@/app/utils/cognito-utils';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 export interface UserProfile {
   sub: string;
@@ -19,7 +20,7 @@ export async function requireUserProfile(locale: string = 'ja', skipDeletionChec
     const userAttributes = await getUserCustomAttributes();
     
     if (!userAttributes) {
-      console.log('No user attributes found, redirecting to signin');
+      debugLog('No user attributes found, redirecting to signin');
       redirect(`/${locale}/signin`);
     }
 
@@ -28,34 +29,34 @@ export async function requireUserProfile(locale: string = 'ja', skipDeletionChec
       redirect(`/${locale}/signin`);
     }
     
-    console.log('userAttributes:', userAttributes);
-    console.log('userAttributes.custom:customerId:', userAttributes['custom:customerId']);
-    console.log('userAttributes.preferred_username:', userAttributes.preferred_username);
-    console.log('userAttributes.locale:', userAttributes.locale);
-    console.log('userAttributes.custom:role:', userAttributes['custom:role']);
-    console.log('userAttributes.custom:paymentMethodId:', userAttributes['custom:paymentMethodId']);
+    debugLog('userAttributes:', userAttributes);
+    debugLog('userAttributes.custom:customerId:', userAttributes['custom:customerId']);
+    debugLog('userAttributes.preferred_username:', userAttributes.preferred_username);
+    debugLog('userAttributes.locale:', userAttributes.locale);
+    debugLog('userAttributes.custom:role:', userAttributes['custom:role']);
+    debugLog('userAttributes.custom:paymentMethodId:', userAttributes['custom:paymentMethodId']);
     
     // Stripe顧客IDが未設定の場合は会社情報登録へ
     if (!userAttributes['custom:customerId']) {
-      console.log('customerId未設定 - 会社情報登録ページにリダイレクト');
+      debugLog('customerId未設定 - 会社情報登録ページにリダイレクト');
       redirect(`/${locale}/signup/create-company`);
     }
 
     // 管理者プロファイルが未設定の場合は管理者作成へ
     if (!userAttributes.preferred_username) {
-      console.log('preferred_username未設定 - 管理者作成ページにリダイレクト');
+      debugLog('preferred_username未設定 - 管理者作成ページにリダイレクト');
       redirect(`/${locale}/signup/create-admin`);
     }
 
     // 支払い方法が未設定の場合は支払い方法登録ページへ
     if (!userAttributes['custom:paymentMethodId']) {
-      console.log('paymentMethodId未設定 - 支払い方法登録ページにリダイレクト');
+      debugLog('paymentMethodId未設定 - 支払い方法登録ページにリダイレクト');
       redirect(`/${locale}/signup/payment`);
     }
     
     // 削除リクエストがある場合は削除ページにリダイレクト（無限ループ防止のためskipDeletionCheckで制御）
     if (!skipDeletionCheck && userAttributes['custom:deletionRequestedAt']) {
-      console.log('deletionRequestedAt設定 - アカウント削除キャンセルページにリダイレクト');
+      debugLog('deletionRequestedAt設定 - アカウント削除キャンセルページにリダイレクト');
       redirect(`/${locale}/cancel-account-deletion`);
     }
     
@@ -69,14 +70,13 @@ export async function requireUserProfile(locale: string = 'ja', skipDeletionChec
       paymentMethodId: userAttributes['custom:paymentMethodId']
     };
   } catch (error: any) {
-    console.error('Error in requireUserProfile:', error);
-    
     // NEXT_REDIRECTエラーの場合は再スロー（Next.jsの正常な動作）
     if (error.digest?.startsWith('NEXT_REDIRECT')) {
       throw error;
     }
     
-    // その他のエラーの場合はサインインページにリダイレクト
+    // その他のエラーの場合はログを出力してサインインページにリダイレクト
+    errorLog('Error in requireUserProfile:', error);
     redirect(`/${locale}/signin`);
   }
 }
@@ -90,8 +90,14 @@ export async function requireAuth(locale: string = 'ja'): Promise<UserAttributes
     }
 
     return userAttributes;
-  } catch (error) {
-    console.error('Error in requireAuth:', error);
+  } catch (error: any) {
+    // NEXT_REDIRECTエラーの場合は再スロー（Next.jsの正常な動作）
+    if (error.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error;
+    }
+    
+    // その他のエラーの場合はログを出力してサインインページにリダイレクト
+    errorLog('Error in requireAuth:', error);
     redirect(`/${locale}/signin`);
   }
 }

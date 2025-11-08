@@ -54,7 +54,11 @@ const de: SignUpAuthLocale = {
     verificationCodeNotFound: "Bestätigungscode nicht gefunden oder abgelaufen",
     remainingAttempts: "Verbleibende Versuche",
     verificationCodeExpired: "Bestätigungscode ist abgelaufen",
-    maxAttemptsReached: "Maximale Anzahl der Versuche erreicht"
+    maxAttemptsReached: "Maximale Anzahl der Versuche erreicht",
+    rateLimitExceeded: "Maximale Anzahl der Versuche erreicht. Bitte versuchen Sie es später erneut.",
+    rateLimitBlocked: "Vorübergehend blockiert. Bitte versuchen Sie es später erneut.",
+    rateLimitSendExceeded: "Maximale Anzahl der Bestätigungscode-Sendungen erreicht. Bitte versuchen Sie es später erneut.",
+    rateLimitCheckExceeded: "Maximale Anzahl der Bestätigungscode-Überprüfungen erreicht. Bitte versuchen Sie es später erneut."
   },
   modal: {
     emailVerificationTitle: "E-Mail-Bestätigung",

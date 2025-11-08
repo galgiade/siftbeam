@@ -3,6 +3,7 @@
 import { PutCommand, GetCommand, UpdateCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamoDocClient } from '@/app/lib/aws-clients';
 import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const USER_PROFILE_TABLE = process.env.USER_TABLE_NAME;
 
@@ -53,7 +54,7 @@ export async function createUserProfile(
 
     await dynamoDocClient.send(command);
 
-    console.log(`User profile created for user: ${userId}`);
+    debugLog(`User profile created for user: ${userId}`);
     
     // 監査ログ記録（成功）
     await logSuccessAction('CREATE', 'UserProfile', 'profile', '', userName);
@@ -63,7 +64,7 @@ export async function createUserProfile(
       message: 'ユーザープロファイルが正常に作成されました。',
     };
   } catch (error: any) {
-    console.error('Error creating user profile:', error);
+    errorLog('Error creating user profile:', error);
     
     // 監査ログ記録（失敗）
     await logFailureAction('CREATE', 'UserProfile', error?.message || 'ユーザープロファイル作成に失敗しました', 'profile', '', userName);
@@ -86,11 +87,11 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     const response = await dynamoDocClient.send(command);
     return response.Item as UserProfile || null;
   } catch (error: any) {
-    console.error('Error getting user profile:', error);
+    errorLog('Error getting user profile:', error);
     
     // DynamoDB権限エラーの場合は一時的にnullを返す
     if (error.name === 'AccessDeniedException') {
-      console.log('DynamoDB access denied, returning null');
+      debugLog('DynamoDB access denied, returning null');
       return null;
     }
     
@@ -118,7 +119,7 @@ export async function updateUserProfile(
 
     await dynamoDocClient.send(command);
 
-    console.log(`User profile updated for user: ${userId}`);
+    debugLog(`User profile updated for user: ${userId}`);
     
     // 監査ログ記録（成功）
     await logSuccessAction('UPDATE', 'UserProfile', 'department,position', '', userId);
@@ -128,11 +129,11 @@ export async function updateUserProfile(
       message: 'ユーザープロファイルが正常に更新されました。',
     };
   } catch (error: any) {
-    console.error('Error updating user profile:', error);
+    errorLog('Error updating user profile:', error);
     
     // DynamoDB権限エラーの場合は一時的に成功を返す（開発用）
     if (error.name === 'AccessDeniedException') {
-      console.log('DynamoDB access denied, using temporary workaround');
+      debugLog('DynamoDB access denied, using temporary workaround');
       return {
         success: true,
         message: 'ユーザープロファイルが正常に更新されました。（開発モード）',
@@ -164,11 +165,11 @@ export async function getUserProfileByCustomerId(customerId: string): Promise<Us
     const response = await dynamoDocClient.send(command);
     return response.Items?.[0] as UserProfile || null;
   } catch (error: any) {
-    console.error('Error getting user profile by customerId:', error);
+    errorLog('Error getting user profile by customerId:', error);
     
     // DynamoDB権限エラーの場合は一時的にnullを返す
     if (error.name === 'AccessDeniedException') {
-      console.log('DynamoDB access denied, returning null');
+      debugLog('DynamoDB access denied, returning null');
       return null;
     }
     

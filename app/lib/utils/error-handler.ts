@@ -33,7 +33,7 @@ export function getFieldError(
  * 
  * @example
  * const passwordErrors = getFieldErrors(result.errors, 'password');
- * passwordErrors.forEach(error => console.log(error));
+ * passwordErrors.forEach(error => debugLog(error));
  */
 export function getFieldErrors(
   errors: Record<string, string[]> | undefined,

@@ -51,7 +51,8 @@ const ko: UserProfileLocale = {
     generalUserPermission: "일반 사용자 권한",
     adminPermission: "관리자 권한",
     verifyAndUpdate: "인증 및 업데이트",
-    verificationCodePlaceholder: "인증 코드(6자리)"
+    verificationCodePlaceholder: "인증 코드(6자리)",
+    retryAfter: "이후 재시도 가능"
   },
   modal: {
     modalTitle: "이메일 확인",

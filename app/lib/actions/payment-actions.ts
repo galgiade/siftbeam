@@ -3,6 +3,7 @@
 import Stripe from 'stripe';
 import { getUserCustomAttributes, updateUserCustomAttribute } from '@/app/utils/cognito-utils';
 import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -55,7 +56,7 @@ export async function getPaymentMethodsAction(customerId: string): Promise<Payme
       paymentMethods: paymentMethods.data
     };
   } catch (error) {
-    console.error('Error fetching payment methods:', error);
+    errorLog('Error fetching payment methods:', error);
     return {
       success: false,
       message: 'Failed to fetch payment methods'
@@ -82,7 +83,7 @@ export async function getDefaultPaymentMethodAction(customerId: string) {
       defaultPaymentMethodId: typeof defaultPaymentMethodId === 'string' ? defaultPaymentMethodId : null
     };
   } catch (error) {
-    console.error('Error fetching default payment method:', error);
+    errorLog('Error fetching default payment method:', error);
     return {
       success: false,
       message: 'Failed to fetch default payment method'
@@ -127,7 +128,7 @@ export async function createSetupIntentAction(): Promise<SetupIntentResponse> {
       }
     };
   } catch (error) {
-    console.error('Error creating setup intent:', error);
+    errorLog('Error creating setup intent:', error);
     return {
       success: false,
       message: 'Failed to create setup intent'
@@ -183,7 +184,7 @@ export async function confirmSetupIntentAction(
       const cognitoUpdateResult = await updateUserCustomAttribute('custom:paymentMethodId', paymentMethodId);
       
       if (!cognitoUpdateResult.success) {
-        console.warn('Failed to update Cognito paymentMethodId for first card:', cognitoUpdateResult.message);
+        warnLog('Failed to update Cognito paymentMethodId for first card:', cognitoUpdateResult.message);
       }
     }
 
@@ -203,7 +204,7 @@ export async function confirmSetupIntentAction(
       }
     };
   } catch (error) {
-    console.error('Error confirming setup intent:', error);
+    errorLog('Error confirming setup intent:', error);
     return {
       success: false,
       error: {
@@ -253,7 +254,7 @@ export async function setDefaultPaymentMethodAction(paymentMethodId: string) {
     const cognitoUpdateResult = await updateUserCustomAttribute('custom:paymentMethodId', paymentMethodId);
     
     if (!cognitoUpdateResult.success) {
-      console.warn('Failed to update Cognito paymentMethodId:', cognitoUpdateResult.message);
+      warnLog('Failed to update Cognito paymentMethodId:', cognitoUpdateResult.message);
       // Cognitoの更新に失敗してもStripeの更新は成功しているので、警告のみ
     }
 
@@ -265,7 +266,7 @@ export async function setDefaultPaymentMethodAction(paymentMethodId: string) {
       message: 'Default payment method set successfully'
     };
   } catch (error: any) {
-    console.error('Error setting default payment method:', error);
+    errorLog('Error setting default payment method:', error);
     
     // 監査ログ記録（失敗）
     await logFailureAction('UPDATE', 'PaymentMethod', error?.message || 'Failed to set default payment method', 'defaultPaymentMethod', '', paymentMethodId);
@@ -299,7 +300,7 @@ export async function getInvoicesAction(customerId: string, limit: number = 20, 
       hasMore: invoices.has_more
     };
   } catch (error) {
-    console.error('Error fetching invoices:', error);
+    errorLog('Error fetching invoices:', error);
     return {
       success: false,
       message: 'Failed to fetch invoices',
@@ -346,7 +347,7 @@ export async function getInvoicePdfAction(invoiceId: string) {
       invoiceNumber: invoice.number
     };
   } catch (error) {
-    console.error('Error fetching invoice PDF:', error);
+    errorLog('Error fetching invoice PDF:', error);
     return {
       success: false,
       message: 'Failed to fetch invoice PDF'
@@ -408,7 +409,7 @@ export async function deletePaymentMethodAction(paymentMethodId: string) {
       message: 'Payment method deleted successfully'
     };
   } catch (error: any) {
-    console.error('Error deleting payment method:', error);
+    errorLog('Error deleting payment method:', error);
     
     // 監査ログ記録（失敗）
     await logFailureAction('DELETE', 'PaymentMethod', error?.message || 'Failed to delete payment method', 'paymentMethod', '', '');
@@ -491,7 +492,7 @@ export async function createSubscriptionAction(paymentMethodId: string) {
       message: 'Subscription created successfully'
     };
   } catch (error: any) {
-    console.error('Error creating subscription:', error);
+    errorLog('Error creating subscription:', error);
     
     // 監査ログ記録（失敗）
     await logFailureAction('CREATE', 'Subscription', error?.message || 'Failed to create subscription', 'subscriptionId', '', '');

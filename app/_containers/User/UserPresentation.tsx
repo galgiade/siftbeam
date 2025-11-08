@@ -9,7 +9,7 @@ import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
 import type { UserProfileLocale } from '@/app/dictionaries/user/user.d.ts';
 import { RiEdit2Fill } from "react-icons/ri"
 import { FaCheck, FaXmark } from "react-icons/fa6"
-import { sendVerificationEmailAction, storeVerificationCodeAction, verifyEmailCodeForUpdateAction } from "@/app/lib/actions/user-verification-actions"
+import { sendVerificationEmailAction, verifyEmailCodeForUpdateAction } from "@/app/lib/actions/user-verification-actions"
 
 interface UserPresentationProps {
   user: User;
@@ -166,26 +166,11 @@ export default function UserProfilePresentation({
     setEmailVerificationState(prev => ({ ...prev, isSendingCode: true }));
     
     try {
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // 認証コードをDynamoDBに保存
-      const storeResult = await storeVerificationCodeAction(
-        user.userId,
-        newEmail,
-        code,
-        userAttributes.locale || 'ja'
-      );
-      
-      if (!storeResult.success) {
-        setFieldErrors({ ...fieldErrors, email: storeResult.error || dictionary.alert.codeStoreFailed });
-        return;
-      }
-      
-      // 認証コードをメールで送信
+      // sendVerificationEmailAction内で認証コード生成、保存、送信を全て行う
       const emailResult = await sendVerificationEmailAction(
         newEmail,
-        code,
-        userAttributes.locale || 'ja'
+        user.userId,
+        userAttributes.locale || 'en'
       );
       
       if (emailResult.success) {
@@ -197,7 +182,23 @@ export default function UserProfilePresentation({
         }));
         setFieldErrors({ ...fieldErrors, email: '' });
       } else {
-        setFieldErrors({ ...fieldErrors, email: emailResult.error || 'メール送信に失敗しました。' });
+        // ✅ 新しいAPI: messageKey を使用（ロケール対応）
+        let errorMessage = 'メール送信に失敗しました。';
+        
+        if (emailResult.messageKey) {
+          // レート制限エラーの場合、辞書から取得
+          errorMessage = emailResult.error || 'メール送信に失敗しました。';
+          
+          // リセット時刻も表示（ロケール対応）
+          if (emailResult.resetAt) {
+            const formattedTime = emailResult.resetAt.toLocaleString(userAttributes.locale || 'en');
+            errorMessage = `${errorMessage} (${formattedTime} ${dictionary.label.retryAfter})`;
+          }
+        } else if (emailResult.error) {
+          errorMessage = emailResult.error;
+        }
+        
+        setFieldErrors({ ...fieldErrors, email: errorMessage });
       }
     } catch (error: any) {
       setFieldErrors({ ...fieldErrors, email: error?.message || 'エラーが発生しました。' });
@@ -216,7 +217,7 @@ export default function UserProfilePresentation({
         user.userId,
         emailVerificationState.newEmail,
         emailVerificationState.verificationCode,
-        userAttributes.locale || 'ja'
+        userAttributes.locale || 'en'
       );
       
       if (result.success) {
@@ -239,7 +240,23 @@ export default function UserProfilePresentation({
           setFieldErrors({ ...fieldErrors, email: updateResult.message || dictionary.alert.emailUpdateFail });
         }
       } else {
-        setFieldErrors({ ...fieldErrors, email: result.error || dictionary.alert.invalidConfirmationCode });
+        // ✅ 新しいAPI: messageKey を使用（ロケール対応）
+        let errorMessage = dictionary.alert.invalidConfirmationCode;
+        
+        if (result.messageKey) {
+          // レート制限エラーの場合
+          errorMessage = result.error || dictionary.alert.invalidConfirmationCode;
+          
+          // リセット時刻も表示（ロケール対応）
+          if (result.resetAt) {
+            const formattedTime = result.resetAt.toLocaleString(userAttributes.locale || 'en');
+            errorMessage = `${errorMessage} (${formattedTime} ${dictionary.label.retryAfter})`;
+          }
+        } else if (result.error) {
+          errorMessage = result.error;
+        }
+        
+        setFieldErrors({ ...fieldErrors, email: errorMessage });
       }
     } catch (error: any) {
       setFieldErrors({ ...fieldErrors, email: error?.message || dictionary.alert.updateError });

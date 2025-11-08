@@ -176,6 +176,7 @@ export type UserManagementLocale = {
     close: string;
     roleUser: string;
     roleAdmin: string;
+    retryAfter: string;
   };
   modal: {
     emailVerificationTitle: string;

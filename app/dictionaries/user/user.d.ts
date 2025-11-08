@@ -24,6 +24,7 @@ export interface UserProfileLocale {
     adminPermission: string;
     verifyAndUpdate: string;
     verificationCodePlaceholder: string;
+    retryAfter: string;
   };
   alert: {
     updateSuccess: string;

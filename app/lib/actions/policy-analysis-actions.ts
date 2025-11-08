@@ -5,6 +5,7 @@ import { DynamoDBDocumentClient, PutCommand, QueryCommand, GetCommand, UpdateCom
 import { v4 as uuidv4 } from 'uuid';
 import { getUserCustomAttributes } from '@/app/utils/cognito-utils';
 import { logSuccessAction, logFailureAction } from './audit-log-actions';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const client = new DynamoDBClient({
   region: process.env.REGION || 'ap-northeast-1',
@@ -124,7 +125,7 @@ export async function createPolicyAnalysisAction(request: CreatePolicyAnalysisRe
       analysis: analysisEntry
     };
   } catch (error: any) {
-    console.error('Error creating policy analysis:', error);
+    errorLog('Error creating policy analysis:', error);
     await logFailureAction('CREATE', 'PolicyAnalysis', error.message || 'Failed to create policy analysis');
     return {
       success: false,
@@ -205,7 +206,7 @@ export async function getPolicyAnalysesByCustomerIdAction(
       lastEvaluatedKey: response.LastEvaluatedKey,
     };
   } catch (error: any) {
-    console.error('Error fetching policy analyses by customer ID:', error);
+    errorLog('Error fetching policy analyses by customer ID:', error);
     await logFailureAction('READ', 'PolicyAnalysis', error.message || 'Failed to fetch policy analyses');
     return { success: false, message: error.message || 'Failed to fetch policy analyses' };
   }
@@ -248,7 +249,7 @@ export async function getPolicyAnalysesByPolicyIdAction(
       lastEvaluatedKey: response.LastEvaluatedKey,
     };
   } catch (error: any) {
-    console.error('Error fetching policy analyses by policy ID:', error);
+    errorLog('Error fetching policy analyses by policy ID:', error);
     await logFailureAction('READ', 'PolicyAnalysis', error.message || 'Failed to fetch policy analyses');
     return { success: false, message: error.message || 'Failed to fetch policy analyses' };
   }
@@ -290,7 +291,7 @@ export async function getPolicyAnalysisByIdAction(analysisId: string): Promise<P
 
     return { success: true, analysis };
   } catch (error: any) {
-    console.error('Error fetching policy analysis by ID:', error);
+    errorLog('Error fetching policy analysis by ID:', error);
     await logFailureAction('READ', 'PolicyAnalysis', error.message || 'Failed to fetch policy analysis');
     return { success: false, message: error.message || 'Failed to fetch policy analysis' };
   }
@@ -392,7 +393,7 @@ export async function updatePolicyAnalysisAction(request: UpdatePolicyAnalysisRe
       analysis: response.Attributes as PolicyAnalysisEntry
     };
   } catch (error: any) {
-    console.error('Error updating policy analysis:', error);
+    errorLog('Error updating policy analysis:', error);
     await logFailureAction('UPDATE', 'PolicyAnalysis', error.message || 'Failed to update policy analysis');
     return {
       success: false,
@@ -441,7 +442,7 @@ export async function deletePolicyAnalysisAction(analysisId: string): Promise<Po
       message: 'Policy analysis deleted successfully'
     };
   } catch (error: any) {
-    console.error('Error deleting policy analysis:', error);
+    errorLog('Error deleting policy analysis:', error);
     await logFailureAction('DELETE', 'PolicyAnalysis', error.message || 'Failed to delete policy analysis');
     return {
       success: false,
@@ -467,7 +468,7 @@ export async function updatePolicyAnalysisStatusAction(
 
     return await updatePolicyAnalysisAction(updateRequest);
   } catch (error: any) {
-    console.error('Error updating policy analysis status:', error);
+    errorLog('Error updating policy analysis status:', error);
     await logFailureAction('UPDATE', 'PolicyAnalysis', error.message || 'Failed to update policy analysis status');
     return {
       success: false,
@@ -499,7 +500,7 @@ export async function updatePolicyAnalysisResultsAction(
 
     return await updatePolicyAnalysisAction(updateRequest);
   } catch (error: any) {
-    console.error('Error updating policy analysis results:', error);
+    errorLog('Error updating policy analysis results:', error);
     await logFailureAction('UPDATE', 'PolicyAnalysis', error.message || 'Failed to update policy analysis results');
     return {
       success: false,
@@ -538,7 +539,7 @@ export async function getAllPolicyAnalysesAction(
       lastEvaluatedKey: response.LastEvaluatedKey,
     };
   } catch (error: any) {
-    console.error('Error fetching all policy analyses:', error);
+    errorLog('Error fetching all policy analyses:', error);
     await logFailureAction('READ', 'PolicyAnalysis', error.message || 'Failed to fetch all policy analyses');
     return { success: false, message: error.message || 'Failed to fetch all policy analyses' };
   }
@@ -586,7 +587,7 @@ export async function getPolicyAnalysesByStatusAction(
       lastEvaluatedKey: response.LastEvaluatedKey,
     };
   } catch (error: any) {
-    console.error('Error fetching policy analyses by status:', error);
+    errorLog('Error fetching policy analyses by status:', error);
     await logFailureAction('READ', 'PolicyAnalysis', error.message || 'Failed to fetch policy analyses by status');
     return { success: false, message: error.message || 'Failed to fetch policy analyses by status' };
   }
@@ -662,7 +663,7 @@ export async function setActivePolicyAnalysisAction(analysisId: string): Promise
       analysis: updatedAnalysis
     };
   } catch (error: any) {
-    console.error('Error setting active policy analysis:', error);
+    errorLog('Error setting active policy analysis:', error);
     await logFailureAction('UPDATE', 'PolicyAnalysis', error.message || 'Failed to set active policy analysis');
     return { success: false, message: error.message || 'Failed to set active policy analysis' };
   }

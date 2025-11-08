@@ -21,7 +21,6 @@ interface PolicySelectorProps {
 
 /**
  * ポリシー選択コンポーネント
- * TODO: 実際のポリシーAPIと連携する
  */
 export default function PolicySelector({ 
   customerId, 
@@ -34,44 +33,28 @@ export default function PolicySelector({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // TODO: 実際のポリシーAPIから取得
+  // ポリシーAPIから取得
   useEffect(() => {
     const fetchPolicies = async () => {
       try {
         setLoading(true);
         
-        // モックデータ（実際のAPIに置き換える）
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 擬似的な遅延
+        // 実際のポリシーAPIから取得（policy-api.tsのqueryPoliciesを使用）
+        const { queryPolicies } = await import('@/app/lib/actions/policy-api');
+        const result = await queryPolicies({ customerId });
         
-        const mockPolicies: Policy[] = [
-          {
-            id: 'policy-image-classification',
-            policyName: '画像分類',
-            description: '画像を自動的に分類します',
-            acceptedFileTypes: ['image/jpeg', 'image/png', 'image/webp']
-          },
-          {
-            id: 'policy-text-analysis',
-            policyName: 'テキスト分析',
-            description: 'テキストの感情分析や要約を行います',
-            acceptedFileTypes: ['text/plain', 'text/csv', 'application/json']
-          },
-          {
-            id: 'policy-data-clustering',
-            policyName: 'データクラスタリング',
-            description: 'データを自動的にグループ化します',
-            acceptedFileTypes: ['text/csv', 'application/json', 'application/vnd.ms-excel']
-          },
-          {
-            id: 'policy-prediction-model',
-            policyName: '予測モデル',
-            description: '機械学習による予測を実行します',
-            acceptedFileTypes: ['text/csv', 'application/json']
-          }
-        ];
-        
-        setPolicies(mockPolicies);
-        setError('');
+        if (result.success && result.data) {
+          const formattedPolicies: Policy[] = result.data.policies.map(p => ({
+            id: p.policyId,
+            policyName: p.policyName,
+            description: p.description,
+            acceptedFileTypes: p.acceptedFileTypes
+          }));
+          setPolicies(formattedPolicies);
+          setError('');
+        } else {
+          setError(dictionary.error.policiesFetchFailed);
+        }
       } catch (err: any) {
         console.error('Policy fetch error:', err);
         setError(dictionary.error.policiesFetchFailed);

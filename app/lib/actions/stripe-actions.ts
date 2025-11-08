@@ -5,6 +5,7 @@ import { getUserCustomAttributes } from '@/app/utils/cognito-utils';
 import { UpdateUserAttributesCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { cognitoClient } from '@/app/lib/aws-clients';
 import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -71,7 +72,7 @@ function convertCountryNameToCode(countryName: string): string {
   
   // 既に国コードの場合はそのまま返す
   if (countryName.length === 2 && countryName.match(/^[A-Z]{2}$/)) {
-    console.log('✅ Already country code:', countryName);
+    debugLog('✅ Already country code:', countryName);
     return countryName;
   }
   
@@ -97,18 +98,18 @@ function convertCountryNameToCode(countryName: string): string {
   
   // 日本語名からの変換を試行
   if (countryMapping[countryName]) {
-    console.log(`✅ Country name "${countryName}" converted to code "${countryMapping[countryName]}"`);
+    debugLog(`✅ Country name "${countryName}" converted to code "${countryMapping[countryName]}"`);
     return countryMapping[countryName];
   }
   
-  console.warn(`⚠️ Could not convert country name "${countryName}" to country code`);
+  warnLog(`⚠️ Could not convert country name "${countryName}" to country code`);
   return countryName; // 変換できない場合はそのまま返す
 }
 
 // Stripe顧客情報を取得
 export async function getStripeCustomerAction(customerId: string): Promise<ApiResponse<StripeCustomer>> {
   try {
-    console.log('Retrieving Stripe customer:', customerId);
+    debugLog('Retrieving Stripe customer:', customerId);
     
     const customer = await stripe.customers.retrieve(customerId);
     
@@ -130,7 +131,7 @@ export async function getStripeCustomerAction(customerId: string): Promise<ApiRe
       metadata: customer.metadata,
     };
     
-    console.log('✅ Customer retrieved successfully:', customer.id);
+    debugLog('✅ Customer retrieved successfully:', customer.id);
     
     return {
       success: true,
@@ -138,7 +139,7 @@ export async function getStripeCustomerAction(customerId: string): Promise<ApiRe
       data: customerData,
     };
   } catch (error: any) {
-    console.error('❌ Error retrieving customer:', error);
+    errorLog('❌ Error retrieving customer:', error);
     return {
       success: false,
       message: error?.message || '顧客情報の取得に失敗しました。',
@@ -152,7 +153,7 @@ export async function updateStripeCustomerAction(
   updateData: CustomerUpdateInput
 ): Promise<ApiResponse<StripeCustomer>> {
   try {
-    console.log('Updating Stripe customer:', { customerId, updateData });
+    debugLog('Updating Stripe customer:', { customerId, updateData });
     
     // 更新前の値を取得（監査ログ用）
     const existingCustomer = await stripe.customers.retrieve(customerId);
@@ -166,7 +167,7 @@ export async function updateStripeCustomerAction(
     
     // 住所フィールドが含まれている場合、既存の住所情報を取得してマージ
     if (updateData.address) {
-      console.log('Address update detected, merging with existing data...');
+      debugLog('Address update detected, merging with existing data...');
       
       // 既存の住所情報と新しい住所情報をマージ
       const currentAddress = existingCustomer.address || {
@@ -186,7 +187,7 @@ export async function updateStripeCustomerAction(
         state: updateData.address.state ?? currentAddress.state ?? undefined,
       };
       
-      console.log('Address merged:', { 
+      debugLog('Address merged:', { 
         current: currentAddress, 
         update: updateData.address 
       });
@@ -196,7 +197,7 @@ export async function updateStripeCustomerAction(
     if (updateData.address?.country) {
       const originalCountry = updateData.address.country;
       updateData.address.country = convertCountryNameToCode(originalCountry);
-      console.log('Country field converted:', { original: originalCountry, converted: updateData.address.country });
+      debugLog('Country field converted:', { original: originalCountry, converted: updateData.address.country });
     }
     
     // バリデーション
@@ -251,7 +252,7 @@ export async function updateStripeCustomerAction(
       metadata: updatedCustomer.metadata,
     };
     
-    console.log('✅ Customer updated successfully:', updatedCustomer.id);
+    debugLog('✅ Customer updated successfully:', updatedCustomer.id);
     
     // 監査ログ記録（成功） - 各フィールドごとに記録
     if (updateData.name !== undefined) {
@@ -278,7 +279,7 @@ export async function updateStripeCustomerAction(
       data: customerData,
     };
   } catch (error: any) {
-    console.error('❌ Error updating customer:', error);
+    errorLog('❌ Error updating customer:', error);
     
     // 監査ログ記録（失敗）
     await logFailureAction('UPDATE', 'StripeCustomer', error?.message || '顧客情報の更新に失敗しました', 'customerId', '', customerId);
@@ -303,7 +304,7 @@ export async function checkPaymentMethodsAction(customerId: string): Promise<Pay
       paymentMethods: paymentMethods.data
     };
   } catch (error) {
-    console.error('Error checking payment methods:', error);
+    errorLog('Error checking payment methods:', error);
     return {
       success: false,
       hasPaymentMethods: false,
@@ -393,11 +394,11 @@ export async function createStripeCustomerAction(formData: FormData): Promise<Cr
       });
 
       await cognitoClient.send(updateCommand);
-      console.log('Cognito attributes updated successfully with customer ID:', customer.id);
+      debugLog('Cognito attributes updated successfully with customer ID:', customer.id);
     } catch (cognitoError) {
-      console.error('Error updating Cognito attributes:', cognitoError);
+      errorLog('Error updating Cognito attributes:', cognitoError);
       // Cognito更新に失敗した場合でもStripeは成功しているので、警告として記録
-      console.warn('Stripe customer created successfully, but Cognito update failed');
+      warnLog('Stripe customer created successfully, but Cognito update failed');
     }
 
     // 監査ログ記録（成功）
@@ -409,7 +410,7 @@ export async function createStripeCustomerAction(formData: FormData): Promise<Cr
       message: 'Customer created successfully'
     };
   } catch (error: any) {
-    console.error('Error creating Stripe customer:', error);
+    errorLog('Error creating Stripe customer:', error);
     
     // 監査ログ記録（失敗）
     await logFailureAction('CREATE', 'StripeCustomer', error?.message || 'Failed to create customer', 'customerId', '', '');

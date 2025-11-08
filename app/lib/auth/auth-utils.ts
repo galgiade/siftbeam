@@ -1,6 +1,7 @@
 // 認証ユーティリティ（サーバーサイド用）
 import { GetUserCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { cognitoClient } from '@/app/lib/aws-clients';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 export interface AuthUser {
   sub: string;
@@ -57,7 +58,7 @@ export async function getCurrentUserServer(accessToken: string): Promise<AuthUse
 
     return user;
   } catch (error) {
-    console.error('Error getting current user:', error);
+    errorLog('Error getting current user:', error);
     return null;
   }
 }

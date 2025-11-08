@@ -54,7 +54,11 @@ const ko: SignUpAuthLocale = {
     verificationCodeNotFound: "인증 코드를 찾을 수 없거나 만료되었습니다",
     remainingAttempts: "남은 시도 횟수",
     verificationCodeExpired: "인증 코드가 만료되었습니다",
-    maxAttemptsReached: "최대 시도 횟수에 도달했습니다"
+    maxAttemptsReached: "최대 시도 횟수에 도달했습니다",
+    rateLimitExceeded: "최대 시도 횟수에 도달했습니다. 잠시 후 다시 시도해주세요.",
+    rateLimitBlocked: "일시적으로 차단되었습니다. 잠시 후 다시 시도해주세요.",
+    rateLimitSendExceeded: "인증 코드 전송 횟수가 상한에 도달했습니다. 잠시 후 다시 시도해주세요.",
+    rateLimitCheckExceeded: "인증 코드 확인 횟수가 상한에 도달했습니다. 잠시 후 다시 시도해주세요."
   },
   modal: {
     emailVerificationTitle: "이메일 확인",

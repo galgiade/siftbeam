@@ -51,7 +51,8 @@ const de: UserProfileLocale = {
     generalUserPermission: "Allgemeine Benutzerberechtigung",
     adminPermission: "Administratorberechtigung",
     verifyAndUpdate: "Verifizieren und Aktualisieren",
-    verificationCodePlaceholder: "Bestätigungscode (6 Ziffern)"
+    verificationCodePlaceholder: "Bestätigungscode (6 Ziffern)",
+    retryAfter: "Wiederholung verfügbar nach"
   },
   modal: {
     modalTitle: "E-Mail-Bestätigung",

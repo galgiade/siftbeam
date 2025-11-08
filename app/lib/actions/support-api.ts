@@ -1,5 +1,6 @@
 'use server'
 
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 import { 
   GetCommand, 
   PutCommand, 
@@ -86,7 +87,7 @@ export interface QuerySupportRepliesInput {
  * エラーハンドリング用のヘルパー関数
  */
 function handleError(error: any, operation: string): ApiResponse<any> {
-  console.error(`Error in ${operation}:`, {
+  errorLog(`Error in ${operation}:`, {
     name: error.name,
     message: error.message,
     code: error.code,
@@ -203,7 +204,7 @@ export async function getSupportRequestById(supportRequestId: string): Promise<A
       };
     }
 
-    console.log('Support request retrieved successfully:', { supportRequestId });
+    debugLog('Support request retrieved successfully:', { supportRequestId });
 
     return {
       success: true,
@@ -264,7 +265,7 @@ export async function querySupportRequests(
     const result = await dynamoDocClient.send(command);
     const supportRequests = result.Items as SupportRequest[];
 
-    console.log('Support requests queried successfully:', { 
+    debugLog('Support requests queried successfully:', { 
       count: supportRequests.length, 
       customerId: input.customerId,
       status: input.status
@@ -289,7 +290,7 @@ export async function querySupportRequests(
  */
 export async function createSupportRequest(input: CreateSupportRequestInput): Promise<ApiResponse<SupportRequest>> {
   try {
-    console.log('createSupportRequest called with input:', input);
+    debugLog('createSupportRequest called with input:', input);
     
     // 入力バリデーション
     const errors: Record<string, string[]> = {};
@@ -319,7 +320,7 @@ export async function createSupportRequest(input: CreateSupportRequestInput): Pr
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -356,7 +357,7 @@ export async function createSupportRequest(input: CreateSupportRequestInput): Pr
 
     await dynamoDocClient.send(putCommand);
 
-    console.log('Support request created successfully:', { 
+    debugLog('Support request created successfully:', { 
       supportRequestId,
       subject: input.subject,
       customerId: input.customerId 
@@ -384,7 +385,7 @@ export async function createSupportRequest(input: CreateSupportRequestInput): Pr
  */
 export async function updateSupportRequest(input: UpdateSupportRequestInput): Promise<ApiResponse<SupportRequest>> {
   try {
-    console.log('updateSupportRequest called with:', input);
+    debugLog('updateSupportRequest called with:', input);
     
     // 個別フィールドバリデーション（提供されたフィールドのみ）
     const errors: Record<string, string[]> = {};
@@ -406,7 +407,7 @@ export async function updateSupportRequest(input: UpdateSupportRequestInput): Pr
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -477,7 +478,7 @@ export async function updateSupportRequest(input: UpdateSupportRequestInput): Pr
 
     const result = await dynamoDocClient.send(updateCommand);
 
-    console.log('Support request updated successfully:', {
+    debugLog('Support request updated successfully:', {
       supportRequestId: input.supportRequestId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
@@ -541,7 +542,7 @@ export async function deleteSupportRequest(
       await dynamoDocClient.send(deleteCommand);
     }
 
-    console.log('Support request deleted successfully:', { 
+    debugLog('Support request deleted successfully:', { 
       supportRequestId, 
       softDelete 
     });
@@ -584,7 +585,7 @@ export async function getSupportReplyById(supportReplyId: string): Promise<ApiRe
       };
     }
 
-    console.log('Support reply retrieved successfully:', { supportReplyId });
+    debugLog('Support reply retrieved successfully:', { supportReplyId });
 
     return {
       success: true,
@@ -622,7 +623,7 @@ export async function querySupportReplies(
     const result = await dynamoDocClient.send(command);
     const supportReplies = result.Items as SupportReply[];
 
-    console.log('Support replies queried successfully:', { 
+    debugLog('Support replies queried successfully:', { 
       supportRequestId: input.supportRequestId,
       count: supportReplies.length
     });
@@ -646,7 +647,7 @@ export async function querySupportReplies(
  */
 export async function createSupportReply(input: CreateSupportReplyInput): Promise<ApiResponse<SupportReply>> {
   try {
-    console.log('createSupportReply called with input:', input);
+    debugLog('createSupportReply called with input:', input);
     
     // 入力バリデーション
     const errors: Record<string, string[]> = {};
@@ -672,7 +673,7 @@ export async function createSupportReply(input: CreateSupportReplyInput): Promis
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -707,7 +708,7 @@ export async function createSupportReply(input: CreateSupportReplyInput): Promis
 
     await dynamoDocClient.send(putCommand);
 
-    console.log('Support reply created successfully:', { 
+    debugLog('Support reply created successfully:', { 
       supportReplyId,
       supportRequestId: input.supportRequestId,
       senderType: input.senderType
@@ -729,7 +730,7 @@ export async function createSupportReply(input: CreateSupportReplyInput): Promis
  */
 export async function updateSupportReply(input: UpdateSupportReplyInput): Promise<ApiResponse<SupportReply>> {
   try {
-    console.log('updateSupportReply called with:', input);
+    debugLog('updateSupportReply called with:', input);
     
     // 個別フィールドバリデーション（提供されたフィールドのみ）
     const errors: Record<string, string[]> = {};
@@ -739,7 +740,7 @@ export async function updateSupportReply(input: UpdateSupportReplyInput): Promis
     }
     
     if (Object.keys(errors).length > 0) {
-      console.log('Validation errors:', errors);
+      debugLog('Validation errors:', errors);
       return {
         success: false,
         message: '入力内容に誤りがあります。',
@@ -792,7 +793,7 @@ export async function updateSupportReply(input: UpdateSupportReplyInput): Promis
 
     const result = await dynamoDocClient.send(updateCommand);
 
-    console.log('Support reply updated successfully:', {
+    debugLog('Support reply updated successfully:', {
       supportReplyId: input.supportReplyId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
@@ -835,7 +836,7 @@ export async function deleteSupportReply(
 
     await dynamoDocClient.send(deleteCommand);
 
-    console.log('Support reply deleted successfully:', { 
+    debugLog('Support reply deleted successfully:', { 
       supportReplyId, 
       softDelete 
     });

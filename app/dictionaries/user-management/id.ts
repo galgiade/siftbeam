@@ -177,7 +177,8 @@ const id: UserManagementLocale = {
     executeDelete: "Jalankan Penghapusan",
     close: "Tutup",
     roleUser: "Pengguna",
-    roleAdmin: "Administrator"
+    roleAdmin: "Administrator",
+    retryAfter: "Coba lagi tersedia setelah"
   },
   modal: {
     emailVerificationTitle: "Verifikasi Alamat Email",

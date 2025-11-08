@@ -2,6 +2,7 @@
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const REGION = process.env.REGION || 'ap-northeast-1';
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || 'siftbeam';
@@ -65,7 +66,7 @@ export async function generatePresignedUrl(
     // S3キーを生成
     const s3Key = `service/${fileType_metadata}/${customerId}/${processingHistoryId}/${fileName}`;
 
-    console.log('Generating presigned URL:', {
+    debugLog('Generating presigned URL:', {
       s3Key,
       fileType,
       isLastFile,
@@ -88,7 +89,7 @@ export async function generatePresignedUrl(
       expiresIn: 3600, // 1時間
     });
 
-    console.log('Presigned URL generated successfully:', {
+    debugLog('Presigned URL generated successfully:', {
       s3Key,
       expiresIn: 3600,
     });
@@ -102,7 +103,7 @@ export async function generatePresignedUrl(
       },
     };
   } catch (error: any) {
-    console.error('Error generating presigned URL:', error);
+    errorLog('Error generating presigned URL:', error);
     return {
       success: false,
       message: '署名付きURLの生成に失敗しました。',

@@ -6,6 +6,7 @@ import { AdminUpdateUserAttributesCommand } from '@aws-sdk/client-cognito-identi
 import { cognitoClient } from '@/app/lib/aws-clients';
 import { logSuccessAction, logFailureAction } from '@/app/lib/actions/audit-log-actions';
 import { queryUsers } from '@/app/lib/actions/user-api';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -85,7 +86,7 @@ export async function requestAccountDeletionAction(): Promise<DeletionRequestRes
       deletionRequestedAt: deletionRequestedAt
     };
   } catch (error) {
-    console.error('Error requesting account deletion:', error);
+    errorLog('Error requesting account deletion:', error);
     
     // 失敗の監査ログを記録
     await logFailureAction(
@@ -156,7 +157,7 @@ export async function restoreAccountAction(): Promise<RestoreAccountResponse> {
       restoredUsers: restoredUsers
     };
   } catch (error) {
-    console.error('Error restoring account:', error);
+    errorLog('Error restoring account:', error);
     
     // 失敗の監査ログを記録
     await logFailureAction(
@@ -228,7 +229,7 @@ export async function checkDeletionStatusAction(): Promise<DeletionStatusRespons
       message: 'Account is active'
     };
   } catch (error) {
-    console.error('Error checking deletion status:', error);
+    errorLog('Error checking deletion status:', error);
     return {
       success: false,
       isDeleted: false,
@@ -275,7 +276,7 @@ async function updateAllUsersWithCustomerId(customerId: string, deletionRequeste
           await cognitoClient.send(updateCommand);
           return 1;
         } catch (error) {
-          console.error(`Failed to update user ${user.userId}:`, error);
+          errorLog(`Failed to update user ${user.userId}:`, error);
           return 0;
         }
       });
@@ -287,7 +288,7 @@ async function updateAllUsersWithCustomerId(customerId: string, deletionRequeste
 
     return affectedUsers;
   } catch (error) {
-    console.error('Error updating users with deletion flag:', error);
+    errorLog('Error updating users with deletion flag:', error);
     throw error;
   }
 }
@@ -330,7 +331,7 @@ async function removeAllUsersCustomerIdDeletionFlag(customerId: string): Promise
           await cognitoClient.send(updateCommand);
           return 1;
         } catch (error) {
-          console.error(`Failed to restore user ${user.userId}:`, error);
+          errorLog(`Failed to restore user ${user.userId}:`, error);
           return 0;
         }
       });
@@ -342,7 +343,7 @@ async function removeAllUsersCustomerIdDeletionFlag(customerId: string): Promise
 
     return restoredUsers;
   } catch (error) {
-    console.error('Error removing deletion flag from users:', error);
+    errorLog('Error removing deletion flag from users:', error);
     throw error;
   }
 }
@@ -372,7 +373,7 @@ async function countUsersWithCustomerId(customerId: string): Promise<number> {
 
     return userCount;
   } catch (error) {
-    console.error('Error counting users with customerId:', error);
+    errorLog('Error counting users with customerId:', error);
     return 0;
   }
 }

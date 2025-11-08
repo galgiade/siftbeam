@@ -3,10 +3,11 @@
 
 import { QueryCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { dynamoDocClient } from '@/app/lib/aws-clients';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 // テーブル名
 const ANNOUNCEMENT_TABLE_NAME = process.env.ANNOUNCEMENT_TABLE_NAME;
-console.log("ANNOUNCEMENT_TABLE_NAME", ANNOUNCEMENT_TABLE_NAME);
+debugLog("ANNOUNCEMENT_TABLE_NAME", ANNOUNCEMENT_TABLE_NAME);
 // アナウンスメントの型定義（Amplifyスキーマ準拠）
 export interface Announcement {
   announcementId: string;        // パーティションキー
@@ -44,7 +45,7 @@ export async function getAnnouncementAction(announcementId: string): Promise<Ann
     
     return null;
   } catch (error: any) {
-    console.error('アナウンスメント取得エラー:', error);
+    errorLog('アナウンスメント取得エラー:', error);
     return null;
   }
 }
@@ -65,14 +66,14 @@ export async function getAnnouncementsAction(locale: string = 'ja', limit: numbe
       Limit: limit,
     });
     const result = await dynamoDocClient.send(command);
-    console.log("result", result);
+    debugLog("result", result);
     if (result.Items) {
       return result.Items as Announcement[];
     }
     
     return [];
   } catch (error: any) {
-    console.error('アナウンスメント一覧取得エラー:', error);
+    errorLog('アナウンスメント一覧取得エラー:', error);
     return [];
   }
 }

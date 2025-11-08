@@ -177,7 +177,8 @@ const ko: UserManagementLocale = {
     executeDelete: "삭제 실행",
     close: "닫기",
     roleUser: "사용자",
-    roleAdmin: "관리자"
+    roleAdmin: "관리자",
+    retryAfter: "이후 재시도 가능"
   },
   modal: {
     emailVerificationTitle: "이메일 주소 확인",

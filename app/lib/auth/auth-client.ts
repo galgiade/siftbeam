@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { getCurrentUserAction, signOutAction, type AuthUser } from './auth-actions';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 export function useAuth() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -14,7 +15,7 @@ export function useAuth() {
         const userData = await getCurrentUserAction();
         setUser(userData);
       } catch (error) {
-        console.error('Auth check error:', error);
+        errorLog('Auth check error:', error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -29,7 +30,7 @@ export function useAuth() {
       await signOutAction();
       setUser(null);
     } catch (error) {
-      console.error('Sign out error:', error);
+      errorLog('Sign out error:', error);
     }
   };
 

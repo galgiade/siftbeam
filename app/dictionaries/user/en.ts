@@ -50,7 +50,8 @@ const en: UserProfileLocale = {
     generalUserPermission: "General User Permission",
     adminPermission: "Administrator Permission",
     verifyAndUpdate: "Verify and Update",
-    verificationCodePlaceholder: "Verification Code (6 digits)"
+    verificationCodePlaceholder: "Verification Code (6 digits)",
+    retryAfter: "Retry available after"
   },
   modal: {
     modalTitle: "Email Confirmation",

@@ -8,6 +8,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { dynamoDocClient } from '@/app/lib/aws-clients';
 import { ApiResponse } from '@/app/lib/types/TypeAPIs';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const DATA_USAGE_TABLE_NAME = process.env.DATA_USAGE_TABLE_NAME || 'siftbeam-data-usages';
 
@@ -49,7 +50,7 @@ export interface CreateDataUsageInput {
  * エラーハンドリング用のヘルパー関数
  */
 function handleError(error: any, operation: string): ApiResponse<any> {
-  console.error(`Error in ${operation}:`, {
+  errorLog(`Error in ${operation}:`, {
     name: error.name,
     message: error.message,
     code: error.code,
@@ -79,7 +80,7 @@ function generateId(): string {
  */
 export async function createDataUsage(input: CreateDataUsageInput): Promise<ApiResponse<DataUsage>> {
   try {
-    console.log('createDataUsage called with:', input);
+    debugLog('createDataUsage called with:', input);
     
     // 入力バリデーション
     const errors: Record<string, string[]> = {};
@@ -153,7 +154,7 @@ export async function createDataUsage(input: CreateDataUsageInput): Promise<ApiR
 
     await dynamoDocClient.send(putCommand);
 
-    console.log('Data usage created successfully:', {
+    debugLog('Data usage created successfully:', {
       dataUsageId: dataUsageIdValue,
       customerId: input.customerId,
       usageAmountBytes: input.usageAmountBytes
@@ -199,7 +200,7 @@ export async function getCustomerMonthlyUsage(
     // 合計バイト数を計算
     const totalBytes = usageRecords.reduce((sum, record) => sum + record.usageAmountBytes, 0);
 
-    console.log('Customer monthly usage retrieved:', {
+    debugLog('Customer monthly usage retrieved:', {
       customerId,
       startOfMonth: startOfMonthISO,
       totalBytes,
@@ -249,7 +250,7 @@ export async function getUserMonthlyUsage(
     // 合計バイト数を計算
     const totalBytes = usageRecords.reduce((sum, record) => sum + record.usageAmountBytes, 0);
 
-    console.log('User monthly usage retrieved:', {
+    debugLog('User monthly usage retrieved:', {
       userId,
       startOfMonth: startOfMonthISO,
       totalBytes,
@@ -281,7 +282,7 @@ export async function updateDataUsage(
   }
 ): Promise<ApiResponse<DataUsage>> {
   try {
-    console.log('updateDataUsage called with:', { dataUsageId, updates });
+    debugLog('updateDataUsage called with:', { dataUsageId, updates });
     
     // 更新する属性を動的に構築
     const updateExpressions: string[] = [];
@@ -329,7 +330,7 @@ export async function updateDataUsage(
     
     const result = await dynamoDocClient.send(command);
     
-    console.log('Data usage updated successfully:', {
+    debugLog('Data usage updated successfully:', {
       dataUsageId,
       updatedFields: Object.keys(expressionAttributeValues).filter(key => key !== ':updatedAt')
     });
@@ -341,7 +342,7 @@ export async function updateDataUsage(
     };
     
   } catch (error: any) {
-    console.error('Error updating data usage:', error);
+    errorLog('Error updating data usage:', error);
     
     if (error.name === 'ConditionalCheckFailedException') {
       return {

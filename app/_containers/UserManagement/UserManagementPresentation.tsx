@@ -9,7 +9,7 @@ import { UserAttributesDTO } from "@/app/lib/types/TypeAPIs"
 import type { UserManagementLocale } from '@/app/dictionaries/user-management/user-management.d.ts';
 import { RiEdit2Fill } from "react-icons/ri"
 import { FaCheck, FaXmark, FaPlus, FaTrash } from "react-icons/fa6"
-import { sendVerificationEmailAction, storeVerificationCodeAction, verifyEmailCodeForUpdateAction } from "@/app/lib/actions/user-verification-actions"
+import { sendVerificationEmailAction, verifyEmailCodeForUpdateAction } from "@/app/lib/actions/user-verification-actions"
 import Link from "next/link"
 
 interface UserManagementPresentationProps {
@@ -250,26 +250,11 @@ export default function UserManagementPresentation({
     setEmailVerificationState(prev => ({ ...prev, isSendingCode: true }));
     
     try {
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // 認証コードをDynamoDBに保存
-      const storeResult = await storeVerificationCodeAction(
-        selectedUser.userId,
-        newEmail,
-        code,
-        userAttributes.locale || 'en'
-      );
-      
-      if (!storeResult.success) {
-        setFieldErrors({ ...fieldErrors, email: storeResult.error || dictionary.label.codeSaveFailed });
-        return;
-      }
-      
-      // 認証コードをメールで送信
+      // sendVerificationEmailAction内で認証コード生成、保存、送信を全て行う
       const emailResult = await sendVerificationEmailAction(
         newEmail,
-        code,
-        userAttributes.locale || 'ja'
+        selectedUser.userId,
+        userAttributes.locale || 'en'
       );
       
       if (emailResult.success) {
@@ -281,7 +266,23 @@ export default function UserManagementPresentation({
         }));
         setFieldErrors({ ...fieldErrors, email: '' });
       } else {
-        setFieldErrors({ ...fieldErrors, email: emailResult.error || dictionary.label.emailSendFailed });
+        // ✅ 新しいAPI: messageKey を使用（ロケール対応）
+        let errorMessage = dictionary.label.emailSendFailed;
+        
+        if (emailResult.messageKey) {
+          // レート制限エラーの場合、辞書から取得
+          errorMessage = emailResult.error || dictionary.label.emailSendFailed;
+          
+          // リセット時刻も表示（ロケール対応）
+          if (emailResult.resetAt) {
+            const formattedTime = emailResult.resetAt.toLocaleString(userAttributes.locale || 'en');
+            errorMessage = `${errorMessage} (${formattedTime} ${dictionary.label.retryAfter})`;
+          }
+        } else if (emailResult.error) {
+          errorMessage = emailResult.error;
+        }
+        
+        setFieldErrors({ ...fieldErrors, email: errorMessage });
       }
     } catch (error: any) {
       setFieldErrors({ ...fieldErrors, email: error?.message || dictionary.label.errorOccurredGeneric });
@@ -302,7 +303,7 @@ export default function UserManagementPresentation({
         selectedUser.userId,
         emailVerificationState.newEmail,
         emailVerificationState.verificationCode,
-        userAttributes.locale || 'ja'
+        userAttributes.locale || 'en'
       );
       
       if (result.success) {
@@ -325,7 +326,23 @@ export default function UserManagementPresentation({
           setFieldErrors({ ...fieldErrors, email: updateResult.message || dictionary.label.emailUpdateFailed });
         }
       } else {
-        setFieldErrors({ ...fieldErrors, email: result.error || dictionary.label.invalidVerificationCode });
+        // ✅ 新しいAPI: messageKey を使用（ロケール対応）
+        let errorMessage = dictionary.label.invalidVerificationCode;
+        
+        if (result.messageKey) {
+          // レート制限エラーの場合
+          errorMessage = result.error || dictionary.label.invalidVerificationCode;
+          
+          // リセット時刻も表示（ロケール対応）
+          if (result.resetAt) {
+            const formattedTime = result.resetAt.toLocaleString(userAttributes.locale || 'en');
+            errorMessage = `${errorMessage} (${formattedTime} ${dictionary.label.retryAfter})`;
+          }
+        } else if (result.error) {
+          errorMessage = result.error;
+        }
+        
+        setFieldErrors({ ...fieldErrors, email: errorMessage });
       }
     } catch (error: any) {
       setFieldErrors({ ...fieldErrors, email: error?.message || dictionary.label.errorOccurredGeneric });

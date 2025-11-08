@@ -4,6 +4,7 @@ import { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand, DeleteCo
 import { dynamoDocClient } from '@/app/lib/aws-clients';
 import { sendVerificationCodeEmailAction } from '@/app/lib/actions/email-actions';
 import { randomBytes } from 'crypto';
+import { debugLog, errorLog, warnLog } from '@/app/lib/utils/logger';
 
 const VERIFICATION_TABLE_NAME = 'siftbeam-verification-codes';
 
@@ -74,7 +75,7 @@ export async function createVerificationCodeAction(
       };
     }
 
-    console.log(`Verification code created and email sent for ${email}: ${code}`); // 開発用ログ
+    debugLog(`Verification code created and email sent for ${email}: ${code}`); // 開発用ログ
 
     return {
       success: true,
@@ -82,17 +83,17 @@ export async function createVerificationCodeAction(
       verificationId,
     };
   } catch (error: any) {
-    console.error('Error creating verification code:', error);
+    errorLog('Error creating verification code:', error);
     
     // DynamoDB権限エラーの場合は一時的にダミーデータを返す
     if (error.name === 'AccessDeniedException') {
-      console.log('DynamoDB access denied, using temporary workaround');
+      debugLog('DynamoDB access denied, using temporary workaround');
       
       // 一時的なverificationIdを生成
       const tempVerificationId = generateVerificationId();
       
       // 開発用ログ（本来はメール送信）
-      console.log(`TEMPORARY: Verification code for ${email}: ${generateVerificationCode()}`);
+      debugLog(`TEMPORARY: Verification code for ${email}: ${generateVerificationCode()}`);
       
       return {
         success: true,
@@ -187,15 +188,15 @@ export async function verifyCodeAction(
       };
     }
   } catch (error: any) {
-    console.error('Error verifying code:', error);
+    errorLog('Error verifying code:', error);
     
     // DynamoDB権限エラーの場合は一時的に成功を返す（開発用）
     if (error.name === 'AccessDeniedException') {
-      console.log('DynamoDB access denied, using temporary workaround for verification');
+      debugLog('DynamoDB access denied, using temporary workaround for verification');
       
       // 開発モードでは任意のコードを受け入れる
       if (inputCode && inputCode.length === 6) {
-        console.log(`TEMPORARY: Accepting verification code ${inputCode} for development`);
+        debugLog(`TEMPORARY: Accepting verification code ${inputCode} for development`);
         return {
           success: true,
           message: '認証が完了しました（開発モード）',
@@ -221,7 +222,7 @@ export async function deleteVerificationCodeAction(verificationId: string): Prom
 
     await dynamoDocClient.send(command);
   } catch (error) {
-    console.error('Error deleting verification code:', error);
+    errorLog('Error deleting verification code:', error);
   }
 }
 
@@ -264,14 +265,14 @@ export async function resendVerificationCodeAction(
       newVerificationId: newResult.verificationId,
     };
   } catch (error: any) {
-    console.error('Error resending verification code:', error);
+    errorLog('Error resending verification code:', error);
     
     // DynamoDB権限エラーの場合は一時的に成功を返す（開発用）
     if (error.name === 'AccessDeniedException') {
-      console.log('DynamoDB access denied, using temporary workaround for resend');
+      debugLog('DynamoDB access denied, using temporary workaround for resend');
       
       const tempVerificationId = generateVerificationId();
-      console.log(`TEMPORARY: New verification code generated: ${generateVerificationCode()}`);
+      debugLog(`TEMPORARY: New verification code generated: ${generateVerificationCode()}`);
       
       return {
         success: true,
