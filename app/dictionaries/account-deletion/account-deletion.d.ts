@@ -94,6 +94,7 @@ export type AccountDeletionLocale = {
     restoringButton: string;
     supportContact: string;
     supportTeam: string;
+    pleaseContact: string;
     unknown: string;
   };
   alert: {

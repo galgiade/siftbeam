@@ -95,6 +95,7 @@ const ja: AccountDeletionLocale = {
     restoringButton: "復旧処理中...",
     supportContact: "この操作について不明な点がある場合は、",
     supportTeam: "サポートチーム",
+    pleaseContact: "にお問い合わせください。",
     unknown: "不明"
   },
   alert: {

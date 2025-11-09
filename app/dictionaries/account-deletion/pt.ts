@@ -95,6 +95,7 @@ const pt: AccountDeletionLocale = {
     restoringButton: "Restaurando...",
     supportContact: "Se tiver dúvidas sobre esta ação, entre em contato com a",
     supportTeam: "equipe de suporte",
+    pleaseContact: ".",
     unknown: "Desconhecido"
   },
   alert: {

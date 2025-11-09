@@ -95,6 +95,7 @@ const ko: AccountDeletionLocale = {
     restoringButton: "복구 중...",
     supportContact: "이 작업에 대해 궁금한 점이 있으면",
     supportTeam: "지원 팀",
+    pleaseContact: "에 문의하세요.",
     unknown: "알 수 없음"
   },
   alert: {
