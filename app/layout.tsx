@@ -6,7 +6,8 @@ import GoogleAnalytics from "@/app/_components/common/GoogleAnalytics";
 import { WebVitals } from "@/app/_components/common/WebVitals";
 import { PageTracking } from "@/app/_components/common/PageTracking";
 import { checkRequiredEnvVars } from "@/app/lib/utils/validateEnv";
-
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 // 環境変数の検証（開発環境でのみ実行）
 if (process.env.NODE_ENV === 'development') {
   checkRequiredEnvVars();
@@ -101,6 +102,8 @@ export default async function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

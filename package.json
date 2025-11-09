@@ -31,6 +31,8 @@
     "@stripe/stripe-js": "^8.0.0",
     "@types/jszip": "^3.4.0",
     "@types/uuid": "^10.0.0",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
     "framer-motion": "^12.23.22",
     "i18n-iso-countries": "^7.14.0",
     "jszip": "^3.10.1",
