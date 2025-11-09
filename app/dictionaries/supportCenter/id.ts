@@ -37,6 +37,7 @@ const id: SupportCenterLocale = {
     markUnresolved: "Tandai belum selesai",
     staff: "Staf",
     customer: "Pelanggan",
+    customerAdmin: "Admin Pelanggan",
     problemType: "Jenis masalah",
     technicalIssue: "Masalah teknis",
     accountRelated: "Terkait akun",

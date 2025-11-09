@@ -37,6 +37,7 @@ const de: SupportCenterLocale = {
     markUnresolved: "Als ungelöst markieren",
     staff: "Mitarbeiter",
     customer: "Kunde",
+    customerAdmin: "Kundenadministrator",
     problemType: "Problemtyp",
     technicalIssue: "Technisches Problem",
     accountRelated: "Kontobezogen",

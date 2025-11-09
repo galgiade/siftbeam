@@ -35,6 +35,7 @@ export type SupportCenterLocale = {
     markUnresolved: string;
     staff: string;
     customer: string;
+    customerAdmin: string;
     problemType: string;
     technicalIssue: string;
     accountRelated: string;

@@ -10,6 +10,7 @@ import type { CommonLocale } from '@/app/dictionaries/common/common.d.ts';
 import { FaLifeRing, FaPaperPlane, FaArrowLeft, FaClock, FaCircleCheck, FaCircleExclamation, FaUser, FaHeadset, FaFile, FaImage, FaVideo, FaMusic, FaRotateLeft } from "react-icons/fa6"
 import Link from "next/link"
 import FileUploader from "@/app/_components/FileUploader"
+import FileDownloadButton from "@/app/_components/FileDownloadButton"
 import { v4 as uuidv4 } from 'uuid'
 
 interface SupportDetailPresentationProps {
@@ -76,7 +77,7 @@ const getSenderTypeConfig = (senderType: string, dictionary: SupportCenterLocale
   const configs: Record<string, any> = {
     'customer': { icon: FaUser, label: dictionary.label.customer, color: 'text-blue-600' },
     'support': { icon: FaHeadset, label: dictionary.label.staff, color: 'text-green-600' },
-    'admin': { icon: FaHeadset, label: dictionary.label.staff, color: 'text-purple-600' }
+    'admin': { icon: FaUser, label: dictionary.label.customerAdmin, color: 'text-purple-600' }
   };
   return configs[senderType] || configs['customer'];
 };
@@ -373,6 +374,11 @@ export default function SupportDetailPresentation({
                           {dictionary.label.requestCreationTime}
                         </p>
                       </div>
+                      <FileDownloadButton
+                        fileKey={fileKey}
+                        fileName={fileName}
+                        size="md"
+                      />
                     </div>
                   );
                 })}
@@ -437,6 +443,11 @@ export default function SupportDetailPresentation({
                                     {fileName}
                                   </p>
                                 </div>
+                                <FileDownloadButton
+                                  fileKey={fileKey}
+                                  fileName={fileName}
+                                  size="sm"
+                                />
                               </div>
                             );
                           })}

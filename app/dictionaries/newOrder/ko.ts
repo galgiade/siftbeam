@@ -136,6 +136,7 @@ const ko: NewOrderLocale = {
     customer: "고객",
     support: "지원",
     admin: "관리자",
+    customerAdmin: "고객 관리자",
     sendMessage: "메시지 보내기",
     sending: "전송 중...",
     sendMessageButton: "메시지 보내기",

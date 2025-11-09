@@ -158,6 +158,7 @@ export type NewOrderLocale = {
     customer: string;
     support: string;
     admin: string;
+    customerAdmin: string;
     sendMessage: string;
     sending: string;
     sendMessageButton: string;

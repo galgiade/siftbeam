@@ -136,6 +136,7 @@ const zh: NewOrderLocale = {
     customer: "客户",
     support: "支持",
     admin: "管理员",
+    customerAdmin: "客户管理员",
     sendMessage: "发送消息",
     sending: "发送中...",
     sendMessageButton: "发送消息",

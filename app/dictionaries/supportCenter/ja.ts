@@ -37,6 +37,7 @@ const ja: SupportCenterLocale = {
     markUnresolved: "未対応に戻す",
     staff: "スタッフ",
     customer: "お客様",
+    customerAdmin: "顧客管理者",
     problemType: "問題タイプ",
     technicalIssue: "技術的な問題",
     accountRelated: "アカウント関連",

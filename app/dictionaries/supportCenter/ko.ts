@@ -37,6 +37,7 @@ const ko: SupportCenterLocale = {
     markUnresolved: "미해결로 표시",
     staff: "담당자",
     customer: "고객",
+    customerAdmin: "고객 관리자",
     problemType: "문제 종류",
     technicalIssue: "기술 문제",
     accountRelated: "계정 관련",

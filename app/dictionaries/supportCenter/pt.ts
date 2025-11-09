@@ -37,6 +37,7 @@ const pt: SupportCenterLocale = {
     markUnresolved: "Marcar como pendente",
     staff: "Equipe",
     customer: "Cliente",
+    customerAdmin: "Administrador do cliente",
     problemType: "Tipo de problema",
     technicalIssue: "Problema técnico",
     accountRelated: "Relacionado à conta",
