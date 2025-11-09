@@ -95,6 +95,7 @@ const zh: AccountDeletionLocale = {
     restoringButton: "正在恢复...",
     supportContact: "如对该操作有疑问，请联系",
     supportTeam: "支持团队",
+    pleaseContact: "。",
     unknown: "未知"
   },
   alert: {

@@ -95,6 +95,7 @@ const id: AccountDeletionLocale = {
     restoringButton: "Memulihkan...",
     supportContact: "Jika Anda memiliki pertanyaan tentang tindakan ini, hubungi",
     supportTeam: "tim dukungan",
+    pleaseContact: ".",
     unknown: "Tidak diketahui"
   },
   alert: {

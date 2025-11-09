@@ -95,6 +95,7 @@ const fr: AccountDeletionLocale = {
     restoringButton: "Restauration...",
     supportContact: "Pour toute question concernant cette action, contactez l'",
     supportTeam: "équipe d'assistance",
+    pleaseContact: ".",
     unknown: "Inconnu"
   },
   alert: {

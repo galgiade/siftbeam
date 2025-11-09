@@ -301,10 +301,10 @@ export default function CancelAccountDeletionPresentation({
       <div className="text-center mt-6">
         <p className="text-sm text-gray-500">
           {dictionary.label.supportContact}
-          <a href="mailto:support@example.com" className="text-blue-600 hover:underline ml-1">
-            {dictionary.label.supportTeam}
-          </a>
-          にお問い合わせください。
+          <span className="ml-1">
+            {dictionary.label.supportTeam}（connectechceomatsui@gmail.com）
+          </span>
+          {dictionary.label.pleaseContact}
         </p>
       </div>
     </div>
