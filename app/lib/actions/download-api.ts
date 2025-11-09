@@ -16,7 +16,49 @@ const s3Client = new S3Client({
 const S3_BUCKET = process.env.S3_BUCKET_NAME || 'siftbeam';
 
 /**
- * S3からファイルをダウンロードするServer Action
+ * S3から単一ファイルをダウンロードするServer Action
+ * 
+ * @param s3Key - S3キー
+ * @returns ファイルデータ（Base64エンコード）とメタデータ
+ */
+export async function downloadFile(s3Key: string): Promise<{
+  success: boolean;
+  data?: {
+    content: string;
+    fileName: string;
+    contentType: string;
+  };
+  error?: string;
+}> {
+  try {
+    if (!s3Key) {
+      return {
+        success: false,
+        error: 'S3キーが指定されていません'
+      };
+    }
+
+    return await downloadSingleFile(s3Key);
+
+  } catch (error: any) {
+    errorLog('Download error:', error);
+    
+    if (error.name === 'NoSuchKey') {
+      return {
+        success: false,
+        error: 'ファイルが見つかりません。保存期間（1年）を過ぎた可能性があります。'
+      };
+    }
+
+    return {
+      success: false,
+      error: `ダウンロードに失敗しました: ${error.message}`
+    };
+  }
+}
+
+/**
+ * S3から複数ファイルをダウンロードするServer Action
  * 
  * @param s3Keys - S3キーの配列
  * @returns ファイルデータ（Base64エンコード）とメタデータ

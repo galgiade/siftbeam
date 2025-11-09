@@ -136,6 +136,7 @@ const id: NewOrderLocale = {
     customer: "Pelanggan",
     support: "Dukungan",
     admin: "Admin",
+    customerAdmin: "Admin Pelanggan",
     sendMessage: "Kirim pesan",
     sending: "Mengirim...",
     sendMessageButton: "Kirim pesan",

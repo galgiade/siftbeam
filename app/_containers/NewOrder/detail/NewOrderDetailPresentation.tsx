@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation"
 import { FaPaperPlane, FaArrowLeft, FaClock, FaCircleCheck, FaCircleExclamation, FaUser, FaHeadset, FaFile, FaImage, FaVideo, FaMusic } from "react-icons/fa6"
 import Link from "next/link"
 import FileUploader from "@/app/_components/FileUploader"
+import FileDownloadButton from "@/app/_components/FileDownloadButton"
 import { v4 as uuidv4 } from 'uuid'
 
 interface NewOrderDetailPresentationProps {
@@ -89,7 +90,7 @@ const getSenderTypeConfig = (senderType: string, dictionary: NewOrderLocale) => 
   const configs: Record<string, any> = {
     'customer': { icon: FaUser, label: dictionary.label.customer, color: 'text-blue-600' },
     'support': { icon: FaHeadset, label: dictionary.label.support, color: 'text-green-600' },
-    'admin': { icon: FaHeadset, label: dictionary.label.admin, color: 'text-purple-600' }
+    'admin': { icon: FaUser, label: dictionary.label.customerAdmin, color: 'text-purple-600' }
   };
   return configs[senderType] || configs['customer'];
 };
@@ -342,6 +343,11 @@ export default function NewOrderDetailPresentation({
                           {dictionary.label.requestCreationTime}
                         </p>
                       </div>
+                      <FileDownloadButton
+                        fileKey={fileKey}
+                        fileName={fileName}
+                        size="md"
+                      />
                     </div>
                   );
                 })}
@@ -406,6 +412,11 @@ export default function NewOrderDetailPresentation({
                                     {fileName}
                                   </p>
                                 </div>
+                                <FileDownloadButton
+                                  fileKey={fileKey}
+                                  fileName={fileName}
+                                  size="sm"
+                                />
                               </div>
                             );
                           })}

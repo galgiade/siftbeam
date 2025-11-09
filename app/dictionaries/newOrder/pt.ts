@@ -136,6 +136,7 @@ const pt: NewOrderLocale = {
     customer: "Cliente",
     support: "Suporte",
     admin: "Admin",
+    customerAdmin: "Administrador do cliente",
     sendMessage: "Enviar mensagem",
     sending: "Enviando...",
     sendMessageButton: "Enviar mensagem",

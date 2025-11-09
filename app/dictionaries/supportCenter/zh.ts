@@ -37,6 +37,7 @@ const zh: SupportCenterLocale = {
     markUnresolved: "标记为未解决",
     staff: "工作人员",
     customer: "客户",
+    customerAdmin: "客户管理员",
     problemType: "问题类别",
     technicalIssue: "技术问题",
     accountRelated: "账户相关",

@@ -127,6 +127,7 @@ const ja: NewOrderLocale = {
     customer: "お客様",
     support: "サポート",
     admin: "管理者",
+    customerAdmin: "顧客管理者",
     sendMessage: "メッセージを送信",
     sending: "送信中...",
     sendMessageButton: "メッセージを送信",
