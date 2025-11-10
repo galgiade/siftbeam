@@ -99,9 +99,11 @@ const ko: PrivacyLocale = {
       ],
     },
     cookies: {
-      title: "쿠키 등 사용",
+      title: "쿠키, 분석 및 성능 모니터링",
       paragraphs: [
         "편의성, 보안 및 분석을 위해 쿠키/유사 기술을 사용할 수 있습니다. 브라우저에서 비활성화할 수 있으나 일부 기능에 영향이 있을 수 있습니다.",
+        "【Google Analytics】본 사이트는 서비스 개선을 위해 Google Analytics를 사용합니다. Google Analytics는 쿠키를 사용하여 사용자 행동 데이터를 수집합니다. 수집된 데이터는 Google의 개인정보 보호정책에 따라 관리되며 IP 주소는 익명화되어 처리됩니다. 수집되는 정보에는 페이지 조회수, 세션 시간, 사용 기기, 브라우저, OS, 지역 정보(국가/도시 수준), 리퍼러 등이 포함됩니다. Google Analytics 데이터 수집을 거부하려면 Google에서 제공하는 브라우저 애드온(https://tools.google.com/dlpage/gaoptout)을 설치하십시오. 자세한 내용은 Google 개인정보 보호정책(https://policies.google.com/privacy)을 참조하십시오.",
+        "【Vercel Analytics / Speed Insights】본 사이트는 개인정보 보호를 고려한 액세스 분석 및 성능 측정을 위해 Vercel Analytics 및 Vercel Speed Insights를 사용합니다. 이러한 도구는 쿠키를 사용하지 않으며 개인 식별 정보(예: IP 주소)를 수집하지 않습니다. 수집되는 정보에는 페이지 조회수, 기기 유형, 대략적인 지역 정보(국가 수준), 리퍼러 정보, 페이지 로드 시간, 상호작용 응답 시간 등이 포함됩니다. 이 정보는 통계 분석에만 사용되며 개인을 식별할 수 없습니다. 이러한 도구는 GDPR 및 CCPA를 준수합니다.",
       ],
     },
     minors: {
@@ -317,7 +319,7 @@ const ko: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "2025년 11월 7일",
+    lastUpdated: "2025년 11월 9일",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japan",

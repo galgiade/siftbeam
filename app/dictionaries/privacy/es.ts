@@ -99,9 +99,11 @@ const es: PrivacyLocale = {
       ],
     },
     cookies: {
-      title: "Cookies y Tecnologías Similares",
+      title: "Cookies, Análisis y Monitoreo de Rendimiento",
       paragraphs: [
         "Podemos usar cookies y tecnologías similares para usabilidad, seguridad y analítica. Puede deshabilitarlas en la configuración del navegador, pero algunas funciones podrían verse afectadas.",
+        "[Google Analytics] Utilizamos Google Analytics para mejorar nuestro servicio. Google Analytics utiliza cookies para recopilar datos de comportamiento del usuario. Los datos recopilados se gestionan según la Política de Privacidad de Google y las direcciones IP se anonimizan. La información recopilada incluye páginas vistas, duración de sesión, tipo de dispositivo, navegador, sistema operativo, ubicación geográfica (país/ciudad) y referente. Para desactivar la recopilación de datos de Google Analytics, puede instalar el complemento de navegador proporcionado por Google (https://tools.google.com/dlpage/gaoptout). Para más detalles, consulte la Política de Privacidad de Google (https://policies.google.com/privacy).",
+        "[Vercel Analytics / Speed Insights] Utilizamos Vercel Analytics y Vercel Speed Insights para análisis de acceso y medición de rendimiento respetuosos con la privacidad. Estas herramientas no utilizan cookies y no recopilan información de identificación personal (como direcciones IP). La información recopilada incluye páginas vistas, tipo de dispositivo, ubicación geográfica aproximada (nivel de país), información de referente, tiempos de carga de página y tiempos de respuesta de interacción. Esta información se utiliza únicamente para análisis estadístico y no puede identificar a individuos. Estas herramientas cumplen con GDPR y CCPA.",
       ],
     },
     minors: {
@@ -317,7 +319,7 @@ const es: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "7 de noviembre de 2025",
+    lastUpdated: "9 de noviembre de 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu-shi, Shizuoka, Japón",
