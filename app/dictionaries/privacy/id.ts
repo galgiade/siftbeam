@@ -100,9 +100,11 @@ const id: PrivacyLocale = {
       ],
     },
     cookies: {
-      title: "Cookie dan Teknologi Serupa",
+      title: "Cookie, Analitik, dan Pemantauan Kinerja",
       paragraphs: [
         "Kami dapat menggunakan cookie/teknologi serupa untuk kegunaan, keamanan, dan analitik. Anda dapat menonaktifkannya di pengaturan browser, namun beberapa fungsi dapat terpengaruh.",
+        "[Google Analytics] Kami menggunakan Google Analytics untuk meningkatkan layanan kami. Google Analytics menggunakan cookie untuk mengumpulkan data perilaku pengguna. Data yang dikumpulkan dikelola sesuai dengan Kebijakan Privasi Google dan alamat IP dianonimkan. Informasi yang dikumpulkan meliputi tampilan halaman, durasi sesi, jenis perangkat, browser, sistem operasi, lokasi geografis (negara/kota), dan perujuk. Untuk menonaktifkan pengumpulan data Google Analytics, Anda dapat menginstal add-on browser yang disediakan oleh Google (https://tools.google.com/dlpage/gaoptout). Untuk detail lebih lanjut, silakan lihat Kebijakan Privasi Google (https://policies.google.com/privacy).",
+        "[Vercel Analytics / Speed Insights] Kami menggunakan Vercel Analytics dan Vercel Speed Insights untuk analisis akses dan pengukuran kinerja yang menghormati privasi. Alat-alat ini tidak menggunakan cookie dan tidak mengumpulkan informasi identifikasi pribadi (seperti alamat IP). Informasi yang dikumpulkan meliputi tampilan halaman, jenis perangkat, lokasi geografis perkiraan (tingkat negara), informasi perujuk, waktu muat halaman, dan waktu respons interaksi. Informasi ini hanya digunakan untuk analisis statistik dan tidak dapat mengidentifikasi individu. Alat-alat ini mematuhi GDPR dan CCPA.",
       ],
     },
     minors: {
@@ -318,7 +320,7 @@ const id: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "7 November 2025",
+    lastUpdated: "9 November 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Jepang",

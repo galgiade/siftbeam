@@ -99,9 +99,11 @@ const de: PrivacyLocale = {
       ],
     },
     cookies: {
-      title: "Cookies und ähnliche Technologien",
+      title: "Cookies, Analysen und Leistungsüberwachung",
       paragraphs: [
         "Zur Verbesserung der Nutzbarkeit, Sicherheit und Analyse können Cookies/ähnliche Technologien eingesetzt werden. Eine Deaktivierung im Browser ist möglich, kann jedoch Funktionen beeinträchtigen.",
+        "[Google Analytics] Wir verwenden Google Analytics zur Verbesserung unseres Dienstes. Google Analytics verwendet Cookies, um Nutzungsverhaltensdaten zu erfassen. Die erfassten Daten werden gemäß der Datenschutzerklärung von Google verwaltet, und IP-Adressen werden anonymisiert. Zu den erfassten Informationen gehören Seitenaufrufe, Sitzungsdauer, Gerätetyp, Browser, Betriebssystem, geografischer Standort (Land/Stadt) und Referrer. Um die Datenerfassung durch Google Analytics zu deaktivieren, können Sie das von Google bereitgestellte Browser-Add-on installieren (https://tools.google.com/dlpage/gaoptout). Weitere Informationen finden Sie in der Datenschutzerklärung von Google (https://policies.google.com/privacy).",
+        "[Vercel Analytics / Speed Insights] Wir verwenden Vercel Analytics und Vercel Speed Insights für datenschutzfreundliche Zugriffsanalysen und Leistungsmessungen. Diese Tools verwenden keine Cookies und erfassen keine personenbezogenen Daten (wie IP-Adressen). Zu den erfassten Informationen gehören Seitenaufrufe, Gerätetyp, ungefährer geografischer Standort (Länderebene), Referrer-Informationen, Seitenladezeiten und Interaktionsantwortzeiten. Diese Informationen werden ausschließlich für statistische Analysen verwendet und können keine Personen identifizieren. Diese Tools sind DSGVO- und CCPA-konform.",
       ],
     },
     minors: {
@@ -317,7 +319,7 @@ const de: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "7. November 2025",
+    lastUpdated: "9. November 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japan",

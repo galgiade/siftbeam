@@ -99,9 +99,11 @@ const en: PrivacyLocale = {
       ],
     },
     cookies: {
-      title: "Cookies and Similar Technologies",
+      title: "Cookies, Analytics, and Performance Monitoring",
       paragraphs: [
         "We may use cookies and similar technologies for usability, security, and analytics. You can disable them in your browser settings, but some features may be affected.",
+        "[Google Analytics] We use Google Analytics to improve our service. Google Analytics uses cookies to collect user behavior data. The collected data is managed according to Google's Privacy Policy, and IP addresses are anonymized. Information collected includes page views, session duration, device type, browser, OS, geographic location (country/city level), and referrer. To opt out of Google Analytics data collection, you can install the browser add-on provided by Google (https://tools.google.com/dlpage/gaoptout). For more details, please refer to Google's Privacy Policy (https://policies.google.com/privacy).",
+        "[Vercel Analytics / Speed Insights] We use Vercel Analytics and Vercel Speed Insights for privacy-friendly access analysis and performance measurement. These tools do not use cookies and do not collect personally identifiable information (such as IP addresses). Information collected includes page views, device type, approximate geographic location (country level), referrer information, page load times, and interaction response times. This information is used solely for statistical analysis and cannot identify individuals. These tools are compliant with GDPR and CCPA.",
       ],
     },
     minors: {
@@ -317,7 +319,7 @@ const en: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "November 7, 2025",
+    lastUpdated: "November 9, 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu-shi, Shizuoka, Japan",

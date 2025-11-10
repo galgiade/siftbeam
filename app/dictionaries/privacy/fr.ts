@@ -99,9 +99,11 @@ const fr: PrivacyLocale = {
       ],
     },
     cookies: {
-      title: "Cookies et technologies similaires",
+      title: "Cookies, analyses et surveillance des performances",
       paragraphs: [
         "Nous pouvons utiliser des cookies/technologies similaires pour l'ergonomie, la sécurité et l'analyse. Ils peuvent être désactivés dans le navigateur, mais certaines fonctionnalités peuvent être affectées.",
+        "[Google Analytics] Nous utilisons Google Analytics pour améliorer notre service. Google Analytics utilise des cookies pour collecter des données sur le comportement des utilisateurs. Les données collectées sont gérées conformément à la politique de confidentialité de Google et les adresses IP sont anonymisées. Les informations collectées incluent les pages vues, la durée des sessions, le type d'appareil, le navigateur, le système d'exploitation, la localisation géographique (pays/ville) et le référent. Pour désactiver la collecte de données par Google Analytics, vous pouvez installer le module complémentaire de navigateur fourni par Google (https://tools.google.com/dlpage/gaoptout). Pour plus de détails, consultez la politique de confidentialité de Google (https://policies.google.com/privacy).",
+        "[Vercel Analytics / Speed Insights] Nous utilisons Vercel Analytics et Vercel Speed Insights pour l'analyse d'accès et la mesure des performances respectueuses de la vie privée. Ces outils n'utilisent pas de cookies et ne collectent pas d'informations permettant d'identifier personnellement les utilisateurs (comme les adresses IP). Les informations collectées incluent le nombre de pages vues, le type d'appareil, la localisation géographique approximative (niveau pays), les informations de référent, le temps de chargement des pages et le temps de réponse aux interactions. Ces informations sont utilisées uniquement à des fins d'analyse statistique et ne peuvent pas identifier les individus. Ces outils sont conformes au RGPD et au CCPA.",
       ],
     },
     minors: {
@@ -317,7 +319,7 @@ const fr: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "7 novembre 2025",
+    lastUpdated: "9 novembre 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japon",

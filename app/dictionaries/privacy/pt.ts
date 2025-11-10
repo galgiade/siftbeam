@@ -99,9 +99,11 @@ const pt: PrivacyLocale = {
       ],
     },
     cookies: {
-      title: "Cookies e Tecnologias Semelhantes",
+      title: "Cookies, Análises e Monitoramento de Desempenho",
       paragraphs: [
         "Podemos utilizar cookies/tecnologias semelhantes para usabilidade, segurança e análises. É possível desativá-los nas configurações do navegador, mas algumas funções podem ser afetadas.",
+        "[Google Analytics] Utilizamos o Google Analytics para melhorar nosso serviço. O Google Analytics utiliza cookies para coletar dados de comportamento do usuário. Os dados coletados são gerenciados de acordo com a Política de Privacidade do Google e os endereços IP são anonimizados. As informações coletadas incluem visualizações de página, duração da sessão, tipo de dispositivo, navegador, sistema operacional, localização geográfica (país/cidade) e referenciador. Para desativar a coleta de dados do Google Analytics, você pode instalar o complemento de navegador fornecido pelo Google (https://tools.google.com/dlpage/gaoptout). Para mais detalhes, consulte a Política de Privacidade do Google (https://policies.google.com/privacy).",
+        "[Vercel Analytics / Speed Insights] Utilizamos o Vercel Analytics e o Vercel Speed Insights para análise de acesso e medição de desempenho com respeito à privacidade. Essas ferramentas não utilizam cookies e não coletam informações de identificação pessoal (como endereços IP). As informações coletadas incluem visualizações de página, tipo de dispositivo, localização geográfica aproximada (nível de país), informações de referenciador, tempos de carregamento de página e tempos de resposta de interação. Essas informações são usadas apenas para análise estatística e não podem identificar indivíduos. Essas ferramentas estão em conformidade com GDPR e CCPA.",
       ],
     },
     minors: {
@@ -317,7 +319,7 @@ const pt: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "7 de novembro de 2025",
+    lastUpdated: "9 de novembro de 2025",
     company: {
       name: "Connect Tech Inc.",
       address: "Dias Wago 202, 315-1485 Wago-cho, Chuo-ku, Hamamatsu, Shizuoka, Japão",

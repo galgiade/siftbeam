@@ -99,9 +99,11 @@ const ja: PrivacyLocale = {
       ],
     },
     cookies: {
-      title: "Cookie等の利用",
+      title: "Cookie等の利用とアクセス解析",
       paragraphs: [
         "本サービスの利便性向上・セキュリティ・分析のためCookie/類似技術を使用することがあります。ブラウザ設定で無効化可能ですが、一部機能に支障が出る場合があります。",
+        "【Google Analytics】当サイトでは、サービス向上のためにGoogle Analyticsを使用しています。Google AnalyticsはCookieを使用してユーザーの行動データを収集します。収集されたデータはGoogleのプライバシーポリシーに基づいて管理され、IPアドレスは匿名化されて処理されます。収集される情報には、ページビュー、セッション時間、使用デバイス、ブラウザ、OS、地域情報（国、都市レベル）、リファラー等が含まれます。Google Analyticsによるデータ収集を無効化したい場合は、Googleが提供するブラウザアドオン（https://tools.google.com/dlpage/gaoptout）をインストールしてください。詳細はGoogleのプライバシーポリシー（https://policies.google.com/privacy）をご確認ください。",
+        "【Vercel Analytics / Speed Insights】当サイトでは、プライバシーに配慮したアクセス解析およびパフォーマンス測定のために、Vercel AnalyticsおよびVercel Speed Insightsを使用しています。これらのツールはCookieを使用せず、個人を特定できる情報（IPアドレスなど）を収集しません。収集される情報には、ページビュー数、使用デバイスの種類、おおまかな地域情報（国レベル）、リファラー情報、ページ読み込み時間、インタラクション応答時間等が含まれます。これらの情報は統計的な分析のみに使用され、個人を特定することはできません。GDPR、CCPAに準拠しています。",
       ],
     },
     minors: {
@@ -317,7 +319,7 @@ const ja: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "2025年11月7日",
+    lastUpdated: "2025年11月9日",
     company: {
       name: "株式会社コネクトテック",
       address: "静岡県浜松市中央区和合町315-1485 ディアス和合202号",

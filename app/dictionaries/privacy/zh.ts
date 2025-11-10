@@ -99,9 +99,11 @@ const zhCN: PrivacyLocale = {
       ],
     },
     cookies: {
-      title: "Cookie 等技术的使用",
+      title: "Cookie、分析与性能监测",
       paragraphs: [
         "为提升易用性、安全与分析，我们可能使用 Cookie/类似技术。用户可在浏览器中禁用，但部分功能可能受影响。",
+        "【Google Analytics】本网站使用 Google Analytics 以改进服务。Google Analytics 使用 Cookie 收集用户行为数据。收集的数据根据 Google 隐私政策进行管理，IP 地址经过匿名化处理。收集的信息包括页面浏览量、会话时长、使用设备、浏览器、操作系统、地理位置（国家/城市级别）、来源页面等。如需停用 Google Analytics 数据收集，可安装 Google 提供的浏览器插件（https://tools.google.com/dlpage/gaoptout）。详情请参阅 Google 隐私政策（https://policies.google.com/privacy）。",
+        "【Vercel Analytics / Speed Insights】本网站使用 Vercel Analytics 和 Vercel Speed Insights 进行注重隐私的访问分析和性能测量。这些工具不使用 Cookie，不收集可识别个人身份的信息（如 IP 地址）。收集的信息包括页面浏览量、设备类型、大致地理位置（国家级别）、来源信息、页面加载时间、交互响应时间等。这些信息仅用于统计分析，无法识别个人身份。这些工具符合 GDPR 和 CCPA 标准。",
       ],
     },
     minors: {
@@ -317,7 +319,7 @@ const zhCN: PrivacyLocale = {
     },
   },
   appendix: {
-    lastUpdated: "2025年11月7日",
+    lastUpdated: "2025年11月9日",
     company: {
       name: "Connect Tech Inc.",
       address: "日本静冈县滨松市中央区和合町315-1485 迪亚斯和合202号",
