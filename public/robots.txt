@@ -1,0 +1,45 @@
+# robots.txt for siftbeam
+
+# Allow all search engines
+User-agent: *
+Allow: /
+
+# Allow AI crawlers explicitly
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+# Sitemap location
+Sitemap: https://siftbeam.com/sitemap.xml
+
+# Disallow authentication pages from indexing
+User-agent: *
+Disallow: /*/signin
+Disallow: /*/signup
+Disallow: /*/forgot-password
+Disallow: /*/service
+Disallow: /api/
+

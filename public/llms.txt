@@ -1,0 +1,97 @@
+# siftbeam - Enterprise Data Processing Service
+
+## Overview
+siftbeam is a B2B data processing service that offers customizable data processing workflows for each client. Built on AWS infrastructure with a focus on security, scalability, and flexibility.
+
+## Service Description
+siftbeam provides enterprise-grade data processing solutions with per-client customization. Our platform enables businesses to automate complex data workflows, transform files, and process data at scale using AWS Step Functions, S3, and other cloud-native technologies.
+
+## Key Features
+- **Customizable Data Processing**: Tailored workflows for each client's specific needs
+- **AWS Step Functions**: Complex data processing pipelines with JSONata support
+- **Secure File Storage**: AWS S3-based encrypted file handling
+- **Real-time Processing**: Automated data transformation and processing
+- **Scalable Architecture**: Cloud-native infrastructure that grows with your needs
+- **Pay-as-you-go Pricing**: Flexible pricing model based on actual usage
+
+## Technology Stack
+- **Frontend**: Next.js 16 (App Router), React, TypeScript, Tailwind CSS, HeroUI
+- **Backend**: AWS (Cognito, DynamoDB, S3, Step Functions, API Gateway)
+- **Payment**: Stripe integration (USD only)
+- **Infrastructure**: Serverless architecture on AWS
+
+## Use Cases
+- Enterprise data transformation and ETL processes
+- Automated file processing and conversion
+- Custom data workflows for business operations
+- Data migration between systems
+- Batch processing of large datasets
+- Real-time data processing pipelines
+
+## Pricing
+Pay-as-you-go model with transparent pricing:
+- No upfront costs
+- Charged per processing unit
+- Stripe payment processing (USD)
+- Contact for enterprise volume discounts
+
+## Getting Started
+1. Sign up at https://siftbeam.com/en/signup
+2. Upload your data files
+3. Configure your processing workflow
+4. Monitor processing in real-time
+5. Download processed results
+
+## Documentation
+- Service Overview: https://siftbeam.com/en
+- Pricing Details: https://siftbeam.com/en/pricing
+- Processing Flow: https://siftbeam.com/en/flow
+- Terms of Service: https://siftbeam.com/en/terms
+- Privacy Policy: https://siftbeam.com/en/privacy
+
+## Support
+- Contact: Available through the service dashboard
+- Languages: English, Japanese
+- Response Time: Business hours (JST)
+
+## Security & Compliance
+- AWS Cognito authentication
+- S3 encryption at rest
+- IAM-based access control
+- Secure file upload/download
+- HTTPS/TLS encryption in transit
+
+## Target Audience
+- Enterprise businesses requiring custom data processing
+- Companies with complex data transformation needs
+- Organizations seeking scalable data processing solutions
+- Businesses looking for AWS-based data workflows
+
+## Competitive Advantages
+- **Per-client Customization**: Unlike generic tools, siftbeam offers fully customizable workflows
+- **AWS Native**: Built on reliable AWS infrastructure
+- **No Vendor Lock-in**: Standard data formats and APIs
+- **Transparent Pricing**: Pay only for what you use
+- **Developer Friendly**: Modern tech stack with comprehensive documentation
+
+## Company Information
+- Service Name: siftbeam
+- Type: B2B SaaS
+- Launch: 2024
+- Primary Market: Global (English and Japanese support)
+- Website: https://siftbeam.com
+
+## Contact Information
+For inquiries, enterprise plans, or custom solutions, please visit:
+https://siftbeam.com/en/service
+
+## Additional Resources
+- Blog: Technical articles and best practices (coming soon)
+- API Documentation: Developer guides and integration examples (coming soon)
+- Case Studies: Customer success stories (coming soon)
+
+---
+
+Last Updated: 2025-01-12
+Version: 1.0
+
