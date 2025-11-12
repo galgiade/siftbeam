@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
   // パワードバイヘッダーを削除(セキュリティ)
   poweredByHeader: false,
   
+  // パフォーマンス最適化
+  experimental: {
+    optimizePackageImports: ['@heroui/react'], // HeroUI のインポートを最適化
+  },
+  
   // HTTPヘッダーの設定(セキュリティとSEO)
   async headers() {
     return [

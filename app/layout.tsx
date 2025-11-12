@@ -8,6 +8,15 @@ import { PageTracking } from "@/app/_components/common/PageTracking";
 import { checkRequiredEnvVars } from "@/app/lib/utils/validateEnv";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Inter } from 'next/font/google';
+
+// フォント最適化: Interフォントをプリロード
+const inter = Inter({
+  subsets: ['latin', 'latin-ext'],
+  display: 'swap', // フォント読み込み中もテキストを表示
+  preload: true,
+  variable: '--font-inter',
+});
 // 環境変数の検証（開発環境でのみ実行）
 if (process.env.NODE_ENV === 'development') {
   checkRequiredEnvVars();
@@ -94,8 +103,8 @@ export default async function RootLayout({
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
   
   return (
-    <html lang={locale}>
-      <body>
+    <html lang={locale} className={inter.variable}>
+      <body className={inter.className}>
         <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
         <WebVitals />
         <PageTracking />
