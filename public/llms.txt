@@ -16,9 +16,14 @@ siftbeam provides enterprise-grade data processing solutions with per-client cus
 
 ## Technology Stack
 - **Frontend**: Next.js 16 (App Router), React, TypeScript, Tailwind CSS, HeroUI
-- **Backend**: AWS (Cognito, DynamoDB, S3, Step Functions, API Gateway)
+- **Backend**: AWS Lambda, API Gateway, Step Functions (with JSONata)
+- **Database**: AWS DynamoDB
+- **Storage**: AWS S3 (encrypted)
+- **Authentication**: AWS Cognito
+- **Email**: AWS SES
+- **Monitoring**: AWS CloudWatch
 - **Payment**: Stripe integration (USD only)
-- **Infrastructure**: Serverless architecture on AWS
+- **Infrastructure**: Fully serverless architecture on AWS
 
 ## Use Cases
 - Enterprise data transformation and ETL processes
@@ -30,13 +35,20 @@ siftbeam provides enterprise-grade data processing solutions with per-client cus
 
 ## Pricing
 Pay-as-you-go model with transparent pricing:
-- No upfront costs
-- Charged per processing unit
-- Stripe payment processing (USD)
+- **Data Processing Fee**: $0.00001 per byte (0.001 US cents per byte)
+- **Includes**: 1-year storage after processing
+- **No upfront costs**: No setup fees or minimum charges
+- **Payment**: Stripe (USD only)
+- **Billing**: Monthly (usage from 1st to last day of month)
+- **Auto-deletion**: Data automatically deleted after 1 year
 - Contact for enterprise volume discounts
 
+### Pricing Examples
+- Small file (100B): $0.001
+- Large file (2MB × 3 files = 6,291,456B): $62.91
+
 ## Getting Started
-1. Sign up at https://siftbeam.com/en/signup
+1. Sign up at https://siftbeam.com/en/signup/auth
 2. Upload your data files
 3. Configure your processing workflow
 4. Monitor processing in real-time
@@ -50,9 +62,10 @@ Pay-as-you-go model with transparent pricing:
 - Privacy Policy: https://siftbeam.com/en/privacy
 
 ## Support
-- Contact: Available through the service dashboard
+- Contact Method: Chat support (available through the service dashboard)
 - Languages: English, Japanese
-- Response Time: Business hours (JST)
+- Response Time: Typically responds within 3 business days
+- Business Hours: JST (Japan Standard Time)
 
 ## Security & Compliance
 - AWS Cognito authentication
@@ -76,10 +89,14 @@ Pay-as-you-go model with transparent pricing:
 
 ## Company Information
 - Service Name: siftbeam
+- Company: ConnectTech Inc.
+- Representative: Kazuaki Matsui
+- Location: Hamamatsu, Shizuoka, Japan
 - Type: B2B SaaS
 - Launch: 2024
 - Primary Market: Global (English and Japanese support)
 - Website: https://siftbeam.com
+- Email: connectechceomatsui@gmail.com
 
 ## Contact Information
 For inquiries, enterprise plans, or custom solutions, please visit:
