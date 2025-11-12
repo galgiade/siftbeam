@@ -26,6 +26,8 @@ const nextConfig: NextConfig = {
   // パフォーマンス最適化
   experimental: {
     optimizePackageImports: ['@heroui/react'], // HeroUI のインポートを最適化
+    // CSS最適化を有効化
+    optimizeCss: true,
   },
   
   // HTTPヘッダーの設定(セキュリティとSEO)

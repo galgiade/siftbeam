@@ -11,7 +11,7 @@
 - **First Input Delay (FID)**: 3ms ✅
 - **Time to First Byte (TTFB)**: 1.33s ✅
 
-## 🎯 実施した最適化
+## 🎯 実施した最適化 (Next.js公式ドキュメント準拠)
 
 ### 1. フォント最適化 ✅
 **目的**: FCPを改善し、フォント読み込み中もテキストを表示
@@ -67,20 +67,77 @@ compress: true,
 minimumCacheTTL: 60,
 ```
 
-## 📈 追加で実施可能な最適化
+### 5. CSS最適化 ✅
+**Next.js公式推奨**: `optimizeCss`を有効化してCSSを自動最適化
 
-### 優先度: 高 🔴
-
-#### A. 重要なCSSのインライン化
+**実装内容**:
 ```typescript
-// next.config.ts に追加
+// next.config.ts
 experimental: {
   optimizePackageImports: ['@heroui/react'],
   optimizeCss: true, // CSS最適化を有効化
 }
 ```
 
-#### B. 画像のプリロード
+**効果**:
+- 未使用のCSSを自動削除
+- CSSバンドルサイズの削減
+- FCPの改善
+
+### 6. リソースヒント ✅
+**Next.js公式推奨**: `preconnect`と`dns-prefetch`で外部リソースの接続を高速化
+
+**実装内容**:
+```typescript
+// app/layout.tsx のメタデータ
+other: {
+  'link': [
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.googleapis.com',
+    },
+    {
+      rel: 'dns-prefetch',
+      href: 'https://www.googletagmanager.com',
+    },
+  ],
+}
+```
+
+**効果**:
+- Google Fontsへの接続を事前確立
+- Google Analyticsへの接続を高速化
+- TTFBとFCPの改善
+
+### 7. Suspenseによるストリーミング ✅
+**Next.js公式推奨**: Suspenseで非クリティカルなコンポーネントを遅延読み込み
+
+**実装内容**:
+```typescript
+// app/layout.tsx
+<Suspense fallback={null}>
+  <WebVitals />
+  <PageTracking />
+</Suspense>
+<Providers>
+  {children}
+</Providers>
+<Suspense fallback={null}>
+  <Analytics />
+  <SpeedInsights />
+</Suspense>
+```
+
+**効果**:
+- メインコンテンツの表示を優先
+- 非クリティカルなコンポーネントを並行読み込み
+- FCPとLCPの改善
+
+## 📈 追加で実施可能な最適化
+
+### 優先度: 高 🔴
+
+#### A. 画像のプリロード
 重要な画像（ヒーローイメージなど）をプリロードする:
 ```typescript
 // app/[locale]/page.tsx のメタデータに追加
@@ -100,9 +157,11 @@ export async function generateMetadata() {
 }
 ```
 
-#### C. 動的インポート
+#### C. 動的インポート (クライアントコンポーネント用)
 大きなコンポーネントを遅延読み込み:
 ```typescript
+'use client'; // クライアントコンポーネントで使用
+
 import dynamic from 'next/dynamic';
 
 const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
@@ -110,6 +169,8 @@ const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
   ssr: false, // クライアントサイドのみで読み込む
 });
 ```
+
+**注意**: Server Componentでは`ssr: false`は使用できません。
 
 ### 優先度: 中 🟡
 

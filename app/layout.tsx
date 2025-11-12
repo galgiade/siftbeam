@@ -6,9 +6,10 @@ import GoogleAnalytics from "@/app/_components/common/GoogleAnalytics";
 import { WebVitals } from "@/app/_components/common/WebVitals";
 import { PageTracking } from "@/app/_components/common/PageTracking";
 import { checkRequiredEnvVars } from "@/app/lib/utils/validateEnv";
+import { Inter } from 'next/font/google';
+import { Suspense } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Inter } from 'next/font/google';
 
 // フォント最適化: Interフォントをプリロード
 const inter = Inter({
@@ -90,6 +91,19 @@ export const metadata = {
   verification: {
     google: 'your-google-verification-code',
   },
+  // リソースヒント: 重要なリソースをプリロード
+  other: {
+    'link': [
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.googleapis.com',
+      },
+      {
+        rel: 'dns-prefetch',
+        href: 'https://www.googletagmanager.com',
+      },
+    ],
+  },
 }
 
 export default async function RootLayout({
@@ -106,13 +120,17 @@ export default async function RootLayout({
     <html lang={locale} className={inter.variable}>
       <body className={inter.className}>
         <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
-        <WebVitals />
-        <PageTracking />
+        <Suspense fallback={null}>
+          <WebVitals />
+          <PageTracking />
+        </Suspense>
         <Providers>
           {children}
         </Providers>
-        <Analytics />
-        <SpeedInsights />
+        <Suspense fallback={null}>
+          <Analytics />
+          <SpeedInsights />
+        </Suspense>
       </body>
     </html>
   );
