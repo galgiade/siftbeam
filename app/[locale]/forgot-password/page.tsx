@@ -7,12 +7,23 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const resolvedParams = await params
   const dict = pickDictionary(forgotPasswordDictionaries, resolvedParams.locale, 'en')
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
+  
   return {
     title: dict.label.forgotPasswordTitle || 'Forgot Password',
     description: dict.label.emailDescription || 'Reset your password',
+    alternates: {
+      canonical: `${baseUrl}/${resolvedParams.locale}/forgot-password`,
+    },
     openGraph: {
       title: dict.label.forgotPasswordTitle || 'Forgot Password',
       description: dict.label.emailDescription || 'Reset your password',
+      url: `${baseUrl}/${resolvedParams.locale}/forgot-password`,
+      type: 'website',
+    },
+    robots: {
+      index: false, // パスワードリセットページは検索結果に表示しない
+      follow: false,
     },
   }
 }
