@@ -1,11 +1,11 @@
-import { Metadata } from 'next';
-
 /**
- * Open Graphのロケール形式に変換
- * @param locale - アプリケーションのロケール文字列
- * @returns OGP用のロケール文字列 (例: 'ja_JP', 'en_US')
+ * SEOメタデータ生成のヘルパー関数
  */
-export function getOGLocale(locale: string): string {
+
+import type { Metadata } from 'next'
+
+// ロケールマッピング
+export const getOGLocale = (locale: string): string => {
   const localeMap: Record<string, string> = {
     ja: 'ja_JP',
     'en-US': 'en_US',
@@ -17,118 +17,118 @@ export function getOGLocale(locale: string): string {
     de: 'de_DE',
     es: 'es_ES',
     pt: 'pt_BR',
-    id: 'id_ID',
+    id: 'id_ID'
   };
   
   return localeMap[locale] || 'en_US';
-}
+};
 
-/**
- * 多言語対応のalternate言語リンクを生成
- * @param path - ページのパス (例: '/pricing', '/flow')
- * @param baseUrl - ベースURL (デフォルト: 'https://siftbeam.com')
- * @returns alternates.languages オブジェクト
- */
-export function generateAlternateLanguages(
-  path: string,
-  baseUrl: string = 'https://siftbeam.com'
-): Record<string, string> {
+// 全言語の代替URLを生成
+export const generateAlternateLanguages = (path: string, baseUrl?: string): Record<string, string> => {
+  const url = baseUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   const languages = ['ja', 'en', 'en-US', 'zh-CN', 'ko', 'fr', 'de', 'es', 'pt', 'id'];
   
-  const alternates: Record<string, string> = {};
-  languages.forEach(lang => {
-    alternates[lang] = `${baseUrl}/${lang}${path}`;
-  });
-  
-  return alternates;
-}
+  return languages.reduce((acc, lang) => {
+    acc[lang] = `${url}/${lang}${path}`;
+    return acc;
+  }, {} as Record<string, string>);
+};
 
-/**
- * OGP画像の設定を生成
- * @param title - 画像のaltテキスト
- * @param baseUrl - ベースURL (デフォルト: 'https://siftbeam.com')
- * @returns OGP画像の配列
- */
-export function generateOGImages(
-  title: string,
-  baseUrl: string = 'https://siftbeam.com'
-): Array<{ url: string; width: number; height: number; alt: string }> {
+// OGP画像設定
+export const generateOGImages = (title: string, baseUrl?: string) => {
+  const url = baseUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
   return [
     {
-      url: `${baseUrl}/og-image.jpg`,
+      url: `${url}/og-image.jpg`,
       width: 1200,
       height: 630,
       alt: title,
     },
   ];
-}
+};
 
-/**
- * ページメタデータを生成するヘルパー関数
- * @param options - メタデータ生成のオプション
- * @returns Next.js Metadataオブジェクト
- */
-export function generatePageMetadata({
-  locale,
-  title,
-  description,
-  keywords,
-  path,
-  baseUrl = 'https://siftbeam.com',
-  ogType = 'website',
-  robotsIndex = true,
-  robotsFollow = true,
-  googleBotMaxSnippet = -1,
-  googleBotMaxImagePreview = 'large',
-  googleBotMaxVideoPreview = -1,
-}: {
+// 完全なメタデータ生成
+interface GenerateMetadataOptions {
   locale: string;
   title: string;
   description: string;
   keywords: string[];
   path: string;
-  baseUrl?: string;
-  ogType?: 'website' | 'article' | 'book' | 'profile' | 'video.movie' | 'video.episode' | 'video.tv_show' | 'video.other' | 'music.song' | 'music.album' | 'music.playlist' | 'music.radio_station';
-  robotsIndex?: boolean;
-  robotsFollow?: boolean;
-  googleBotMaxSnippet?: number;
-  googleBotMaxImagePreview?: 'none' | 'standard' | 'large';
-  googleBotMaxVideoPreview?: number;
-}): Metadata {
-  return {
+  noIndex?: boolean;
+}
+
+export function generatePageMetadata(options: GenerateMetadataOptions): Metadata {
+  const {
+    locale,
     title,
     description,
     keywords,
+    path,
+    noIndex = false
+  } = options;
+  
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  const fullUrl = `${baseUrl}/${locale}${path}`;
+  
+  return {
+    title: `${title} | siftbeam`,
+    description,
+    keywords,
     alternates: {
-      canonical: `${baseUrl}${path}`,
+      canonical: fullUrl,
       languages: generateAlternateLanguages(path, baseUrl),
     },
     openGraph: {
-      title,
+      title: `${title} | siftbeam`,
       description,
-      url: `${baseUrl}${path}`,
-      type: ogType,
+      url: fullUrl,
+      type: 'website',
       locale: getOGLocale(locale),
       siteName: 'siftbeam',
       images: generateOGImages(title, baseUrl),
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: `${title} | siftbeam`,
       description,
       images: [`${baseUrl}/og-image.jpg`],
     },
-    robots: {
-      index: robotsIndex,
-      follow: robotsFollow,
+    robots: noIndex ? {
+      index: false,
+      follow: false,
+    } : {
+      index: true,
+      follow: true,
       googleBot: {
-        index: robotsIndex,
-        follow: robotsFollow,
-        'max-video-preview': googleBotMaxVideoPreview,
-        'max-image-preview': googleBotMaxImagePreview,
-        'max-snippet': googleBotMaxSnippet,
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
       },
     },
   };
+}
+
+// よく使うキーワードセット
+export const commonKeywords = {
+  dataProcessing: {
+    ja: ['データ処理', 'データ管理', 'クラウド処理', 'ファイル処理', 'データ分析'],
+    'en-US': ['data processing', 'data management', 'cloud processing', 'file processing', 'data analysis'],
+    'zh-CN': ['数据处理', '数据管理', '云处理', '文件处理', '数据分析'],
+    ko: ['데이터 처리', '데이터 관리', '클라우드 처리', '파일 처리', '데이터 분석'],
+  },
+  enterprise: {
+    ja: ['企業向け', 'ビジネス', 'エンタープライズ', 'B2B'],
+    'en-US': ['enterprise', 'business', 'B2B', 'corporate'],
+    'zh-CN': ['企业', '商业', 'B2B', '企业级'],
+    ko: ['기업', '비즈니스', 'B2B', '엔터프라이즈'],
+  },
+};
+
+export function getKeywords(locale: string, category: keyof typeof commonKeywords): string[] {
+  const normalizedLocale = locale === 'en' ? 'en-US' : locale;
+  return commonKeywords[category][normalizedLocale as keyof typeof commonKeywords[typeof category]] || commonKeywords[category]['en-US'];
 }
 
