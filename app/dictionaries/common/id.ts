@@ -16,6 +16,7 @@ const id: CommonLocale = {
       services: 'Layanan',
       myPage: 'Halaman Saya',
       supportCenter: 'Pusat Dukungan',
+      faq: 'Pertanyaan yang Sering Diajukan',
     },
     footer: {
       title: 'siftbeam',
@@ -25,6 +26,7 @@ const id: CommonLocale = {
         terms: 'Ketentuan Layanan',
         privacy: 'Kebijakan Privasi',
         legalDisclosures: 'Pengungkapan Hukum',
+        faq: 'Pertanyaan yang Sering Diajukan',
       },
       copyright: 'Connect Tech Inc.',
     },

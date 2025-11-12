@@ -16,6 +16,7 @@ const es: CommonLocale = {
       services: 'Servicios',
       myPage: 'Mi página',
       supportCenter: 'Centro de soporte',
+      faq: 'Preguntas Frecuentes',
     },
     footer: {
       title: 'siftbeam',
@@ -25,6 +26,7 @@ const es: CommonLocale = {
         terms: 'Términos de servicio',
         privacy: 'Política de privacidad',
         legalDisclosures: 'Divulgaciones legales',
+        faq: 'Preguntas Frecuentes',
       },
       copyright: 'Connect Tech Inc.',
     },

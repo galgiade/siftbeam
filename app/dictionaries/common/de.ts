@@ -16,6 +16,7 @@ const de: CommonLocale = {
       services: 'Dienstleistungen',
       myPage: 'Meine Seite',
       supportCenter: 'Support-Center',
+      faq: 'Häufig gestellte Fragen',
     },
     footer: {
       title: 'siftbeam',
@@ -25,6 +26,7 @@ const de: CommonLocale = {
         terms: 'Nutzungsbedingungen',
         privacy: 'Datenschutzrichtlinie',
         legalDisclosures: 'Rechtliche Hinweise',
+        faq: 'Häufig gestellte Fragen',
       },
       copyright: 'Connect Tech Inc.',
     },

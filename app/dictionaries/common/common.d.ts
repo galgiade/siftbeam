@@ -14,6 +14,7 @@ export interface CommonLocale {
       services: string;
       myPage: string;
       supportCenter: string;
+      faq: string;
     };
     footer: {
       title: string;
@@ -22,6 +23,7 @@ export interface CommonLocale {
         terms: string;
         privacy: string;
         legalDisclosures: string;
+        faq: string;
       };
       copyright: string;
     };

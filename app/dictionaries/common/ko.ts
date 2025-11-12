@@ -16,6 +16,7 @@ const ko: CommonLocale = {
       services: '서비스',
       myPage: '마이페이지',
       supportCenter: '지원 센터',
+      faq: '자주 묻는 질문',
     },
     footer: {
       title: 'siftbeam',
@@ -25,6 +26,7 @@ const ko: CommonLocale = {
         terms: '이용약관',
         privacy: '개인정보 처리방침',
         legalDisclosures: '전자상거래법에 따른 표기',
+        faq: '자주 묻는 질문',
       },
       copyright: '주식회사 커넥트테크',
     },

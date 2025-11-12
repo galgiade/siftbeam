@@ -16,6 +16,7 @@ const ja: CommonLocale = {
       services: 'サービス',
       myPage: 'マイページ',
       supportCenter: 'サポートセンター',
+      faq: 'よくある質問',
     },
     footer: {
       title: 'siftbeam',
@@ -25,6 +26,7 @@ const ja: CommonLocale = {
         terms: '利用規約',
         privacy: 'プライバシーポリシー',
         legalDisclosures: '特定商取引法に基づく表記',
+        faq: 'よくある質問',
       },
       copyright: '株式会社コネクトテック',
     },

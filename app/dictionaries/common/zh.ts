@@ -16,6 +16,7 @@ const zh: CommonLocale = {
       services: '服务',
       myPage: '我的页面',
       supportCenter: '支持中心',
+      faq: '常见问题',
     },
     footer: {
       title: 'siftbeam',
@@ -25,6 +26,7 @@ const zh: CommonLocale = {
         terms: '服务条款',
         privacy: '隐私政策',
         legalDisclosures: '法律声明',
+        faq: '常见问题',
       },
       copyright: 'Connect Tech Inc.',
     },
