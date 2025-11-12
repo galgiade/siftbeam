@@ -2,17 +2,38 @@ import type { Metadata } from 'next'
 import TermsContainer from '@/app/_containers/Terms/TermsContainer'
 import { termsDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 import StructuredData, { generateBreadcrumbStructuredData } from '@/app/_components/common/StructuredData'
-import { getOGLocale, generateAlternateLanguages, generateOGImages } from '@/app/lib/seo-helpers'
 
-// 言語別キーワード
-const getTermsKeywords = (locale: string): string[] => {
-  const keywords: Record<string, string[]> = {
+// 全言語対応のキーワード設定
+const getTermsKeywordsByLocale = (locale: string): string[] => {
+  const keywordMap = {
     ja: ['利用規約', '規約', '契約条件', '利用条件', '法的事項', 'サービス規約', '使用条件', '約款', 'ユーザー規約', '同意事項'],
     'en-US': ['terms', 'terms of service', 'legal', 'terms and conditions', 'service agreement', 'usage terms', 'user agreement', 'terms of use', 'legal terms', 'service terms'],
     'zh-CN': ['服务条款', '条款', '法律条款', '使用条款', '服务协议', '用户协议', '法律事项', '条件', '服务条件', '用户条款'],
     ko: ['이용약관', '약관', '계약조건', '서비스 약관', '사용조건', '법적사항', '이용조건', '사용자 약관', '서비스 조건', '동의사항'],
+    fr: ['conditions d\'utilisation', 'termes', 'conditions', 'accord de service', 'conditions légales', 'termes d\'utilisation', 'accord utilisateur', 'conditions de service', 'mentions légales', 'termes légaux'],
+    de: ['Nutzungsbedingungen', 'Bedingungen', 'AGB', 'Servicebedingungen', 'rechtliche Bedingungen', 'Nutzungsvereinbarung', 'Benutzervereinbarung', 'Dienstbedingungen', 'rechtliche Hinweise', 'Servicevereinbarung'],
+    es: ['términos de servicio', 'términos', 'condiciones', 'acuerdo de servicio', 'términos legales', 'condiciones de uso', 'acuerdo de usuario', 'términos de uso', 'condiciones legales', 'términos del servicio'],
+    pt: ['termos de serviço', 'termos', 'condições', 'acordo de serviço', 'termos legais', 'condições de uso', 'acordo de usuário', 'termos de uso', 'condições legais', 'termos do serviço'],
+    id: ['syarat layanan', 'syarat', 'ketentuan', 'perjanjian layanan', 'syarat hukum', 'ketentuan penggunaan', 'perjanjian pengguna', 'syarat penggunaan', 'ketentuan hukum', 'syarat layanan']
   };
-  return keywords[locale] || keywords['en-US'];
+  
+  return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en-US'];
+};
+
+const getLocaleByLanguage = (locale: string): string => {
+  const localeMap = {
+    ja: 'ja_JP',
+    'en-US': 'en_US',
+    'zh-CN': 'zh_CN',
+    ko: 'ko_KR',
+    fr: 'fr_FR',
+    de: 'de_DE',
+    es: 'es_ES',
+    pt: 'pt_BR',
+    id: 'id_ID'
+  };
+  
+  return localeMap[locale as keyof typeof localeMap] || 'en_US';
 };
 
 export async function generateMetadata(
@@ -25,19 +46,37 @@ export async function generateMetadata(
   return {
     title: dict.title || 'Terms of Service | siftbeam',
     description: dict.intro || 'Terms of Service for siftbeam data processing platform. Read our service agreement and usage conditions.',
-    keywords: getTermsKeywords(resolvedParams.locale),
+    keywords: getTermsKeywordsByLocale(resolvedParams.locale),
     alternates: {
       canonical: `${baseUrl}/${resolvedParams.locale}/terms`,
-      languages: generateAlternateLanguages('/terms', baseUrl),
+      languages: {
+        'ja': `${baseUrl}/ja/terms`,
+        'en': `${baseUrl}/en/terms`,
+        'en-US': `${baseUrl}/en-US/terms`,
+        'zh-CN': `${baseUrl}/zh-CN/terms`,
+        'ko': `${baseUrl}/ko/terms`,
+        'fr': `${baseUrl}/fr/terms`,
+        'de': `${baseUrl}/de/terms`,
+        'es': `${baseUrl}/es/terms`,
+        'pt': `${baseUrl}/pt/terms`,
+        'id': `${baseUrl}/id/terms`,
+      },
     },
     openGraph: {
       title: dict.title || 'Terms of Service | siftbeam',
       description: dict.intro || 'Terms of Service for siftbeam',
       url: `${baseUrl}/${resolvedParams.locale}/terms`,
       type: 'website',
-      locale: getOGLocale(resolvedParams.locale),
+      locale: getLocaleByLanguage(resolvedParams.locale),
       siteName: 'siftbeam',
-      images: generateOGImages(dict.title || 'Terms of Service', baseUrl),
+      images: [
+        {
+          url: `${baseUrl}/og-image.jpg`,
+          width: 1200,
+          height: 630,
+          alt: dict.title || 'Terms of Service',
+        },
+      ],
     },
     twitter: {
       card: 'summary',
@@ -62,15 +101,31 @@ export default async function TermsPage(
   const params = await props.params
   const locale = params.locale
   
-  // 構造化データ
+  // パンくずリストの翻訳
+  const breadcrumbTranslations = {
+    ja: { home: 'ホーム', terms: '利用規約' },
+    'en-US': { home: 'Home', terms: 'Terms of Service' },
+    'zh-CN': { home: '主页', terms: '服务条款' },
+    ko: { home: '홈', terms: '이용약관' },
+    fr: { home: 'Accueil', terms: 'Conditions d\'utilisation' },
+    de: { home: 'Startseite', terms: 'Nutzungsbedingungen' },
+    es: { home: 'Inicio', terms: 'Términos de servicio' },
+    pt: { home: 'Início', terms: 'Termos de serviço' },
+    id: { home: 'Beranda', terms: 'Syarat Layanan' }
+  };
+  
+  const breadcrumbLabels = breadcrumbTranslations[locale as keyof typeof breadcrumbTranslations] || breadcrumbTranslations['en-US'];
+  
   const breadcrumbData = generateBreadcrumbStructuredData(locale, [
-    { name: locale === 'ja' ? 'ホーム' : 'Home', url: `/${locale}` },
-    { name: locale === 'ja' ? '利用規約' : 'Terms of Service', url: `/${locale}/terms` }
+    { name: breadcrumbLabels.home, url: `/${locale}` },
+    { name: breadcrumbLabels.terms, url: `/${locale}/terms` }
   ]);
   
   return (
     <>
+      {/* 構造化データ */}
       <StructuredData data={breadcrumbData} />
+      
       <TermsContainer params={params} />
     </>
   )
