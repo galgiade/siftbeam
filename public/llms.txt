@@ -1,29 +1,18 @@
 # siftbeam - Enterprise Data Processing Service
 
 ## Overview
-siftbeam is a B2B data processing service that offers customizable data processing workflows for each client. Built on AWS infrastructure with a focus on security, scalability, and flexibility.
+siftbeam is a B2B data processing service that offers customizable data processing workflows for each client. Built with enterprise-grade cloud infrastructure, focusing on security, scalability, and flexibility.
 
 ## Service Description
-siftbeam provides enterprise-grade data processing solutions with per-client customization. Our platform enables businesses to automate complex data workflows, transform files, and process data at scale using AWS Step Functions, S3, and other cloud-native technologies.
+siftbeam provides enterprise-grade data processing solutions with per-client customization. Our platform enables businesses to automate complex data workflows, transform files, and process data at scale with secure cloud infrastructure.
 
 ## Key Features
 - **Customizable Data Processing**: Tailored workflows for each client's specific needs
-- **AWS Step Functions**: Complex data processing pipelines with JSONata support
-- **Secure File Storage**: AWS S3-based encrypted file handling
+- **Secure File Storage**: Encrypted file handling with automatic 1-year retention
 - **Real-time Processing**: Automated data transformation and processing
 - **Scalable Architecture**: Cloud-native infrastructure that grows with your needs
 - **Pay-as-you-go Pricing**: Flexible pricing model based on actual usage
-
-## Technology Stack
-- **Frontend**: Next.js 16 (App Router), React, TypeScript, Tailwind CSS, HeroUI
-- **Backend**: AWS Lambda, API Gateway, Step Functions (with JSONata)
-- **Database**: AWS DynamoDB
-- **Storage**: AWS S3 (encrypted)
-- **Authentication**: AWS Cognito
-- **Email**: AWS SES
-- **Monitoring**: AWS CloudWatch
-- **Payment**: Stripe integration (USD only)
-- **Infrastructure**: Fully serverless architecture on AWS
+- **Multi-language Support**: Available in 9 languages (Japanese, English, Chinese, Korean, French, German, Spanish, Portuguese, Indonesian)
 
 ## Use Cases
 - Enterprise data transformation and ETL processes
@@ -63,29 +52,29 @@ Pay-as-you-go model with transparent pricing:
 
 ## Support
 - Contact Method: Chat support (available through the service dashboard)
-- Languages: English, Japanese
+- Languages: 9 languages supported (Japanese, English, Chinese, Korean, French, German, Spanish, Portuguese, Indonesian)
 - Response Time: Typically responds within 3 business days
 - Business Hours: JST (Japan Standard Time)
 
 ## Security & Compliance
-- AWS Cognito authentication
-- S3 encryption at rest
-- IAM-based access control
+- Secure user authentication
+- Data encryption at rest and in transit
+- Role-based access control
 - Secure file upload/download
-- HTTPS/TLS encryption in transit
+- Enterprise-grade security standards
 
 ## Target Audience
 - Enterprise businesses requiring custom data processing
 - Companies with complex data transformation needs
 - Organizations seeking scalable data processing solutions
-- Businesses looking for AWS-based data workflows
+- Businesses looking for secure cloud-based data workflows
 
 ## Competitive Advantages
 - **Per-client Customization**: Unlike generic tools, siftbeam offers fully customizable workflows
-- **AWS Native**: Built on reliable AWS infrastructure
-- **No Vendor Lock-in**: Standard data formats and APIs
+- **Enterprise-grade Reliability**: Built on proven cloud infrastructure
+- **No Vendor Lock-in**: Standard data formats and open APIs
 - **Transparent Pricing**: Pay only for what you use
-- **Developer Friendly**: Modern tech stack with comprehensive documentation
+- **Easy Integration**: Comprehensive documentation and support
 
 ## Company Information
 - Service Name: siftbeam
@@ -94,7 +83,7 @@ Pay-as-you-go model with transparent pricing:
 - Location: Hamamatsu, Shizuoka, Japan
 - Type: B2B SaaS
 - Launch: 2024
-- Primary Market: Global (English and Japanese support)
+- Primary Market: Global (9 languages: Japanese, English, Chinese, Korean, French, German, Spanish, Portuguese, Indonesian)
 - Website: https://siftbeam.com
 - Email: connectechceomatsui@gmail.com
 
