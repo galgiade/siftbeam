@@ -809,3 +809,28 @@ export const apiDictionaries = {
   zh: zhApi,
   'zh-CN': zhApi,
 };
+
+// FAQ (よくある質問)
+import jaFAQ from '@/app/dictionaries/faq/ja';
+import enFAQ from '@/app/dictionaries/faq/en';
+import zhFAQ from '@/app/dictionaries/faq/zh';
+import koFAQ from '@/app/dictionaries/faq/ko';
+import frFAQ from '@/app/dictionaries/faq/fr';
+import deFAQ from '@/app/dictionaries/faq/de';
+import esFAQ from '@/app/dictionaries/faq/es';
+import ptFAQ from '@/app/dictionaries/faq/pt';
+import idFAQ from '@/app/dictionaries/faq/id';
+
+export const faqDictionaries = {
+  ja: jaFAQ,
+  en: enFAQ,
+  'en-US': enFAQ,
+  es: esFAQ,
+  fr: frFAQ,
+  de: deFAQ,
+  ko: koFAQ,
+  id: idFAQ,
+  pt: ptFAQ,
+  zh: zhFAQ,
+  'zh-CN': zhFAQ,
+};

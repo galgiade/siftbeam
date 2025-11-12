@@ -413,21 +413,33 @@ export function generateBreadcrumbStructuredData(
   };
 }
 
-// FAQPage構造化データ
-export function generateFAQStructuredData(
-  locale: string,
-  faqs: Array<{ question: string; answer: string }>
-) {
+// FAQPage構造化データ生成関数
+export function generateFAQStructuredData(locale: string, dict: any) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
+  // 全カテゴリのFAQアイテムを収集
+  const allFAQItems: any[] = [];
+  
+  Object.values(dict.categories).forEach((category: any) => {
+    category.items.forEach((item: any) => {
+      const answer = Array.isArray(item.answer) 
+        ? item.answer.join('\n') 
+        : item.answer;
+      
+      allFAQItems.push({
+        "@type": "Question",
+        "name": item.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": answer
+        }
+      });
+    });
+  });
+  
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
+    "mainEntity": allFAQItems
   };
 }

@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '', // ホーム
     '/pricing',
     '/flow',
+    '/faq',
     '/terms',
     '/privacy',
     '/legal-disclosures',
@@ -42,6 +43,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority = 1.0 // ホームページは最高優先度
       } else if (page === '/pricing' || page === '/flow') {
         priority = 0.9 // 重要ページ
+      } else if (page === '/faq') {
+        priority = 0.85 // FAQページ
       } else if (page === '/signin' || page === '/signup/auth') {
         priority = 0.7 // 認証ページ
       } else if (page === '/terms' || page === '/privacy') {
@@ -54,6 +57,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency = 'daily'
       } else if (page === '/announcement') {
         changeFrequency = 'weekly'
+      } else if (page === '/faq') {
+        changeFrequency = 'monthly' // FAQは月次更新
       } else if (page === '/terms' || page === '/privacy' || page === '/legal-disclosures') {
         changeFrequency = 'monthly'
       }
