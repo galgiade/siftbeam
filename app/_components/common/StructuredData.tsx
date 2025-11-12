@@ -114,7 +114,7 @@ export function generateSiftbeamStructuredData(locale: string = 'ja') {
     "offers": {
       "@type": "Offer",
       "price": "0",
-      "priceCurrency": locale === 'ja' ? 'JPY' : 'USD',
+      "priceCurrency": "USD", // Stripe決済はUSDのみ
       "availability": "https://schema.org/InStock",
       "url": `${baseUrl}/${locale}`
     },
@@ -269,5 +269,113 @@ export function generateServiceStructuredData(locale: string = 'ja') {
         }
       }))
     }
+  };
+}
+
+// 料金ページ用の構造化データ(PriceSpecification)
+export function generatePricingStructuredData(locale: string = 'ja') {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
+  const pricingTranslations = {
+    ja: {
+      name: "siftbeam 料金プラン",
+      description: "従量課金制のデータ処理サービス。使った分だけお支払い。初期費用なし、月額基本料金なし。",
+    },
+    'en-US': {
+      name: "siftbeam Pricing Plans",
+      description: "Pay-as-you-go data processing service. Pay only for what you use. No setup fees, no monthly base charges.",
+    },
+  };
+  
+  const translation = pricingTranslations[locale as keyof typeof pricingTranslations] || pricingTranslations['en-US'];
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": translation.name,
+    "description": translation.description,
+    "brand": {
+      "@type": "Brand",
+      "name": "siftbeam"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": `${baseUrl}/${locale}/pricing`,
+    },
+  };
+}
+
+// How-To用の構造化データ(使い方ページ用)
+export function generateHowToStructuredData(locale: string = 'ja') {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
+  const howToTranslations = {
+    ja: {
+      name: "siftbeamの使い方",
+      description: "siftbeamでデータ処理を始めるための完全ガイド",
+      steps: [
+        { name: "アカウント登録", text: "メールアドレスで無料アカウントを作成します" },
+        { name: "会社情報登録", text: "会社情報を入力して組織を設定します" },
+        { name: "ポリシー設定", text: "データ処理のポリシーとルールを定義します" },
+        { name: "データアップロード", text: "処理したいデータをアップロードします" },
+        { name: "処理実行", text: "定義したポリシーに基づいてデータが自動処理されます" }
+      ]
+    },
+    'en-US': {
+      name: "How to Use siftbeam",
+      description: "Complete guide to getting started with siftbeam data processing",
+      steps: [
+        { name: "Sign Up", text: "Create a free account with your email address" },
+        { name: "Company Registration", text: "Enter company information to set up your organization" },
+        { name: "Policy Configuration", text: "Define data processing policies and rules" },
+        { name: "Data Upload", text: "Upload the data you want to process" },
+        { name: "Execute Processing", text: "Data is automatically processed based on defined policies" }
+      ]
+    },
+  };
+  
+  const translation = howToTranslations[locale as keyof typeof howToTranslations] || howToTranslations['en-US'];
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": translation.name,
+    "description": translation.description,
+    "image": `${baseUrl}/og-image.jpg`,
+    "totalTime": "PT10M",
+    "estimatedCost": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": "0"
+    },
+    "step": translation.steps.map((step, index) => ({
+      "@type": "HowToStep",
+      "position": index + 1,
+      "name": step.name,
+      "text": step.text,
+      "url": `${baseUrl}/${locale}/flow#step-${index + 1}`
+    })),
+  };
+}
+
+// BreadcrumbList構造化データ
+export function generateBreadcrumbStructuredData(
+  locale: string,
+  breadcrumbs: Array<{ name: string; url: string }>
+) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": item.name,
+      "item": `${baseUrl}${item.url}`
+    }))
   };
 }
