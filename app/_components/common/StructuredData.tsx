@@ -2,12 +2,16 @@ import Script from 'next/script';
 
 interface StructuredDataProps {
   data: Record<string, any>;
+  id?: string;
 }
 
-export default function StructuredData({ data }: StructuredDataProps) {
+export default function StructuredData({ data, id }: StructuredDataProps) {
+  // ユニークなIDを生成（dataの@typeを使用、なければランダム）
+  const uniqueId = id || `structured-data-${data['@type']?.toLowerCase() || Math.random().toString(36).substring(7)}`;
+  
   return (
     <Script
-      id="structured-data"
+      id={uniqueId}
       type="application/ld+json"
       strategy="beforeInteractive"
       dangerouslySetInnerHTML={{
@@ -114,7 +118,7 @@ export function generateSiftbeamStructuredData(locale: string = 'ja') {
     "offers": {
       "@type": "Offer",
       "price": "0",
-      "priceCurrency": locale === 'ja' ? 'JPY' : 'USD',
+      "priceCurrency": "USD",  // Stripe決済はUSDのみ
       "availability": "https://schema.org/InStock",
       "url": `${baseUrl}/${locale}`
     },
@@ -126,13 +130,8 @@ export function generateSiftbeamStructuredData(locale: string = 'ja') {
         "name": getTranslation(locale, 'dashboard')
       }
     ],
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "150",
-      "bestRating": "5",
-      "worstRating": "1"
-    },
+    // aggregateRating: 実際のレビューデータがある場合のみ追加
+    // 現在はレビューシステムが未実装のため、コメントアウト
     "keywords": getTranslation(locale, 'keywords'),
     "inLanguage": locale,
     "isAccessibleForFree": true,
@@ -269,5 +268,212 @@ export function generateServiceStructuredData(locale: string = 'ja') {
         }
       }))
     }
+  };
+}
+
+// 料金ページ用の構造化データ(PriceSpecification)
+export function generatePricingStructuredData(locale: string = 'ja') {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
+  const pricingTranslations = {
+    ja: {
+      name: "siftbeam 料金プラン",
+      description: "従量課金制のデータ処理サービス。使った分だけお支払い。初期費用なし、月額基本料金なし。",
+      plans: [
+        {
+          name: "従量課金プラン",
+          description: "データ処理量に応じた柔軟な料金体系",
+          features: ["データ処理", "ストレージ", "API利用", "24時間サポート"]
+        }
+      ]
+    },
+    'en-US': {
+      name: "siftbeam Pricing Plans",
+      description: "Pay-as-you-go data processing service. Pay only for what you use. No setup fees, no monthly base charges.",
+      plans: [
+        {
+          name: "Pay-as-you-go Plan",
+          description: "Flexible pricing based on data processing volume",
+          features: ["Data Processing", "Storage", "API Access", "24/7 Support"]
+        }
+      ]
+    },
+    'zh-CN': {
+      name: "siftbeam 价格计划",
+      description: "按量付费的数据处理服务。只需为使用付费。无设置费用,无月度基本费用。",
+      plans: [
+        {
+          name: "按量付费计划",
+          description: "根据数据处理量灵活定价",
+          features: ["数据处理", "存储", "API访问", "24小时支持"]
+        }
+      ]
+    },
+    ko: {
+      name: "siftbeam 가격 플랜",
+      description: "종량제 데이터 처리 서비스. 사용한 만큼만 지불. 설정 비용 없음, 월 기본 요금 없음.",
+      plans: [
+        {
+          name: "종량제 플랜",
+          description: "데이터 처리량에 따른 유연한 가격 체계",
+          features: ["데이터 처리", "스토리지", "API 액세스", "24시간 지원"]
+        }
+      ]
+    }
+  };
+  
+  const translation = pricingTranslations[locale as keyof typeof pricingTranslations] || pricingTranslations['en-US'];
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": translation.name,
+    "description": translation.description,
+    "brand": {
+      "@type": "Brand",
+      "name": "siftbeam"
+    },
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "USD",  // Stripe決済はUSDのみ
+      "lowPrice": "0",
+      "offerCount": translation.plans.length,
+      "offers": translation.plans.map(plan => ({
+        "@type": "Offer",
+        "name": plan.name,
+        "description": plan.description,
+        "price": "0",
+        "priceCurrency": "USD",  // Stripe決済はUSDのみ
+        "availability": "https://schema.org/InStock",
+        "url": `${baseUrl}/${locale}/pricing`,
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": "0",
+          "priceCurrency": "USD",  // Stripe決済はUSDのみ
+          "unitText": "per GB"
+        }
+      }))
+    },
+    "audience": {
+      "@type": "BusinessAudience",
+      "audienceType": "Enterprise"
+    }
+  };
+}
+
+// How-To用の構造化データ(使い方ページ用)
+export function generateHowToStructuredData(locale: string = 'ja') {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
+  const howToTranslations = {
+    ja: {
+      name: "siftbeamの使い方",
+      description: "siftbeamでデータ処理を始めるための完全ガイド",
+      steps: [
+        { name: "アカウント登録", text: "メールアドレスで無料アカウントを作成します" },
+        { name: "会社情報登録", text: "会社情報を入力して組織を設定します" },
+        { name: "ポリシー設定", text: "データ処理のポリシーとルールを定義します" },
+        { name: "データアップロード", text: "処理したいデータをアップロードします" },
+        { name: "処理実行", text: "定義したポリシーに基づいてデータが自動処理されます" }
+      ]
+    },
+    'en-US': {
+      name: "How to Use siftbeam",
+      description: "Complete guide to getting started with siftbeam data processing",
+      steps: [
+        { name: "Sign Up", text: "Create a free account with your email address" },
+        { name: "Company Registration", text: "Enter company information to set up your organization" },
+        { name: "Policy Configuration", text: "Define data processing policies and rules" },
+        { name: "Data Upload", text: "Upload the data you want to process" },
+        { name: "Execute Processing", text: "Data is automatically processed based on defined policies" }
+      ]
+    },
+    'zh-CN': {
+      name: "如何使用siftbeam",
+      description: "开始使用siftbeam数据处理的完整指南",
+      steps: [
+        { name: "注册账户", text: "使用电子邮件地址创建免费账户" },
+        { name: "公司信息注册", text: "输入公司信息以设置您的组织" },
+        { name: "策略配置", text: "定义数据处理策略和规则" },
+        { name: "数据上传", text: "上传您想要处理的数据" },
+        { name: "执行处理", text: "根据定义的策略自动处理数据" }
+      ]
+    },
+    ko: {
+      name: "siftbeam 사용 방법",
+      description: "siftbeam 데이터 처리를 시작하기 위한 완전 가이드",
+      steps: [
+        { name: "계정 가입", text: "이메일 주소로 무료 계정을 생성합니다" },
+        { name: "회사 정보 등록", text: "회사 정보를 입력하여 조직을 설정합니다" },
+        { name: "정책 설정", text: "데이터 처리 정책 및 규칙을 정의합니다" },
+        { name: "데이터 업로드", text: "처리하려는 데이터를 업로드합니다" },
+        { name: "처리 실행", text: "정의된 정책에 따라 데이터가 자동으로 처리됩니다" }
+      ]
+    }
+  };
+  
+  const translation = howToTranslations[locale as keyof typeof howToTranslations] || howToTranslations['en-US'];
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": translation.name,
+    "description": translation.description,
+    "image": `${baseUrl}/og-image.jpg`,
+    "totalTime": "PT10M",
+    "estimatedCost": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",  // Stripe決済はUSDのみ
+      "value": "0"
+    },
+    "step": translation.steps.map((step, index) => ({
+      "@type": "HowToStep",
+      "position": index + 1,
+      "name": step.name,
+      "text": step.text,
+      "url": `${baseUrl}/${locale}/flow#step-${index + 1}`
+    })),
+    "tool": {
+      "@type": "HowToTool",
+      "name": "Web Browser"
+    }
+  };
+}
+
+// BreadcrumbList構造化データ
+export function generateBreadcrumbStructuredData(
+  locale: string,
+  breadcrumbs: Array<{ name: string; url: string }>
+) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": item.name,
+      "item": `${baseUrl}${item.url}`
+    }))
+  };
+}
+
+// FAQPage構造化データ
+export function generateFAQStructuredData(
+  locale: string,
+  faqs: Array<{ question: string; answer: string }>
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
   };
 }
