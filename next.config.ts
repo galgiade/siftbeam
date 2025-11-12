@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
   // 圧縮を有効化(パフォーマンス向上)
@@ -28,11 +31,24 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['@heroui/react'], // HeroUI のインポートを最適化
     // CSS最適化を有効化
     optimizeCss: true,
+    // 静的生成の最適化
+    staticGenerationRetryCount: 3,
+    staticGenerationMaxConcurrency: 8,
   },
   
   // HTTPヘッダーの設定(セキュリティとSEO)
   async headers() {
     return [
+      // 静的アセットの長期キャッシュ
+      {
+        source: '/(.*)\\.(ico|png|jpg|jpeg|svg|gif|webp|avif|woff|woff2|ttf|otf|eot)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         source: '/:path*',
         headers: [

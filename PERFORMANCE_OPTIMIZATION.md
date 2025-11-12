@@ -133,6 +133,60 @@ other: {
 - 非クリティカルなコンポーネントを並行読み込み
 - FCPとLCPの改善
 
+### 8. 静的アセットの長期キャッシュ ✅
+**Vercel公式推奨**: 静的ファイルに長期キャッシュヘッダーを設定
+
+**実装内容**:
+```typescript
+// next.config.ts
+async headers() {
+  return [
+    // 静的アセットの長期キャッシュ
+    {
+      source: '/(.*)\\.(ico|png|jpg|jpeg|svg|gif|webp|avif|woff|woff2|ttf|otf|eot)',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=31536000, immutable',
+        },
+      ],
+    },
+  ]
+}
+```
+
+**効果**:
+- 画像・フォントファイルを1年間キャッシュ
+- リピート訪問時のTTFBとFCPを大幅改善
+- CDN配信の効率化
+
+### 9. SVG画像の最適化 ✅
+**実装内容**:
+```typescript
+images: {
+  dangerouslyAllowSVG: true,
+  contentDispositionType: 'attachment',
+  contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+}
+```
+
+**効果**:
+- SVG画像の最適化配信
+- セキュアなSVG処理
+
+### 10. 静的生成の並列化 ✅
+**実装内容**:
+```typescript
+experimental: {
+  staticGenerationRetryCount: 3,
+  staticGenerationMaxConcurrency: 8,
+}
+```
+
+**効果**:
+- ビルド時間の短縮
+- 静的ページ生成の高速化
+
 ## 📈 追加で実施可能な最適化
 
 ### 優先度: 高 🔴
