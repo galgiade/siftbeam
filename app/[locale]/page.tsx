@@ -45,8 +45,7 @@ export async function generateMetadata(
   const dict = pickDictionary(homeDictionaries, resolvedParams.locale, 'en-US')
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
-  // 動的OG画像のURL生成
-  const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(dict.hero.title)}&description=${encodeURIComponent(dict.hero.subtitle)}&locale=${resolvedParams.locale}`;
+  // 静的OG画像を優先（Discordのタイムアウト対策）
   const fallbackImageUrl = `${baseUrl}/og-default.png`;
   
   return {
@@ -62,12 +61,6 @@ export async function generateMetadata(
       siteName: 'siftbeam',
       images: [
         {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: dict.hero.title || 'siftbeam',
-        },
-        {
           url: fallbackImageUrl,
           width: 1200,
           height: 630,
@@ -79,7 +72,7 @@ export async function generateMetadata(
       card: 'summary_large_image',
       title: dict.hero.title || 'siftbeam',
       description: dict.hero.subtitle || 'AI-powered business insights platform',
-      images: [ogImageUrl, fallbackImageUrl],
+      images: [fallbackImageUrl],
     },
     alternates: {
       canonical: `/${resolvedParams.locale}`,

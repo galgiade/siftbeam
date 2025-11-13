@@ -38,9 +38,8 @@ export async function generateMetadata(
   const dict = pickDictionary(blogDictionaries, resolvedParams.locale, 'en-US');
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
-  // ブログ一覧用のOG画像
-  const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(dict.title)}&description=${encodeURIComponent(dict.description)}&locale=${resolvedParams.locale}`;
-  const fallbackImageUrl = `${baseUrl}/og-default.png`;
+  // 静的OG画像を使用（Discordのタイムアウト対策）
+  const ogImageUrl = `${baseUrl}/og-default.png`;
 
   return {
     title: `${dict.title} | siftbeam`,
@@ -68,19 +67,13 @@ export async function generateMetadata(
           height: 630,
           alt: dict.title,
         },
-        {
-          url: fallbackImageUrl,
-          width: 1200,
-          height: 630,
-          alt: dict.title,
-        },
       ],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${dict.title} | siftbeam`,
       description: dict.description,
-      images: [ogImageUrl, fallbackImageUrl],
+      images: [ogImageUrl],
     },
     robots: {
       index: true,

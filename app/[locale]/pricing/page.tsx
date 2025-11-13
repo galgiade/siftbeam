@@ -45,9 +45,8 @@ export async function generateMetadata(
   const dict = pickDictionary(pricingDictionaries, resolvedParams.locale, 'en-US')
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
   
-  // 動的OG画像のURL生成
-  const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(dict.pricing.hero.titleSub)}&description=${encodeURIComponent(dict.pricing.hero.subtitle)}&locale=${resolvedParams.locale}`;
-  const fallbackImageUrl = `${baseUrl}/og-default.png`;
+  // 静的OG画像を使用（Discordのタイムアウト対策）
+  const ogImageUrl = `${baseUrl}/og-default.png`;
   
   return {
     title: `${dict.pricing.hero.titleSub} | siftbeam` || 'Pricing | siftbeam',
@@ -82,19 +81,13 @@ export async function generateMetadata(
           height: 630,
           alt: dict.pricing.hero.titleSub || 'Pricing',
         },
-        {
-          url: fallbackImageUrl,
-          width: 1200,
-          height: 630,
-          alt: dict.pricing.hero.titleSub || 'Pricing',
-        },
       ],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${dict.pricing.hero.titleSub} | siftbeam` || 'Pricing | siftbeam',
       description: dict.pricing.hero.subtitle || 'siftbeam pricing information',
-      images: [ogImageUrl, fallbackImageUrl],
+      images: [ogImageUrl],
     },
     robots: {
       index: true,
