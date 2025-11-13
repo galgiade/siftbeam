@@ -5,8 +5,20 @@ import StructuredData, { generateBreadcrumbStructuredData } from '@/app/_compone
 
 const getBlogKeywordsByLocale = (locale: string): string[] => {
   const keywordMap = {
-    ja: ['ブログ', 'データ処理', '自動化', 'クラウド', 'セキュリティ', 'チュートリアル', '技術解説', 'ベストプラクティス'],
-    'en-US': ['blog', 'data processing', 'automation', 'cloud', 'security', 'tutorial', 'technical guide', 'best practices'],
+    ja: [
+      'ブログ', 'データ処理', '自動化', 'クラウド', 'セキュリティ', 'チュートリアル', '技術解説', 'ベストプラクティス',
+      // ロングテールキーワード追加
+      'データ処理 自動化 方法', 'クラウド データ管理', 'エンタープライズ データ処理', 
+      'ファイル処理 自動化', 'データ処理 セキュリティ', 'データ処理 効率化',
+      'データ処理 ツール 比較', 'データ処理 コスト削減', 'データ処理 始め方'
+    ],
+    'en-US': [
+      'blog', 'data processing', 'automation', 'cloud', 'security', 'tutorial', 'technical guide', 'best practices',
+      // ロングテールキーワード追加
+      'data processing automation guide', 'cloud data management', 'enterprise data processing',
+      'file processing automation', 'data processing security', 'data processing efficiency',
+      'data processing tools comparison', 'data processing cost reduction', 'getting started data processing'
+    ],
   };
   return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en-US'];
 };
@@ -25,6 +37,9 @@ export async function generateMetadata(
   const resolvedParams = await params;
   const dict = pickDictionary(blogDictionaries, resolvedParams.locale, 'en-US');
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
+  // ブログ一覧用のOG画像
+  const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(dict.title)}&description=${encodeURIComponent(dict.description)}&locale=${resolvedParams.locale}`;
 
   return {
     title: `${dict.title} | siftbeam`,
@@ -45,11 +60,20 @@ export async function generateMetadata(
       type: 'website',
       locale: getLocaleByLanguage(resolvedParams.locale),
       siteName: 'siftbeam',
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: dict.title,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${dict.title} | siftbeam`,
       description: dict.description,
+      images: [ogImageUrl],
     },
     robots: {
       index: true,

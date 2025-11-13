@@ -2,6 +2,7 @@
 
 # Sitemap location
 Sitemap: https://siftbeam.com/sitemap.xml
+Sitemap: https://siftbeam.com/rss.xml
 
 # Allow all search engines and AI crawlers
 User-agent: *
@@ -11,6 +12,11 @@ Disallow: /*/signup
 Disallow: /*/forgot-password
 Disallow: /*/service
 Disallow: /api/
+Disallow: /*/account/
+Allow: /*/blog/
+Allow: /*/pricing
+Allow: /*/flow
+Allow: /*/faq
 
 # Explicitly allow AI crawlers (for clarity)
 User-agent: GPTBot

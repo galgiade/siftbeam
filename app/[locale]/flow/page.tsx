@@ -45,6 +45,9 @@ export async function generateMetadata(
   const dict = pickDictionary(flowDictionaries, resolvedParams.locale, 'en-US')
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
   
+  // 動的OG画像のURL生成
+  const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(dict.flow.hero.title)}&description=${encodeURIComponent(dict.flow.hero.subtitle)}&locale=${resolvedParams.locale}`;
+  
   return {
     title: dict.flow.hero.title || 'Flow | siftbeam',
     description: dict.flow.hero.subtitle || 'Step-by-step guide to getting started with siftbeam data processing platform',
@@ -73,7 +76,7 @@ export async function generateMetadata(
       siteName: 'siftbeam',
       images: [
         {
-          url: `${baseUrl}/og-image.jpg`,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: dict.flow.hero.title || 'Flow',
@@ -84,7 +87,7 @@ export async function generateMetadata(
       card: 'summary_large_image',
       title: dict.flow.hero.title || 'Flow | siftbeam',
       description: dict.flow.hero.subtitle || 'Steps to get started with siftbeam',
-      images: [`${baseUrl}/og-image.jpg`],
+      images: [ogImageUrl],
     },
     robots: {
       index: true,

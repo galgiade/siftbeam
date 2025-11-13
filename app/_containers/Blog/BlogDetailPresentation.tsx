@@ -151,7 +151,7 @@ export default function BlogDetailPresentation({ post, relatedPosts, locale }: B
           <Card className="mt-12 bg-gradient-to-r from-primary-500 to-secondary-500">
             <CardBody className="text-center py-12">
               <h2 className="text-2xl font-bold text-white mb-4">
-                {locale === 'ja' ? 'siftbeamを無料で試してみませんか?' : 'Ready to try siftbeam?'}
+                {locale === 'ja' ? 'siftbeamを始めてみませんか?' : 'Ready to try siftbeam?'}
               </h2>
               <p className="text-white/90 mb-6">
                 {locale === 'ja' 
@@ -165,7 +165,7 @@ export default function BlogDetailPresentation({ post, relatedPosts, locale }: B
                 color="default"
                 variant="solid"
               >
-                {locale === 'ja' ? '無料で始める' : 'Get Started Free'}
+                {locale === 'ja' ? '今すぐ始める' : 'Get Started'}
               </Button>
             </CardBody>
           </Card>

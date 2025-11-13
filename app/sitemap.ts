@@ -84,11 +84,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
   locales.forEach(locale => {
     const posts = getAllPosts(locale)
     posts.forEach(post => {
+      // カテゴリーに応じて優先度を調整
+      let priority = 0.75 // デフォルト優先度を上げる
+      if (post.category === 'tutorial' || post.category === 'announcement') {
+        priority = 0.8 // チュートリアルとお知らせは高優先度
+      }
+      
+      // 更新頻度をカテゴリーに応じて調整
+      let changeFrequency: 'monthly' | 'weekly' = 'monthly'
+      if (post.category === 'announcement' || post.category === 'product_update') {
+        changeFrequency = 'weekly' // お知らせと製品更新は頻繁に更新
+      }
+      
       urls.push({
         url: `${baseUrl}/${locale}/blog/${post.slug}`,
         lastModified: new Date(post.updatedAt || post.publishedAt),
-        changeFrequency: 'monthly',
-        priority: 0.7,
+        changeFrequency,
+        priority,
         alternates: {
           languages: Object.fromEntries(
             locales.map(l => [l, `${baseUrl}/${l}/blog/${post.slug}`])

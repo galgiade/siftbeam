@@ -39,6 +39,9 @@ export async function generateMetadata(
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
+  
+  // 動的OG画像のURL生成
+  const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(post.title)}&description=${encodeURIComponent(post.description)}&category=${post.category}&locale=${resolvedParams.locale}`;
 
   return {
     title: `${post.title} | siftbeam Blog`,
@@ -58,11 +61,20 @@ export async function generateMetadata(
       modifiedTime: post.updatedAt,
       authors: [post.author],
       tags: post.tags,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.description,
+      images: [ogImageUrl],
     },
     robots: {
       index: true,
