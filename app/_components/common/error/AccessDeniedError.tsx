@@ -18,10 +18,10 @@ export default function AccessDeniedError({
   backButtonHref 
 }: AccessDeniedErrorProps) {
   const params = useParams();
-  const locale = (params.locale as string) || 'ja';
+  const locale = (params.locale as string) || 'en';
   
   // ロケールに応じた辞書を取得
-  const dictionary = accessDeniedDictionaries[locale as keyof typeof accessDeniedDictionaries] || accessDeniedDictionaries['ja'];
+  const dictionary = accessDeniedDictionaries[locale as keyof typeof accessDeniedDictionaries] || accessDeniedDictionaries['en'];
   
   // デフォルトのリンク先はユーザープロフィールページ
   const href = backButtonHref || `/${locale}/account/user`;

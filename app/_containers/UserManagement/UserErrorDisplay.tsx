@@ -18,7 +18,7 @@ export default function UserErrorDisplay({
   dictionary: UserManagementLocale; 
 }) {
   const params = useParams();
-  const locale = params.locale as string || 'ja';
+  const locale = params.locale as string || 'en';
   
   // アクセス権限エラーかどうかを判定
   const isAccessDenied = error === dictionary.alert.accessDenied;

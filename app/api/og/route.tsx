@@ -6,15 +6,51 @@ export const runtime = 'edge';
 // キャッシュ設定を追加してパフォーマンスを向上
 export const revalidate = 86400; // 24時間キャッシュ
 
+// フッターテキストの多言語対応
+function getFooterText(locale: string): string {
+  const footerTexts: Record<string, string> = {
+    ja: 'ブログ記事',
+    en: 'Blog Post',
+    'en-US': 'Blog Post',
+    'zh-CN': '博客文章',
+    ko: '블로그 게시물',
+    fr: 'Article de blog',
+    de: 'Blog-Beitrag',
+    es: 'Artículo del blog',
+    pt: 'Artigo do blog',
+    id: 'Artikel Blog',
+  };
+  
+  return footerTexts[locale] || footerTexts['en'] || 'Blog Post';
+}
+
+// デフォルトのdescriptionの多言語対応
+function getDefaultDescription(locale: string): string {
+  const descriptions: Record<string, string> = {
+    ja: 'エンタープライズ向けデータ処理サービス',
+    en: 'Enterprise data processing service',
+    'en-US': 'Enterprise data processing service',
+    'zh-CN': '企业数据处理服务',
+    ko: '기업용 데이터 처리 서비스',
+    fr: 'Service de traitement de données pour entreprises',
+    de: 'Datenverarbeitungsservice für Unternehmen',
+    es: 'Servicio de procesamiento de datos empresariales',
+    pt: 'Serviço de processamento de dados empresariais',
+    id: 'Layanan pemrosesan data perusahaan',
+  };
+  
+  return descriptions[locale] || descriptions['en'] || 'Enterprise data processing service';
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const locale = searchParams.get('locale') || 'en';
     const title = searchParams.get('title') || 'siftbeam';
-    const description = searchParams.get('description') || 'エンタープライズ向けデータ処理サービス';
+    const description = searchParams.get('description') || getDefaultDescription(locale);
     const category = searchParams.get('category') || '';
-    const locale = searchParams.get('locale') || 'ja';
 
-    // カテゴリーラベルのマッピング
+    // カテゴリーラベルのマッピング（全9言語対応）
     const categoryLabels: Record<string, Record<string, string>> = {
       ja: {
         technical: '技術',
@@ -36,9 +72,91 @@ export async function GET(request: NextRequest) {
         security: 'Security',
         announcement: 'Announcement',
       },
+      'en-US': {
+        technical: 'Technical',
+        tutorial: 'Tutorial',
+        case_study: 'Case Study',
+        trend: 'Trend',
+        product_update: 'Product Update',
+        comparison: 'Comparison',
+        security: 'Security',
+        announcement: 'Announcement',
+      },
+      'zh-CN': {
+        technical: '技术',
+        tutorial: '教程',
+        case_study: '案例研究',
+        trend: '趋势',
+        product_update: '产品更新',
+        comparison: '比较',
+        security: '安全',
+        announcement: '公告',
+      },
+      ko: {
+        technical: '기술',
+        tutorial: '튜토리얼',
+        case_study: '사례 연구',
+        trend: '트렌드',
+        product_update: '제품 업데이트',
+        comparison: '비교',
+        security: '보안',
+        announcement: '공지사항',
+      },
+      fr: {
+        technical: 'Technique',
+        tutorial: 'Tutoriel',
+        case_study: 'Étude de cas',
+        trend: 'Tendance',
+        product_update: 'Mise à jour',
+        comparison: 'Comparaison',
+        security: 'Sécurité',
+        announcement: 'Annonce',
+      },
+      de: {
+        technical: 'Technisch',
+        tutorial: 'Tutorial',
+        case_study: 'Fallstudie',
+        trend: 'Trend',
+        product_update: 'Produktupdate',
+        comparison: 'Vergleich',
+        security: 'Sicherheit',
+        announcement: 'Ankündigung',
+      },
+      es: {
+        technical: 'Técnico',
+        tutorial: 'Tutorial',
+        case_study: 'Caso de estudio',
+        trend: 'Tendencia',
+        product_update: 'Actualización',
+        comparison: 'Comparación',
+        security: 'Seguridad',
+        announcement: 'Anuncio',
+      },
+      pt: {
+        technical: 'Técnico',
+        tutorial: 'Tutorial',
+        case_study: 'Estudo de caso',
+        trend: 'Tendência',
+        product_update: 'Atualização',
+        comparison: 'Comparação',
+        security: 'Segurança',
+        announcement: 'Anúncio',
+      },
+      id: {
+        technical: 'Teknis',
+        tutorial: 'Tutorial',
+        case_study: 'Studi Kasus',
+        trend: 'Tren',
+        product_update: 'Pembaruan Produk',
+        comparison: 'Perbandingan',
+        security: 'Keamanan',
+        announcement: 'Pengumuman',
+      },
     };
 
-    const categoryLabel = categoryLabels[locale]?.[category] || '';
+    // ロケールの正規化（en-US → en）
+    const normalizedLocale = locale.startsWith('en') ? 'en' : locale;
+    const categoryLabel = categoryLabels[locale]?.[category] || categoryLabels[normalizedLocale]?.[category] || '';
 
     // カテゴリーカラーのマッピング
     const categoryColors: Record<string, string> = {
@@ -163,7 +281,7 @@ export async function GET(request: NextRequest) {
                 display: 'flex',
               }}
             >
-              {locale === 'ja' ? 'ブログ記事' : 'Blog Post'}
+              {getFooterText(locale)}
             </div>
             <div
               style={{

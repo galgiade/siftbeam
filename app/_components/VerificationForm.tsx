@@ -21,7 +21,7 @@ interface VerificationFormProps {
 export default function VerificationForm({
   verificationId,
   email,
-  locale = 'ja',
+  locale = 'en',
   password,
   mode = 'signup',
   onVerificationSuccess

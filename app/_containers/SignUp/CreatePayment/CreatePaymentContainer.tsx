@@ -35,7 +35,7 @@ export default async function CreatePaymentContainer({ params }: CreatePaymentCo
     return redirect(`/${locale}/account/user`);
   }
   
-  const dictionary: CreatePaymentLocale = pickDictionary(createPaymentDictionaries, locale, 'ja');
+  const dictionary: CreatePaymentLocale = pickDictionary(createPaymentDictionaries, locale, 'en');
   // UserAttributesをUserAttributesDTOに変換
   const userAttributesDTO: UserAttributesDTO = {
     sub: userAttributes.sub || '',

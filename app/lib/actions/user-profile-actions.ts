@@ -29,7 +29,7 @@ export async function createUserProfile(
   department: string,
   position: string,
   role: 'admin' | 'user' = 'admin',
-  locale: string = 'ja'
+  locale: string = 'en'
 ): Promise<{ success: boolean; message: string }> {
   try {
     const now = new Date().toISOString();

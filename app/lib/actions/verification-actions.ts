@@ -35,7 +35,7 @@ function calculateTTL(): number {
 // 認証コードを生成してDynamoDBに保存し、メールを送信
 export async function createVerificationCodeAction(
   email: string, 
-  locale: string = 'ja'
+  locale: string = 'en'
 ): Promise<{
   success: boolean;
   message: string;
@@ -229,7 +229,7 @@ export async function deleteVerificationCodeAction(verificationId: string): Prom
 // 認証コードを再送信
 export async function resendVerificationCodeAction(
   verificationId: string,
-  locale: string = 'ja'
+  locale: string = 'en'
 ): Promise<{
   success: boolean;
   message: string;

@@ -15,7 +15,7 @@ export interface UserProfile {
   paymentMethodId?: string;
 }
 
-export async function requireUserProfile(locale: string = 'ja', skipDeletionCheck: boolean = false): Promise<UserProfile> {
+export async function requireUserProfile(locale: string = 'en', skipDeletionCheck: boolean = false): Promise<UserProfile> {
   try {
     const userAttributes = await getUserCustomAttributes();
     
@@ -81,7 +81,7 @@ export async function requireUserProfile(locale: string = 'ja', skipDeletionChec
   }
 }
 
-export async function requireAuth(locale: string = 'ja'): Promise<UserAttributes> {
+export async function requireAuth(locale: string = 'en'): Promise<UserAttributes> {
   try {
     const userAttributes = await getUserCustomAttributes();
     

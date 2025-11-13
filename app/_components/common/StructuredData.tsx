@@ -86,7 +86,7 @@ const getTranslation = (locale: string, key: keyof typeof translations.ja) => {
 };
 
 // siftbeam用の構造化データ生成関数(全言語対応)
-export function generateSiftbeamStructuredData(locale: string = 'ja') {
+export function generateSiftbeamStructuredData(locale: string = 'en') {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
   return {
@@ -142,7 +142,7 @@ export function generateSiftbeamStructuredData(locale: string = 'ja') {
 }
 
 // 組織情報の構造化データ(全言語対応)
-export function generateOrganizationStructuredData(locale: string = 'ja') {
+export function generateOrganizationStructuredData(locale: string = 'en') {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
   const orgTranslations = {
@@ -178,7 +178,7 @@ export function generateOrganizationStructuredData(locale: string = 'ja') {
 }
 
 // サービス情報の構造化データ(全言語対応)
-export function generateServiceStructuredData(locale: string = 'ja') {
+export function generateServiceStructuredData(locale: string = 'en') {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
   const serviceTranslations = {
@@ -272,7 +272,7 @@ export function generateServiceStructuredData(locale: string = 'ja') {
 }
 
 // Pricing構造化データ
-export function generatePricingStructuredData(locale: string = 'ja') {
+export function generatePricingStructuredData(locale: string = 'en') {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
   const pricingTranslations = {
@@ -316,7 +316,7 @@ export function generatePricingStructuredData(locale: string = 'ja') {
 }
 
 // HowTo構造化データ
-export function generateHowToStructuredData(locale: string = 'ja') {
+export function generateHowToStructuredData(locale: string = 'en') {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
   const howToTranslations = {

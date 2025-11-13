@@ -14,7 +14,7 @@ interface PaymentErrorDisplayProps {
 
 export default function PaymentErrorDisplay({ error, dictionary }: PaymentErrorDisplayProps) {
   const params = useParams();
-  const locale = params.locale as string || 'ja';
+  const locale = params.locale as string || 'en';
 
   const isAccessDenied = error === dictionary.alert.accessDenied;
 

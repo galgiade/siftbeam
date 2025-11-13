@@ -26,7 +26,7 @@ export interface customerDTOProps {
 
 // マッピングは共通ファイルに集約
 
-export default async function UpdateCompanyInfoContainer() {
+export default async function UpdateCompanyInfoContainer({ locale }: { locale: string }) {
   try {
     // ユーザー認証情報を取得（ロケール指定なしでデフォルト動作）
     const userProfile = await requireUserProfile();
@@ -87,7 +87,7 @@ export default async function UpdateCompanyInfoContainer() {
   } catch (error: any) {
     console.error('Error in UpdateCompanyInfoContainer:', error);
     
-    const dictionary: CompanyProfileLocale = pickDictionary(companyDictionaries, 'ja', 'en');
+    const dictionary: CompanyProfileLocale = pickDictionary(companyDictionaries, locale, 'en');
     
     return (
       <div className="min-h-screen flex items-center justify-center">

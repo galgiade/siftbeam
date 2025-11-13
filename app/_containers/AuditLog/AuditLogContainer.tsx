@@ -6,7 +6,7 @@ import { auditLogDictionaries } from "@/app/dictionaries/mappings";
 
 export default async function AuditLogContainer({ locale }: { locale: string }) {
   try {
-    const dictionary = auditLogDictionaries[locale as keyof typeof auditLogDictionaries] || auditLogDictionaries['ja'];
+    const dictionary = auditLogDictionaries[locale as keyof typeof auditLogDictionaries] || auditLogDictionaries['en'];
     
     // ユーザーの属性を取得
     const userAttributes = await requireUserProfile();
@@ -35,7 +35,7 @@ export default async function AuditLogContainer({ locale }: { locale: string }) 
   } catch (error: any) {
     console.error('Error in AuditLogContainer:', error);
     
-    const dictionary = auditLogDictionaries[locale as keyof typeof auditLogDictionaries] || auditLogDictionaries['ja'];
+    const dictionary = auditLogDictionaries[locale as keyof typeof auditLogDictionaries] || auditLogDictionaries['en'];
     
     return (
       <AuditLogErrorDisplay 

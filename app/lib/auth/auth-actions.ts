@@ -184,7 +184,7 @@ export async function clearInvalidTokensAction() {
   }
 }
 
-export async function signOutAction(locale: string = 'ja') {
+export async function signOutAction(locale: string = 'en') {
   try {
     // Cookieからトークンを削除
     const cookieStore = await cookies();
@@ -378,7 +378,7 @@ export async function confirmSignUpAction(prevState: any, formData: FormData) {
     // パスワードを取得（自動サインイン用）
     const password = formData.get('password') as string;
     const autoSignIn = formData.get('autoSignIn') === 'true';
-    const locale = formData.get('locale') as string || 'ja';
+    const locale = formData.get('locale') as string || 'en';
 
     // DynamoDBから認証コードを検証
     // まず、emailをuserIdとして検索（既存ユーザー対応）
@@ -478,7 +478,7 @@ export async function confirmSignInAction(prevState: any, formData: FormData) {
 
     // パスワードを取得（自動サインイン用）
     const password = formData.get('password') as string;
-    const locale = formData.get('locale') as string || 'ja';
+    const locale = formData.get('locale') as string || 'en';
 
     // DynamoDBから認証コードを検証（サインイン用なのでCognito確認は不要）
     const verificationResult = await verifyEmailCodeAction(
@@ -532,7 +532,7 @@ export async function confirmSignInAction(prevState: any, formData: FormData) {
 // 認証コード再送信のサーバーアクション
 export async function resendVerificationCodeAction(
   verificationId: string,
-  locale: string = 'ja'
+  locale: string = 'en'
 ): Promise<{
   success: boolean;
   message: string;
@@ -583,7 +583,7 @@ export async function resendVerificationCodeAction(
  */
 export async function forgotPasswordAction(prevState: any, formData: FormData) {
   const email = formData.get('email') as string;
-  const locale = formData.get('locale') as string || 'ja';
+  const locale = formData.get('locale') as string || 'en';
   
   try {
     // バリデーション

@@ -4,7 +4,7 @@ import { requireUserProfile } from "@/app/lib/utils/require-auth";
 import { accountDeletionDictionaries } from "@/app/dictionaries/mappings";
 
 export default async function CancelAccountDeletionContainer({ locale }: { locale: string }) {
-  const dictionary = accountDeletionDictionaries[locale as keyof typeof accountDeletionDictionaries] || accountDeletionDictionaries['ja'];
+  const dictionary = accountDeletionDictionaries[locale as keyof typeof accountDeletionDictionaries] || accountDeletionDictionaries['en'];
   
   // ユーザーの属性を取得（無限ループ防止のためskipDeletionCheck=trueを指定）
   const userAttributes = await requireUserProfile(locale, true);

@@ -67,7 +67,7 @@ export async function sendTemplatedEmailAction({
 export async function sendVerificationCodeEmailAction(
   email: string,
   code: string,
-  locale: string = 'ja'
+  locale: string = 'en'
 ): Promise<{
   success: boolean;
   message: string;
@@ -106,7 +106,7 @@ export async function sendVerificationCodeEmailAction(
 export async function sendPasswordResetEmailAction(
   email: string,
   resetToken: string,
-  locale: string = 'ja'
+  locale: string = 'en'
 ): Promise<{
   success: boolean;
   message: string;
@@ -141,7 +141,7 @@ export async function sendPasswordResetEmailAction(
 export async function sendWelcomeEmailAction(
   email: string,
   userName: string,
-  locale: string = 'ja'
+  locale: string = 'en'
 ): Promise<{
   success: boolean;
   message: string;
@@ -178,7 +178,7 @@ export async function sendUsageLimitNotificationEmailAction(
   customerId: string,
   currentUsageBytes: number,
   exceedingLimitDescription: string,
-  locale: string = 'ja'
+  locale: string = 'en'
 ): Promise<{
   success: boolean;
   message: string;

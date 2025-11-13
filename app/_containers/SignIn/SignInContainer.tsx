@@ -6,7 +6,7 @@ export default async function SignInContainer({
 }: {
   params: { locale: string }
 }) {
-  const locale = params.locale || 'ja'
+  const locale = params.locale || 'en'
   const dictionary = pickDictionary(signInDictionaries, locale, 'en');
   
   // サインインページでは認証チェックを行わない

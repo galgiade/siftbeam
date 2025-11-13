@@ -1,4 +1,4 @@
-export function getApiDictionary(locale: string = 'ja') {
+export function getApiDictionary(locale: string = 'en') {
   const dictionaries = {
     ja: {
       fields: {

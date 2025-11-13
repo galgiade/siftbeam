@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export function validationSchema(locale: string = 'ja') {
+export function validationSchema(locale: string = 'en') {
   const messages = {
     ja: {
       required: 'この項目は必須です',

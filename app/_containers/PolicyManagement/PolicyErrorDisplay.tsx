@@ -14,7 +14,7 @@ interface PolicyErrorDisplayProps {
 
 export default function PolicyErrorDisplay({ error, dictionary }: PolicyErrorDisplayProps) {
   const params = useParams();
-  const locale = params.locale as string || 'ja';
+  const locale = params.locale as string || 'en';
   
   // アクセス権限エラーかどうかを判定
   const isAccessDenied = error === dictionary.alert.accessDenied;
