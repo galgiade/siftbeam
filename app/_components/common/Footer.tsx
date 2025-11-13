@@ -24,10 +24,6 @@ export default function Footer({ dictionary, locale }: FooterProps) {
           <Link href={`/${locale}/legal-disclosures`} className="hover:underline" aria-label={dictionary.links.legalDisclosures}>
             {dictionary.links.legalDisclosures}
           </Link>
-          <span className="opacity-50">|</span>
-          <Link href={`/${locale}/faq`} className="hover:underline" aria-label={dictionary.links.faq}>
-            {dictionary.links.faq}
-          </Link>
         </div>
         <p>{dictionary.copyright}</p>
       </div>

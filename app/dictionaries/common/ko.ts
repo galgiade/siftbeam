@@ -12,7 +12,7 @@ const ko: CommonLocale = {
       signOut: '로그아웃',
       dashboard: '대시보드',
       flow: '사용 방법',
-      announcement: '공지사항',
+      blog: '블로그',
       services: '서비스',
       myPage: '마이페이지',
       supportCenter: '지원 센터',
@@ -21,11 +21,12 @@ const ko: CommonLocale = {
     footer: {
       title: 'siftbeam',
       description:
-        '데이터의 힘을 해방하고 비즈니스의 미래를 개척하는 지능형 예측 분석 플랫폼.',
+        '엔터프라이즈 데이터 처리 서비스. 맞춤형 워크플로우로 비즈니스 데이터 작업을 자동화합니다.',
       links: {
         terms: '이용약관',
         privacy: '개인정보 처리방침',
         legalDisclosures: '전자상거래법에 따른 표기',
+        blog: '블로그',
         faq: '자주 묻는 질문',
       },
       copyright: '주식회사 커넥트테크',

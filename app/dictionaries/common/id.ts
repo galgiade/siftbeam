@@ -12,7 +12,7 @@ const id: CommonLocale = {
       signOut: 'Keluar',
       dashboard: 'Dasbor',
       flow: 'Alur',
-      announcement: 'Pengumuman',
+      blog: 'Blog',
       services: 'Layanan',
       myPage: 'Halaman Saya',
       supportCenter: 'Pusat Dukungan',
@@ -21,11 +21,12 @@ const id: CommonLocale = {
     footer: {
       title: 'siftbeam',
       description:
-        'Platform analitik prediktif cerdas yang melepaskan kekuatan data untuk membentuk masa depan bisnis Anda.',
+        'Layanan pemrosesan data perusahaan dengan alur kerja yang dapat disesuaikan untuk mengotomatiskan operasi data bisnis Anda.',
       links: {
         terms: 'Ketentuan Layanan',
         privacy: 'Kebijakan Privasi',
         legalDisclosures: 'Pengungkapan Hukum',
+        blog: 'Blog',
         faq: 'Pertanyaan yang Sering Diajukan',
       },
       copyright: 'Connect Tech Inc.',

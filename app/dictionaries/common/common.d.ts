@@ -10,7 +10,7 @@ export interface CommonLocale {
       signOut: string;
       dashboard: string;
       flow: string;
-      announcement: string;
+      blog: string;
       services: string;
       myPage: string;
       supportCenter: string;
@@ -23,6 +23,7 @@ export interface CommonLocale {
         terms: string;
         privacy: string;
         legalDisclosures: string;
+        blog: string;
         faq: string;
       };
       copyright: string;

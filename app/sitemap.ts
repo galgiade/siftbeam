@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { getAllPosts } from '@/app/lib/blog'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
@@ -11,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '', // ホーム
     '/pricing',
     '/flow',
+    '/blog',
     '/faq',
     '/terms',
     '/privacy',
@@ -18,7 +20,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/signin',
     '/signup/auth',
     '/forgot-password',
-    '/announcement',
   ]
   
   // 各言語×各ページのURLを生成
@@ -43,6 +44,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority = 1.0 // ホームページは最高優先度
       } else if (page === '/pricing' || page === '/flow') {
         priority = 0.9 // 重要ページ
+      } else if (page === '/blog') {
+        priority = 0.85 // ブログページ
       } else if (page === '/faq') {
         priority = 0.85 // FAQページ
       } else if (page === '/signin' || page === '/signup/auth') {
@@ -55,8 +58,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       let changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never' = 'weekly'
       if (page === '' || page === '/pricing') {
         changeFrequency = 'daily'
-      } else if (page === '/announcement') {
-        changeFrequency = 'weekly'
+      } else if (page === '/blog') {
+        changeFrequency = 'weekly' // ブログは週次更新
       } else if (page === '/faq') {
         changeFrequency = 'monthly' // FAQは月次更新
       } else if (page === '/terms' || page === '/privacy' || page === '/legal-disclosures') {
@@ -71,6 +74,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
         alternates: {
           languages: Object.fromEntries(
             locales.map(l => [l, `${baseUrl}/${l}${page}`])
+          ),
+        },
+      })
+    })
+  })
+  
+  // ブログ記事のURLを追加
+  locales.forEach(locale => {
+    const posts = getAllPosts(locale)
+    posts.forEach(post => {
+      urls.push({
+        url: `${baseUrl}/${locale}/blog/${post.slug}`,
+        lastModified: new Date(post.updatedAt || post.publishedAt),
+        changeFrequency: 'monthly',
+        priority: 0.7,
+        alternates: {
+          languages: Object.fromEntries(
+            locales.map(l => [l, `${baseUrl}/${l}/blog/${post.slug}`])
           ),
         },
       })

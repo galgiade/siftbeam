@@ -12,7 +12,7 @@ const zh: CommonLocale = {
       signOut: '退出',
       dashboard: '仪表板',
       flow: '使用方法',
-      announcement: '公告',
+      blog: '博客',
       services: '服务',
       myPage: '我的页面',
       supportCenter: '支持中心',
@@ -21,11 +21,12 @@ const zh: CommonLocale = {
     footer: {
       title: 'siftbeam',
       description:
-        '释放数据的力量，开创业务未来的智能预测分析平台。',
+        '面向企业的数据处理服务。通过可定制的工作流程自动化您的业务数据操作。',
       links: {
         terms: '服务条款',
         privacy: '隐私政策',
         legalDisclosures: '法律声明',
+        blog: '博客',
         faq: '常见问题',
       },
       copyright: 'Connect Tech Inc.',

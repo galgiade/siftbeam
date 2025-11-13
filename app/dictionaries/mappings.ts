@@ -735,30 +735,6 @@ export const privacyDictionaries = {
   'zh-CN': zhPrivacy,
 };
 
-// Announcement (お知らせ)
-import jaAnnouncement from '@/app/dictionaries/announcement/ja';
-import enAnnouncement from '@/app/dictionaries/announcement/en';
-import esAnnouncement from '@/app/dictionaries/announcement/es';
-import frAnnouncement from '@/app/dictionaries/announcement/fr';
-import deAnnouncement from '@/app/dictionaries/announcement/de';
-import koAnnouncement from '@/app/dictionaries/announcement/ko';
-import idAnnouncement from '@/app/dictionaries/announcement/id';
-import ptAnnouncement from '@/app/dictionaries/announcement/pt';
-import zhAnnouncement from '@/app/dictionaries/announcement/zh';
-
-export const announcementDictionaries = {
-  ja: jaAnnouncement,
-  en: enAnnouncement,
-  'en-US': enAnnouncement,
-  es: esAnnouncement,
-  fr: frAnnouncement,
-  de: deAnnouncement,
-  ko: koAnnouncement,
-  id: idAnnouncement,
-  pt: ptAnnouncement,
-  zh: zhAnnouncement,
-  'zh-CN': zhAnnouncement,
-};
 
 // Legal Disclosures (特定商取引法に基づく表記)
 import jaLegalDisclosures from '@/app/dictionaries/legalDisclosures/ja';
@@ -821,6 +797,10 @@ import esFAQ from '@/app/dictionaries/faq/es';
 import ptFAQ from '@/app/dictionaries/faq/pt';
 import idFAQ from '@/app/dictionaries/faq/id';
 
+// Blog dictionaries
+import blogJa from './blog/ja';
+import blogEn from './blog/en';
+
 export const faqDictionaries = {
   ja: jaFAQ,
   en: enFAQ,
@@ -833,4 +813,16 @@ export const faqDictionaries = {
   pt: ptFAQ,
   zh: zhFAQ,
   'zh-CN': zhFAQ,
+};
+
+export const blogDictionaries = {
+  ja: blogJa,
+  'en-US': blogEn,
+  'zh-CN': blogEn, // TODO: 中国語版を作成
+  ko: blogEn, // TODO: 韓国語版を作成
+  fr: blogEn, // TODO: フランス語版を作成
+  de: blogEn, // TODO: ドイツ語版を作成
+  es: blogEn, // TODO: スペイン語版を作成
+  pt: blogEn, // TODO: ポルトガル語版を作成
+  id: blogEn  // TODO: インドネシア語版を作成
 };

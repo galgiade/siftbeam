@@ -12,7 +12,7 @@ const fr: CommonLocale = {
       signOut: "Se déconnecter",
       dashboard: "Tableau de bord",
       flow: "Flux",
-      announcement: "Annonces",
+      blog: "Blog",
       services: "Services",
       myPage: "Ma page",
       supportCenter: "Centre d'assistance",
@@ -21,11 +21,12 @@ const fr: CommonLocale = {
     footer: {
       title: "siftbeam",
       description:
-        "Une plateforme d'analyse prédictive intelligente qui libère la puissance des données pour façonner l'avenir de votre entreprise.",
+        "Service de traitement de données d'entreprise avec des workflows personnalisables pour automatiser vos opérations de données.",
       links: {
         terms: "Conditions d'utilisation",
         privacy: "Politique de confidentialité",
         legalDisclosures: "Mentions légales",
+        blog: "Blog",
         faq: "FAQ",
       },
       copyright: "Connect Tech Inc.",

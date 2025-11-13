@@ -12,7 +12,7 @@ const ja: CommonLocale = {
       signOut: 'サインアウト',
       dashboard: 'ダッシュボード',
       flow: '使い方',
-      announcement: 'お知らせ',
+      blog: 'ブログ',
       services: 'サービス',
       myPage: 'マイページ',
       supportCenter: 'サポートセンター',
@@ -21,11 +21,12 @@ const ja: CommonLocale = {
     footer: {
       title: 'siftbeam',
       description:
-        'データの力を解き放ち、ビジネスの未来を切り開くインテリジェントな予測分析プラットフォーム。',
+        'エンタープライズ向けデータ処理サービス。カスタマイズ可能なワークフローで、ビジネスのデータ処理を自動化します。',
       links: {
         terms: '利用規約',
         privacy: 'プライバシーポリシー',
         legalDisclosures: '特定商取引法に基づく表記',
+        blog: 'ブログ',
         faq: 'よくある質問',
       },
       copyright: '株式会社コネクトテック',

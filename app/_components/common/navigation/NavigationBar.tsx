@@ -13,8 +13,8 @@ import { useEffect, useState } from 'react';
 export const NAVIGATION_ITEMS = [
   { href: "/pricing", key: "pricing" },
   { href: "/flow", key: "flow" },
+  { href: "/blog", key: "blog" },
   { href: "/faq", key: "faq" },
-  { href: "/announcement", key: "announcement" },
   { href: "/service", key: "services" },
   { href: "/account/user", key: "myPage" }
 ] as const;
