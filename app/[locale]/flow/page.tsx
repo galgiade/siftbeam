@@ -47,6 +47,7 @@ export async function generateMetadata(
   
   // 動的OG画像のURL生成
   const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(dict.flow.hero.title)}&description=${encodeURIComponent(dict.flow.hero.subtitle)}&locale=${resolvedParams.locale}`;
+  const fallbackImageUrl = `${baseUrl}/og-default.png`;
   
   return {
     title: dict.flow.hero.title || 'Flow | siftbeam',
@@ -81,13 +82,19 @@ export async function generateMetadata(
           height: 630,
           alt: dict.flow.hero.title || 'Flow',
         },
+        {
+          url: fallbackImageUrl,
+          width: 1200,
+          height: 630,
+          alt: dict.flow.hero.title || 'Flow',
+        },
       ],
     },
     twitter: {
       card: 'summary_large_image',
       title: dict.flow.hero.title || 'Flow | siftbeam',
       description: dict.flow.hero.subtitle || 'Steps to get started with siftbeam',
-      images: [ogImageUrl],
+      images: [ogImageUrl, fallbackImageUrl],
     },
     robots: {
       index: true,

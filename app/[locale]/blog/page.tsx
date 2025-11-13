@@ -40,6 +40,7 @@ export async function generateMetadata(
   
   // ブログ一覧用のOG画像
   const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(dict.title)}&description=${encodeURIComponent(dict.description)}&locale=${resolvedParams.locale}`;
+  const fallbackImageUrl = `${baseUrl}/og-default.png`;
 
   return {
     title: `${dict.title} | siftbeam`,
@@ -67,13 +68,19 @@ export async function generateMetadata(
           height: 630,
           alt: dict.title,
         },
+        {
+          url: fallbackImageUrl,
+          width: 1200,
+          height: 630,
+          alt: dict.title,
+        },
       ],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${dict.title} | siftbeam`,
       description: dict.description,
-      images: [ogImageUrl],
+      images: [ogImageUrl, fallbackImageUrl],
     },
     robots: {
       index: true,

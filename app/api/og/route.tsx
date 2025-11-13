@@ -3,6 +3,9 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+// キャッシュ設定を追加してパフォーマンスを向上
+export const revalidate = 86400; // 24時間キャッシュ
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -63,7 +66,7 @@ export async function GET(request: NextRequest) {
             justifyContent: 'space-between',
             backgroundColor: '#0F172A',
             padding: '60px 80px',
-            fontFamily: 'system-ui, sans-serif',
+            fontFamily: 'sans-serif',
           }}
         >
           {/* ヘッダー */}
@@ -77,7 +80,7 @@ export async function GET(request: NextRequest) {
             <div
               style={{
                 fontSize: 48,
-                fontWeight: 'bold',
+                fontWeight: 700,
                 color: '#FFFFFF',
                 display: 'flex',
               }}
@@ -92,7 +95,7 @@ export async function GET(request: NextRequest) {
                   padding: '8px 24px',
                   borderRadius: '8px',
                   fontSize: 24,
-                  fontWeight: '600',
+                  fontWeight: 600,
                   display: 'flex',
                 }}
               >
@@ -115,7 +118,7 @@ export async function GET(request: NextRequest) {
             <div
               style={{
                 fontSize: 64,
-                fontWeight: 'bold',
+                fontWeight: 700,
                 color: '#FFFFFF',
                 lineHeight: 1.2,
                 display: 'flex',
@@ -177,6 +180,9 @@ export async function GET(request: NextRequest) {
       {
         width: 1200,
         height: 630,
+        headers: {
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
+        },
       }
     );
   } catch (e: unknown) {

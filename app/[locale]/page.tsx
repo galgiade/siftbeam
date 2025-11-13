@@ -47,6 +47,7 @@ export async function generateMetadata(
   
   // 動的OG画像のURL生成
   const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(dict.hero.title)}&description=${encodeURIComponent(dict.hero.subtitle)}&locale=${resolvedParams.locale}`;
+  const fallbackImageUrl = `${baseUrl}/og-default.png`;
   
   return {
     title: dict.hero.title || 'siftbeam',
@@ -66,13 +67,19 @@ export async function generateMetadata(
           height: 630,
           alt: dict.hero.title || 'siftbeam',
         },
+        {
+          url: fallbackImageUrl,
+          width: 1200,
+          height: 630,
+          alt: dict.hero.title || 'siftbeam',
+        },
       ],
     },
     twitter: {
       card: 'summary_large_image',
       title: dict.hero.title || 'siftbeam',
       description: dict.hero.subtitle || 'AI-powered business insights platform',
-      images: [ogImageUrl],
+      images: [ogImageUrl, fallbackImageUrl],
     },
     alternates: {
       canonical: `/${resolvedParams.locale}`,

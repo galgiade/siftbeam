@@ -42,6 +42,8 @@ export async function generateMetadata(
   
   // 動的OG画像のURL生成
   const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(post.title)}&description=${encodeURIComponent(post.description)}&category=${post.category}&locale=${resolvedParams.locale}`;
+  // フォールバック: 静的なデフォルトOG画像
+  const fallbackImageUrl = `${baseUrl}/og-default.png`;
 
   return {
     title: `${post.title} | siftbeam Blog`,
@@ -68,13 +70,19 @@ export async function generateMetadata(
           height: 630,
           alt: post.title,
         },
+        {
+          url: fallbackImageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
       ],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.description,
-      images: [ogImageUrl],
+      images: [ogImageUrl, fallbackImageUrl],
     },
     robots: {
       index: true,
