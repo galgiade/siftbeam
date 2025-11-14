@@ -301,6 +301,7 @@ export function generatePricingStructuredData(locale: string = 'en') {
     "@type": "Product",
     "name": translation.name,
     "description": translation.description,
+    "image": `${baseUrl}/og-default.png`,
     "brand": {
       "@type": "Brand",
       "name": "siftbeam"
