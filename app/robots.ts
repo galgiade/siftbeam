@@ -7,10 +7,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: [
+          '/',
+          '/_next/static/', // Next.jsの静的ファイルを許可（重要！）
+        ],
         disallow: [
           '/api/',
-          '/_next/',
+          '/_next/data/', // データファイルのみブロック
           '/private/',
           '/*?*apiKey=*', // APIキーを含むURLを除外
           '/*?*token=*',  // トークンを含むURLを除外
