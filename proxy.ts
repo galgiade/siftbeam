@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // URLパスからロケールを抽出
@@ -15,7 +15,7 @@ export function middleware(request: NextRequest) {
   return response;
 }
 
-// ミドルウェアを適用するパス
+// プロキシを適用するパス
 export const config = {
   matcher: [
     /*
