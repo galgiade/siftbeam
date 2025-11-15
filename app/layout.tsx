@@ -1,7 +1,6 @@
 import { Providers } from "@/app/providers";
 import '@/app/globals.css'
 import { headers } from "next/headers";
-import { getPreferredLocale } from "@/app/utils/locale-utils";
 import GoogleAnalytics from "@/app/_components/common/GoogleAnalytics";
 import { WebVitals } from "@/app/_components/common/WebVitals";
 import { PageTracking } from "@/app/_components/common/PageTracking";
@@ -112,8 +111,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const headersList = await headers();
-  const acceptLanguage = headersList.get('accept-language') || '';
-  const locale = getPreferredLocale(acceptLanguage);
+  
+  // ミドルウェアから渡されたロケールを取得（最も正確）
+  const locale = headersList.get('x-locale') || 'en';
+  
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
   
   return (
