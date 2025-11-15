@@ -5,7 +5,7 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // URLパスからロケールを抽出
-  const localeMatch = pathname.match(/^\/(ja|en|en-US|zh-CN|ko|fr|de|es|pt|id)(\/|$)/);
+  const localeMatch = pathname.match(/^\/(ja|en|en-US|zh-CN|zh|ko|fr|de|es|pt|id)(\/|$)/);
   const locale = localeMatch ? localeMatch[1] : 'en';
   
   // レスポンスヘッダーにロケールを追加
