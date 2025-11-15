@@ -3,23 +3,6 @@ import Footer from '@/app/_components/common/Footer';
 import { pickDictionary, commonDictionaries } from '@/app/dictionaries/mappings';
 import type { CommonLocale } from '@/app/dictionaries/common/common.d.ts';
 
-// 静的生成のためのgenerateStaticParams
-export async function generateStaticParams() {
-  return [
-    { locale: 'ja' },
-    { locale: 'en' },
-    { locale: 'en-US' },
-    { locale: 'zh-CN' },
-    { locale: 'zh' },
-    { locale: 'ko' },
-    { locale: 'fr' },
-    { locale: 'de' },
-    { locale: 'es' },
-    { locale: 'pt' },
-    { locale: 'id' },
-  ];
-}
-
 export default async function LocaleLayout(
   props: {
     children: React.ReactNode;
