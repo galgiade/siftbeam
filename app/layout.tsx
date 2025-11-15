@@ -111,9 +111,9 @@ export default function RootLayout({
 }) {
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
   
-  // デフォルトは英語（各ロケールのlayout.tsxで上書きされる）
+  // デフォルトは英語
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" className={inter.variable}>
       <body className={inter.className}>
         <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
         <Suspense fallback={null}>
