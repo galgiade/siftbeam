@@ -3,6 +3,23 @@ import BlogListContainer from '@/app/_containers/Blog/BlogListContainer';
 import { blogDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import StructuredData, { generateBreadcrumbStructuredData } from '@/app/_components/common/StructuredData';
 
+// 静的生成のためのgenerateStaticParams
+export async function generateStaticParams() {
+  return [
+    { locale: 'ja' },
+    { locale: 'en' },
+    { locale: 'en-US' },
+    { locale: 'zh-CN' },
+    { locale: 'zh' },
+    { locale: 'ko' },
+    { locale: 'fr' },
+    { locale: 'de' },
+    { locale: 'es' },
+    { locale: 'pt' },
+    { locale: 'id' },
+  ];
+}
+
 const getBlogKeywordsByLocale = (locale: string): string[] => {
   const keywordMap = {
     ja: [

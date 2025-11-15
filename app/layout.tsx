@@ -1,6 +1,5 @@
 import { Providers } from "@/app/providers";
 import '@/app/globals.css'
-import { headers } from "next/headers";
 import GoogleAnalytics from "@/app/_components/common/GoogleAnalytics";
 import { WebVitals } from "@/app/_components/common/WebVitals";
 import { PageTracking } from "@/app/_components/common/PageTracking";
@@ -105,20 +104,16 @@ export const metadata = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const headersList = await headers();
-  
-  // ミドルウェアから渡されたロケールを取得（最も正確）
-  const locale = headersList.get('x-locale') || 'en';
-  
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
   
+  // デフォルトは英語（各ロケールのlayout.tsxで上書きされる）
   return (
-    <html lang={locale} className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className={inter.className}>
         <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
         <Suspense fallback={null}>

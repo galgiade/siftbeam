@@ -4,6 +4,23 @@ import HomeContainer from '@/app/_containers/Home/HomeContainer';
 import { homeDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 import StructuredData, { generateSiftbeamStructuredData, generateOrganizationStructuredData, generateServiceStructuredData } from '@/app/_components/common/StructuredData'
 
+// 静的生成のためのgenerateStaticParams
+export async function generateStaticParams() {
+  return [
+    { locale: 'ja' },
+    { locale: 'en' },
+    { locale: 'en-US' },
+    { locale: 'zh-CN' },
+    { locale: 'zh' },
+    { locale: 'ko' },
+    { locale: 'fr' },
+    { locale: 'de' },
+    { locale: 'es' },
+    { locale: 'pt' },
+    { locale: 'id' },
+  ];
+}
+
 // 全言語対応のキーワード設定
 const getKeywordsByLocale = (locale: string): string[] => {
   const keywordMap = {

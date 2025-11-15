@@ -4,6 +4,23 @@ import PricingContainer from '@/app/_containers/Pricing/PricingContainer'
 import { pricingDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 import StructuredData, { generatePricingStructuredData, generateBreadcrumbStructuredData } from '@/app/_components/common/StructuredData'
 
+// 静的生成のためのgenerateStaticParams
+export async function generateStaticParams() {
+  return [
+    { locale: 'ja' },
+    { locale: 'en' },
+    { locale: 'en-US' },
+    { locale: 'zh-CN' },
+    { locale: 'zh' },
+    { locale: 'ko' },
+    { locale: 'fr' },
+    { locale: 'de' },
+    { locale: 'es' },
+    { locale: 'pt' },
+    { locale: 'id' },
+  ];
+}
+
 // 全言語対応のキーワード設定
 const getPricingKeywordsByLocale = (locale: string): string[] => {
   const keywordMap = {
