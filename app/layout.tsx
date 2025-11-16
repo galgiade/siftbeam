@@ -43,8 +43,7 @@ export const metadata = {
     languages: {
       'ja': '/ja',
       'en': '/en',
-      'en-US': '/en-US',
-      'zh-CN': '/zh-CN',
+      'zh': '/zh',
       'ko': '/ko',
       'fr': '/fr',
       'de': '/de',

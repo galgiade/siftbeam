@@ -3,20 +3,11 @@ import BlogListContainer from '@/app/_containers/Blog/BlogListContainer';
 import { blogDictionaries, pickDictionary } from '@/app/dictionaries/mappings';
 import StructuredData, { generateBreadcrumbStructuredData } from '@/app/_components/common/StructuredData';
 
-// 静的生成のためのgenerateStaticParams
+// 静的生成のためのgenerateStaticParams（2文字コードに統一）
 export async function generateStaticParams() {
   return [
     { locale: 'ja' },
     { locale: 'en' },
-    { locale: 'en-US' },
-    { locale: 'zh-CN' },
-    { locale: 'zh' },
-    { locale: 'ko' },
-    { locale: 'fr' },
-    { locale: 'de' },
-    { locale: 'es' },
-    { locale: 'pt' },
-    { locale: 'id' },
   ];
 }
 
@@ -29,7 +20,7 @@ const getBlogKeywordsByLocale = (locale: string): string[] => {
       'ファイル処理 自動化', 'データ処理 セキュリティ', 'データ処理 効率化',
       'データ処理 ツール 比較', 'データ処理 コスト削減', 'データ処理 始め方'
     ],
-    'en-US': [
+    en: [
       'blog', 'data processing', 'automation', 'cloud', 'security', 'tutorial', 'technical guide', 'best practices',
       // ロングテールキーワード追加
       'data processing automation guide', 'cloud data management', 'enterprise data processing',
@@ -37,13 +28,13 @@ const getBlogKeywordsByLocale = (locale: string): string[] => {
       'data processing tools comparison', 'data processing cost reduction', 'getting started data processing'
     ],
   };
-  return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en-US'];
+  return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en'];
 };
 
 const getLocaleByLanguage = (locale: string): string => {
   const localeMap = {
     ja: 'ja_JP',
-    'en-US': 'en_US',
+    en: 'en_US',
   };
   return localeMap[locale as keyof typeof localeMap] || 'en_US';
 };
@@ -52,7 +43,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ locale: string }> }
 ): Promise<Metadata> {
   const resolvedParams = await params;
-  const dict = pickDictionary(blogDictionaries, resolvedParams.locale, 'en-US');
+  const dict = pickDictionary(blogDictionaries, resolvedParams.locale, 'en');
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
   // 静的OG画像を使用（Discordのタイムアウト対策）
@@ -67,7 +58,6 @@ export async function generateMetadata(
       languages: {
         'ja': `${baseUrl}/ja/blog`,
         'en': `${baseUrl}/en/blog`,
-        'en-US': `${baseUrl}/en-US/blog`,
       },
     },
     openGraph: {
@@ -114,10 +104,10 @@ export default async function BlogPage(
 
   const breadcrumbTranslations = {
     ja: { home: 'ホーム', blog: 'ブログ' },
-    'en-US': { home: 'Home', blog: 'Blog' },
+    en: { home: 'Home', blog: 'Blog' },
   };
 
-  const breadcrumbLabels = breadcrumbTranslations[locale as keyof typeof breadcrumbTranslations] || breadcrumbTranslations['en-US'];
+  const breadcrumbLabels = breadcrumbTranslations[locale as keyof typeof breadcrumbTranslations] || breadcrumbTranslations['en'];
 
   const breadcrumbData = generateBreadcrumbStructuredData(locale, [
     { name: breadcrumbLabels.home, url: `/${locale}` },

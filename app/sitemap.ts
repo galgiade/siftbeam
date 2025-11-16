@@ -4,8 +4,8 @@ import { getAllPosts } from '@/app/lib/blog'
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
   
-  // サポートする言語
-  const locales = ['ja', 'en', 'en-US', 'zh-CN', 'ko', 'fr', 'de', 'es', 'pt', 'id']
+  // サポートする言語（2文字コードに統一）
+  const locales = ['ja', 'en', 'zh', 'ko', 'fr', 'de', 'es', 'pt', 'id']
   
   // 公開ページのパス
   const publicPages = [
@@ -25,13 +25,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // 各言語×各ページのURLを生成
   const urls: MetadataRoute.Sitemap = []
   
-  // ルートページ(リダイレクト用)
-  urls.push({
-    url: baseUrl,
-    lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: 1,
-  })
+  // 注意: ルートURL(/)は常にリダイレクトするため、サイトマップに含めない
+  // Googlebotは各言語のURLを直接クロールする
   
   // 各言語のページ
   locales.forEach(locale => {

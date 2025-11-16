@@ -4,13 +4,11 @@ import HomeContainer from '@/app/_containers/Home/HomeContainer';
 import { homeDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 import StructuredData, { generateSiftbeamStructuredData, generateOrganizationStructuredData, generateServiceStructuredData } from '@/app/_components/common/StructuredData'
 
-// 静的生成のためのgenerateStaticParams
+// 静的生成のためのgenerateStaticParams（2文字コードに統一）
 export async function generateStaticParams() {
   return [
     { locale: 'ja' },
     { locale: 'en' },
-    { locale: 'en-US' },
-    { locale: 'zh-CN' },
     { locale: 'zh' },
     { locale: 'ko' },
     { locale: 'fr' },
@@ -26,7 +24,7 @@ const getKeywordsByLocale = (locale: string): string[] => {
   const keywordMap = {
     ja: ['データ処理', 'ファイル管理', 'ポリシー管理', 'クラウドストレージ', 'データアップロード', '使用量監視', '従量課金', 'セキュアデータ管理', 'AWS', 'エンタープライズデータ', '二要素認証', 'データ分析レポート'],
     en: ['data processing', 'file management', 'policy management', 'cloud storage', 'data upload', 'usage monitoring', 'pay-as-you-go', 'secure data management', 'AWS', 'enterprise data', 'two-factor authentication', 'data analysis reports'],
-    'zh-CN': ['数据处理', '文件管理', '策略管理', '云存储', '数据上传', '使用量监控', '按量付费', '安全数据管理', 'AWS', '企业数据', '双因素认证', '数据分析报告'],
+    zh: ['数据处理', '文件管理', '策略管理', '云存储', '数据上传', '使用量监控', '按量付费', '安全数据管理', 'AWS', '企业数据', '双因素认证', '数据分析报告'],
     ko: ['데이터처리', '파일관리', '정책관리', '클라우드스토리지', '데이터업로드', '사용량모니터링', '종량제', '보안데이터관리', 'AWS', '기업데이터', '이중인증', '데이터분석리포트'],
     fr: ['traitement de données', 'gestion de fichiers', 'gestion de politiques', 'stockage cloud', 'téléchargement de données', 'surveillance d\'utilisation', 'paiement à l\'usage', 'gestion sécurisée des données', 'AWS', 'données d\'entreprise', 'authentification à deux facteurs', 'rapports d\'analyse de données'],
     de: ['Datenverarbeitung', 'Dateiverwaltung', 'Richtlinienverwaltung', 'Cloud-Speicher', 'Daten-Upload', 'Nutzungsüberwachung', 'nutzungsbasierte Abrechnung', 'sichere Datenverwaltung', 'AWS', 'Unternehmensdaten', 'Zwei-Faktor-Authentifizierung', 'Datenanalyseberichte'],
@@ -38,12 +36,12 @@ const getKeywordsByLocale = (locale: string): string[] => {
   return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en'];
 };
 
-// 全言語対応のロケール設定
+// 全言語対応のロケール設定（2文字コードに統一）
 const getLocaleByLanguage = (locale: string): string => {
   const localeMap = {
     ja: 'ja_JP',
-    'en-US': 'en_US',
-    'zh-CN': 'zh_CN',
+    en: 'en_US',
+    zh: 'zh_CN',
     ko: 'ko_KR',
     fr: 'fr_FR',
     de: 'de_DE',
@@ -59,7 +57,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ locale: string }> }
 ): Promise<Metadata> {
   const resolvedParams = await params
-  const dict = pickDictionary(homeDictionaries, resolvedParams.locale, 'en-US')
+  const dict = pickDictionary(homeDictionaries, resolvedParams.locale, 'en')
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   
   // 静的OG画像を優先（Discordのタイムアウト対策）
@@ -96,8 +94,7 @@ export async function generateMetadata(
       languages: {
         'ja': '/ja',
         'en': '/en',
-        'en-US': '/en-US',
-        'zh-CN': '/zh-CN',
+        'zh': '/zh',
         'ko': '/ko',
         'fr': '/fr',
         'de': '/de',

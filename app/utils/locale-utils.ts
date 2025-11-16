@@ -1,9 +1,17 @@
-// 対応している言語のリスト
-export const supportedLocales = ['ja', 'en', 'en-US', 'fr', 'de', 'ko', 'es', 'pt', 'id', 'zh', 'zh-CN'] as const;
+// 対応している言語のリスト（2文字コードに統一）
+export const supportedLocales = ['ja', 'en', 'zh', 'ko', 'fr', 'de', 'es', 'pt', 'id'] as const;
 export type SupportedLocale = typeof supportedLocales[number];
 
 // デフォルト言語の設定
 export const DEFAULT_LOCALE: SupportedLocale = 'en';
+
+// 旧ロケールコードから新ロケールコードへのマッピング（後方互換性のため）
+const legacyLocaleMap: Record<string, SupportedLocale> = {
+  'en-US': 'en',
+  'en-us': 'en',
+  'zh-CN': 'zh',
+  'zh-cn': 'zh',
+};
 
 // 言語選択のヘルパー関数
 export function getPreferredLocale(acceptLanguage: string): SupportedLocale {
@@ -31,7 +39,14 @@ export function getPreferredLocale(acceptLanguage: string): SupportedLocale {
 
   for (const item of languages) {
     const langStr = item.language;
-    const exact = canonical.get(langStr.toLowerCase());
+    const lowerLang = langStr.toLowerCase();
+    
+    // 旧ロケールコードのマッピングをチェック
+    if (legacyLocaleMap[lowerLang]) {
+      return legacyLocaleMap[lowerLang];
+    }
+    
+    const exact = canonical.get(lowerLang);
     if (exact) return exact;
 
     const base = (langStr.split('-')[0] || '').toLowerCase();

@@ -93,6 +93,17 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: true,
       },
+      // 旧ロケールコードから新ロケールコードへのリダイレクト（SEO維持）
+      {
+        source: '/en-US/:path*',
+        destination: '/en/:path*',
+        permanent: true, // 301リダイレクト（SEO評価を引き継ぐ）
+      },
+      {
+        source: '/zh-CN/:path*',
+        destination: '/zh/:path*',
+        permanent: true, // 301リダイレクト（SEO評価を引き継ぐ）
+      },
       // 言語なしのパスを日本語にリダイレクト
       {
         source: '/pricing',

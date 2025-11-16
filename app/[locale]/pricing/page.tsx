@@ -4,13 +4,11 @@ import PricingContainer from '@/app/_containers/Pricing/PricingContainer'
 import { pricingDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 import StructuredData, { generatePricingStructuredData, generateBreadcrumbStructuredData } from '@/app/_components/common/StructuredData'
 
-// 静的生成のためのgenerateStaticParams
+// 静的生成のためのgenerateStaticParams（2文字コードに統一）
 export async function generateStaticParams() {
   return [
     { locale: 'ja' },
     { locale: 'en' },
-    { locale: 'en-US' },
-    { locale: 'zh-CN' },
     { locale: 'zh' },
     { locale: 'ko' },
     { locale: 'fr' },
@@ -25,8 +23,8 @@ export async function generateStaticParams() {
 const getPricingKeywordsByLocale = (locale: string): string[] => {
   const keywordMap = {
     ja: ['料金', '価格', 'プラン', '従量課金', 'コスト', '料金プラン', 'データ処理 料金', '企業向け料金', '見積もり', '価格表'],
-    'en-US': ['pricing', 'price', 'plans', 'pay-as-you-go', 'cost', 'pricing plans', 'data processing pricing', 'enterprise pricing', 'quote', 'price list'],
-    'zh-CN': ['价格', '定价', '计划', '按量付费', '成本', '价格计划', '数据处理价格', '企业定价', '报价', '价格表'],
+    en: ['pricing', 'price', 'plans', 'pay-as-you-go', 'cost', 'pricing plans', 'data processing pricing', 'enterprise pricing', 'quote', 'price list'],
+    zh: ['价格', '定价', '计划', '按量付费', '成本', '价格计划', '数据处理价格', '企业定价', '报价', '价格表'],
     ko: ['가격', '요금', '플랜', '종량제', '비용', '가격 플랜', '데이터 처리 가격', '기업 가격', '견적', '가격표'],
     fr: ['prix', 'tarification', 'plans', 'paiement à l\'usage', 'coût', 'plans tarifaires', 'prix du traitement de données', 'tarification entreprise', 'devis', 'liste de prix'],
     de: ['Preise', 'Preisgestaltung', 'Pläne', 'nutzungsbasierte Abrechnung', 'Kosten', 'Preispläne', 'Datenverarbeitungspreise', 'Unternehmenspreise', 'Angebot', 'Preisliste'],
@@ -35,15 +33,15 @@ const getPricingKeywordsByLocale = (locale: string): string[] => {
     id: ['harga', 'tarif', 'paket', 'bayar sesuai penggunaan', 'biaya', 'paket harga', 'harga pemrosesan data', 'harga perusahaan', 'penawaran', 'daftar harga']
   };
   
-  return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en-US'];
+  return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en'];
 };
 
-// 全言語対応のロケール設定
+// 全言語対応のロケール設定（2文字コードに統一）
 const getLocaleByLanguage = (locale: string): string => {
   const localeMap = {
     ja: 'ja_JP',
-    'en-US': 'en_US',
-    'zh-CN': 'zh_CN',
+    en: 'en_US',
+    zh: 'zh_CN',
     ko: 'ko_KR',
     fr: 'fr_FR',
     de: 'de_DE',
@@ -59,7 +57,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ locale: string }> }
 ): Promise<Metadata> {
   const resolvedParams = await params
-  const dict = pickDictionary(pricingDictionaries, resolvedParams.locale, 'en-US')
+  const dict = pickDictionary(pricingDictionaries, resolvedParams.locale, 'en')
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
   
   // 静的OG画像を使用（Discordのタイムアウト対策）
@@ -74,8 +72,7 @@ export async function generateMetadata(
       languages: {
         'ja': `${baseUrl}/ja/pricing`,
         'en': `${baseUrl}/en/pricing`,
-        'en-US': `${baseUrl}/en-US/pricing`,
-        'zh-CN': `${baseUrl}/zh-CN/pricing`,
+        'zh': `${baseUrl}/zh/pricing`,
         'ko': `${baseUrl}/ko/pricing`,
         'fr': `${baseUrl}/fr/pricing`,
         'de': `${baseUrl}/de/pricing`,
@@ -129,11 +126,11 @@ export default async function PricingPage(
   // 構造化データの生成
   const pricingData = generatePricingStructuredData(locale);
   
-  // パンくずリストの翻訳
+  // パンくずリストの翻訳（2文字コードに統一）
   const breadcrumbTranslations = {
     ja: { home: 'ホーム', pricing: '料金' },
-    'en-US': { home: 'Home', pricing: 'Pricing' },
-    'zh-CN': { home: '主页', pricing: '价格' },
+    en: { home: 'Home', pricing: 'Pricing' },
+    zh: { home: '主页', pricing: '价格' },
     ko: { home: '홈', pricing: '가격' },
     fr: { home: 'Accueil', pricing: 'Prix' },
     de: { home: 'Startseite', pricing: 'Preise' },
@@ -142,7 +139,7 @@ export default async function PricingPage(
     id: { home: 'Beranda', pricing: 'Harga' }
   };
   
-  const breadcrumbLabels = breadcrumbTranslations[locale as keyof typeof breadcrumbTranslations] || breadcrumbTranslations['en-US'];
+  const breadcrumbLabels = breadcrumbTranslations[locale as keyof typeof breadcrumbTranslations] || breadcrumbTranslations['en'];
   
   const breadcrumbData = generateBreadcrumbStructuredData(locale, [
     { name: breadcrumbLabels.home, url: `/${locale}` },
