@@ -817,8 +817,10 @@ export const faqDictionaries = {
 
 export const blogDictionaries = {
   ja: blogJa,
-  'en-US': blogEn,
-  'zh-CN': blogEn, // TODO: 中国語版を作成
+  en: blogEn,
+  'en-US': blogEn, // 後方互換性のため
+  zh: blogEn, // TODO: 中国語版を作成
+  'zh-CN': blogEn, // 後方互換性のため
   ko: blogEn, // TODO: 韓国語版を作成
   fr: blogEn, // TODO: フランス語版を作成
   de: blogEn, // TODO: ドイツ語版を作成
