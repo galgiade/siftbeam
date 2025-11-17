@@ -2,20 +2,8 @@ import type { Metadata } from 'next'
 import CreatePaymentContainer from "@/app/_containers/SignUp/CreatePayment/CreatePaymentContainer";
 import { createPaymentDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 
-// 静的生成のためのgenerateStaticParams（2文字コードに統一）
-export async function generateStaticParams() {
-  return [
-    { locale: 'ja' },
-    { locale: 'en' },
-    { locale: 'zh' },
-    { locale: 'ko' },
-    { locale: 'fr' },
-    { locale: 'de' },
-    { locale: 'es' },
-    { locale: 'pt' },
-    { locale: 'id' },
-  ];
-}
+// 認証が必要なページのため、動的レンダリングを強制
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(
   { params }: { params: Promise<{ locale: string }> }
