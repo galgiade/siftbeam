@@ -2,6 +2,21 @@ import type { Metadata } from 'next'
 import { forgotPasswordDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 import ForgotPasswordContainer from '@/app/_containers/ForgotPassword/ForgotPasswordContainer'
 
+// 静的生成のためのgenerateStaticParams（2文字コードに統一）
+export async function generateStaticParams() {
+  return [
+    { locale: 'ja' },
+    { locale: 'en' },
+    { locale: 'zh' },
+    { locale: 'ko' },
+    { locale: 'fr' },
+    { locale: 'de' },
+    { locale: 'es' },
+    { locale: 'pt' },
+    { locale: 'id' },
+  ];
+}
+
 export async function generateMetadata(
   { params }: { params: Promise<{ locale: string }> }
 ): Promise<Metadata> {

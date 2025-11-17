@@ -2,11 +2,26 @@ import type { Metadata } from 'next'
 import SignInContainer from "@/app/_containers/SignIn/SignInContainer";
 import { signInDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 
+// 静的生成のためのgenerateStaticParams（2文字コードに統一）
+export async function generateStaticParams() {
+  return [
+    { locale: 'ja' },
+    { locale: 'en' },
+    { locale: 'zh' },
+    { locale: 'ko' },
+    { locale: 'fr' },
+    { locale: 'de' },
+    { locale: 'es' },
+    { locale: 'pt' },
+    { locale: 'id' },
+  ];
+}
+
 export async function generateMetadata(
   { params }: { params: Promise<{ locale: string }> }
 ): Promise<Metadata> {
   const resolvedParams = await params
-  const dict = pickDictionary(signInDictionaries, resolvedParams.locale, 'en-US')
+  const dict = pickDictionary(signInDictionaries, resolvedParams.locale, 'en')
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
   
   return {

@@ -6,7 +6,13 @@ import { usePathname } from 'next/navigation'
 const localeMap = {
   'en': 'en-US',
   'ja': 'ja-JP',
-  'nl': 'nl-NL'
+  'zh': 'zh-CN',
+  'ko': 'ko-KR',
+  'fr': 'fr-FR',
+  'de': 'de-DE',
+  'es': 'es-ES',
+  'pt': 'pt-BR',
+  'id': 'id-ID'
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {

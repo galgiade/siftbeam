@@ -8,7 +8,7 @@ export const size = {
 }
 export const contentType = 'image/png'
 
-// 言語ごとのテキスト
+// 言語ごとのテキスト（2文字コードに統一）
 const translations: Record<string, { title: string; subtitle: string; features: string }> = {
   ja: {
     title: 'siftbeam',
@@ -20,12 +20,7 @@ const translations: Record<string, { title: string; subtitle: string; features: 
     subtitle: 'Enterprise Data Processing Platform',
     features: 'Policy-based Management | Pay-as-you-go | Secure',
   },
-  'en-US': {
-    title: 'siftbeam',
-    subtitle: 'Enterprise Data Processing Platform',
-    features: 'Policy-based Management | Pay-as-you-go | Secure',
-  },
-  'zh-CN': {
+  zh: {
     title: 'siftbeam',
     subtitle: '企业数据处理管理平台',
     features: '基于策略的管理 | 按量付费 | 安全',

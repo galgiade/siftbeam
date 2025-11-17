@@ -3,12 +3,27 @@ import PrivacyContainer from '@/app/_containers/Privacy/PrivacyContainer'
 import { privacyDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 import StructuredData, { generateBreadcrumbStructuredData } from '@/app/_components/common/StructuredData'
 
+// 静的生成のためのgenerateStaticParams（2文字コードに統一）
+export async function generateStaticParams() {
+  return [
+    { locale: 'ja' },
+    { locale: 'en' },
+    { locale: 'zh' },
+    { locale: 'ko' },
+    { locale: 'fr' },
+    { locale: 'de' },
+    { locale: 'es' },
+    { locale: 'pt' },
+    { locale: 'id' },
+  ];
+}
+
 // 全言語対応のキーワード設定
 const getPrivacyKeywordsByLocale = (locale: string): string[] => {
   const keywordMap = {
     ja: ['プライバシーポリシー', '個人情報保護', 'プライバシー', '個人情報', 'データ保護', '情報保護方針', '個人データ', 'プライバシー保護', 'セキュリティ', 'データ管理'],
-    'en-US': ['privacy policy', 'privacy', 'data protection', 'personal data', 'data privacy', 'information protection', 'personal information', 'privacy protection', 'security', 'data management'],
-    'zh-CN': ['隐私政策', '隐私保护', '数据保护', '个人信息', '隐私', '信息保护', '个人数据', '隐私安全', '安全', '数据管理'],
+    en: ['privacy policy', 'privacy', 'data protection', 'personal data', 'data privacy', 'information protection', 'personal information', 'privacy protection', 'security', 'data management'],
+    zh: ['隐私政策', '隐私保护', '数据保护', '个人信息', '隐私', '信息保护', '个人数据', '隐私安全', '安全', '数据管理'],
     ko: ['개인정보처리방침', '개인정보보호', '프라이버시', '개인정보', '데이터 보호', '정보보호', '개인데이터', '프라이버시 보호', '보안', '데이터 관리'],
     fr: ['politique de confidentialité', 'confidentialité', 'protection des données', 'données personnelles', 'vie privée', 'protection des informations', 'informations personnelles', 'protection de la vie privée', 'sécurité', 'gestion des données'],
     de: ['Datenschutzerklärung', 'Datenschutz', 'Datensicherheit', 'persönliche Daten', 'Privatsphäre', 'Informationsschutz', 'personenbezogene Daten', 'Datenschutz', 'Sicherheit', 'Datenverwaltung'],
@@ -17,14 +32,14 @@ const getPrivacyKeywordsByLocale = (locale: string): string[] => {
     id: ['kebijakan privasi', 'privasi', 'perlindungan data', 'data pribadi', 'privasi data', 'perlindungan informasi', 'informasi pribadi', 'perlindungan privasi', 'keamanan', 'manajemen data']
   };
   
-  return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en-US'];
+  return keywordMap[locale as keyof typeof keywordMap] || keywordMap['en'];
 };
 
 const getLocaleByLanguage = (locale: string): string => {
   const localeMap = {
     ja: 'ja_JP',
-    'en-US': 'en_US',
-    'zh-CN': 'zh_CN',
+    en: 'en_US',
+    zh: 'zh_CN',
     ko: 'ko_KR',
     fr: 'fr_FR',
     de: 'de_DE',
@@ -40,7 +55,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ locale: string }> }
 ): Promise<Metadata> {
   const resolvedParams = await params
-  const dict = pickDictionary(privacyDictionaries, resolvedParams.locale, 'en-US')
+  const dict = pickDictionary(privacyDictionaries, resolvedParams.locale, 'en')
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
   
   return {
@@ -52,8 +67,7 @@ export async function generateMetadata(
       languages: {
         'ja': `${baseUrl}/ja/privacy`,
         'en': `${baseUrl}/en/privacy`,
-        'en-US': `${baseUrl}/en-US/privacy`,
-        'zh-CN': `${baseUrl}/zh-CN/privacy`,
+        'zh': `${baseUrl}/zh/privacy`,
         'ko': `${baseUrl}/ko/privacy`,
         'fr': `${baseUrl}/fr/privacy`,
         'de': `${baseUrl}/de/privacy`,
@@ -101,11 +115,11 @@ export default async function PrivacyPage(
   const params = await props.params
   const locale = params.locale
   
-  // パンくずリストの翻訳
+  // パンくずリストの翻訳（2文字コードに統一）
   const breadcrumbTranslations = {
     ja: { home: 'ホーム', privacy: 'プライバシーポリシー' },
-    'en-US': { home: 'Home', privacy: 'Privacy Policy' },
-    'zh-CN': { home: '主页', privacy: '隐私政策' },
+    en: { home: 'Home', privacy: 'Privacy Policy' },
+    zh: { home: '主页', privacy: '隐私政策' },
     ko: { home: '홈', privacy: '개인정보처리방침' },
     fr: { home: 'Accueil', privacy: 'Politique de confidentialité' },
     de: { home: 'Startseite', privacy: 'Datenschutzerklärung' },
@@ -114,7 +128,7 @@ export default async function PrivacyPage(
     id: { home: 'Beranda', privacy: 'Kebijakan Privasi' }
   };
   
-  const breadcrumbLabels = breadcrumbTranslations[locale as keyof typeof breadcrumbTranslations] || breadcrumbTranslations['en-US'];
+  const breadcrumbLabels = breadcrumbTranslations[locale as keyof typeof breadcrumbTranslations] || breadcrumbTranslations['en'];
   
   const breadcrumbData = generateBreadcrumbStructuredData(locale, [
     { name: breadcrumbLabels.home, url: `/${locale}` },

@@ -7,13 +7,20 @@ import StructuredData, { generateBreadcrumbStructuredData } from '@/app/_compone
 const getLocaleByLanguage = (locale: string): string => {
   const localeMap = {
     ja: 'ja_JP',
-    'en-US': 'en_US',
+    en: 'en_US',
+    zh: 'zh_CN',
+    ko: 'ko_KR',
+    fr: 'fr_FR',
+    de: 'de_DE',
+    es: 'es_ES',
+    pt: 'pt_BR',
+    id: 'id_ID',
   };
   return localeMap[locale as keyof typeof localeMap] || 'en_US';
 };
 
 export async function generateStaticParams() {
-  const locales = ['ja', 'en-US'];
+  const locales = ['ja', 'en', 'zh', 'ko', 'fr', 'de', 'es', 'pt', 'id'];
   const params: { locale: string; slug: string }[] = [];
 
   for (const locale of locales) {
@@ -110,10 +117,17 @@ export default async function BlogPostPage(
 
   const breadcrumbTranslations = {
     ja: { home: 'ホーム', blog: 'ブログ' },
-    'en-US': { home: 'Home', blog: 'Blog' },
+    en: { home: 'Home', blog: 'Blog' },
+    zh: { home: '首页', blog: '博客' },
+    ko: { home: '홈', blog: '블로그' },
+    fr: { home: 'Accueil', blog: 'Blog' },
+    de: { home: 'Startseite', blog: 'Blog' },
+    es: { home: 'Inicio', blog: 'Blog' },
+    pt: { home: 'Início', blog: 'Blog' },
+    id: { home: 'Beranda', blog: 'Blog' },
   };
 
-  const breadcrumbLabels = breadcrumbTranslations[params.locale as keyof typeof breadcrumbTranslations] || breadcrumbTranslations['en-US'];
+  const breadcrumbLabels = breadcrumbTranslations[params.locale as keyof typeof breadcrumbTranslations] || breadcrumbTranslations['en'];
 
   const breadcrumbData = generateBreadcrumbStructuredData(params.locale, [
     { name: breadcrumbLabels.home, url: `/${params.locale}` },

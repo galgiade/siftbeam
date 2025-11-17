@@ -4,22 +4,37 @@ import { legalDisclosuresDictionaries, pickDictionary } from '@/app/dictionaries
 import StructuredData, { generateBreadcrumbStructuredData } from '@/app/_components/common/StructuredData'
 import { getOGLocale, generateAlternateLanguages, generateOGImages } from '@/app/lib/seo-helpers'
 
+// 静的生成のためのgenerateStaticParams（2文字コードに統一）
+export async function generateStaticParams() {
+  return [
+    { locale: 'ja' },
+    { locale: 'en' },
+    { locale: 'zh' },
+    { locale: 'ko' },
+    { locale: 'fr' },
+    { locale: 'de' },
+    { locale: 'es' },
+    { locale: 'pt' },
+    { locale: 'id' },
+  ];
+}
+
 // 言語別キーワード
 const getLegalKeywords = (locale: string): string[] => {
   const keywords: Record<string, string[]> = {
     ja: ['特定商取引法', '法的表示', '会社情報', '事業者情報', '運営者情報', '法令遵守', '商取引法', '事業者表示', '法的事項', '企業情報'],
-    'en-US': ['legal disclosures', 'business terms', 'company information', 'legal notice', 'business information', 'compliance', 'legal terms', 'corporate information', 'legal matters', 'business details'],
-    'zh-CN': ['法律披露', '商业条款', '公司信息', '法律声明', '商业信息', '合规', '法律条款', '企业信息', '法律事项', '商业详情'],
+    en: ['legal disclosures', 'business terms', 'company information', 'legal notice', 'business information', 'compliance', 'legal terms', 'corporate information', 'legal matters', 'business details'],
+    zh: ['法律披露', '商业条款', '公司信息', '法律声明', '商业信息', '合规', '法律条款', '企业信息', '法律事项', '商业详情'],
     ko: ['법적 공시', '사업자 정보', '회사 정보', '법적 고지', '사업 정보', '규정 준수', '법적 조항', '기업 정보', '법적 사항', '사업 세부사항'],
   };
-  return keywords[locale] || keywords['en-US'];
+  return keywords[locale] || keywords['en'];
 };
 
 export async function generateMetadata(
   { params }: { params: Promise<{ locale: string }> }
 ): Promise<Metadata> {
   const resolvedParams = await params
-  const dict = pickDictionary(legalDisclosuresDictionaries, resolvedParams.locale, 'en-US')
+  const dict = pickDictionary(legalDisclosuresDictionaries, resolvedParams.locale, 'en')
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com'
   
   return {

@@ -13,7 +13,9 @@ export function mapToStripeLocale(locale: string): string {
     'pt': 'pt',
     'id': 'id',
     'zh': 'zh',
-    'zh-CN': 'zh'
+    // 後方互換性のため
+    'zh-CN': 'zh',
+    'en-US': 'en'
   };
   
   return localeMap[locale] || 'en';
