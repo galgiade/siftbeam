@@ -1,13 +1,15 @@
 ---
 slug: data-processing-automation-guide
-title: Apa itu Otomasi Pemrosesan Data? Panduan Lengkap untuk Pemula
-description: Pelajari dasar-dasar otomasi pemrosesan data dari dasar hingga praktik. Temukan tantangan pemrosesan manual, manfaat otomasi, dan panduan langkah demi langkah untuk memulai.
+title: Panduan Otomasi Pemrosesan Data: Kurangi Pekerjaan Manual 90% | siftbeam
+description: Temukan bagaimana otomasi pemrosesan data dapat menghemat lebih dari 500 jam per tahun. Pelajari cara menghilangkan entri data manual, mencapai nol kesalahan manusia, dan mengotomatisasi alur kerja. Panduan lengkap dengan contoh nyata dan implementasi langkah demi langkah.
 author: Tim Editorial siftbeam
 publishedAt: 2025-01-15
 category: technical
 tags:
   - Pemrosesan Data
   - Otomasi
+  - Pemrosesan Data Manual
+  - Otomasi Pemrosesan Data
   - Panduan Pemula
   - Efisiensi Operasional
 readingTime: 10 menit

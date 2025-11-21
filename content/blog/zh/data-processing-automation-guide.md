@@ -1,13 +1,16 @@
 ---
 slug: data-processing-automation-guide
-title: 什么是数据处理自动化？初学者完整指南
-description: 从基础到实践，以易于理解的方式讲解数据处理自动化。介绍手动处理的挑战、自动化的优势以及具体的入门步骤。
+title: 自动数据处理指南：减少90%手动工作 | siftbeam
+description: 了解自动数据处理如何每年节省500+小时。学习消除手动数据输入，实现零人为错误，并自动化工作流程。包含真实案例和分步实施的完整指南。
 author: siftbeam编辑团队
 publishedAt: 2025-01-15
 category: technical
 tags:
   - 数据处理
   - 自动化
+  - 自动数据处理
+  - 什么是自动数据处理
+  - 手动数据处理
   - 初学者指南
   - 运营效率
 readingTime: 10分钟
