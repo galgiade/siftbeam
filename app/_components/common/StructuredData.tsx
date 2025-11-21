@@ -408,12 +408,26 @@ export function generatePricingStructuredData(locale: string = 'en') {
         "@type": "OfferShippingDetails",
         "shippingRate": {
           "@type": "MonetaryAmount",
-          "value": "0",
+          "value": 0, // 数値型に統一（デジタル商品なので配送料0）
           "currency": "USD"
         },
         "shippingDestination": {
           "@type": "DefinedRegion",
-          "addressCountry": "US" // グローバルサービスなのでUSを代表として設定
+          "addressCountry": [
+            "US",  // アメリカ合衆国
+            "JP",  // 日本
+            "GB",  // イギリス
+            "CA",  // カナダ
+            "AU",  // オーストラリア
+            "DE",  // ドイツ
+            "FR",  // フランス
+            "ES",  // スペイン
+            "PT",  // ポルトガル
+            "BR",  // ブラジル
+            "ID",  // インドネシア
+            "CN",  // 中国
+            "KR"   // 韓国
+          ] // グローバルサービスに対応する主要国（ISO 3166-1 alpha-2コード）
         },
         "deliveryTime": {
           "@type": "ShippingDeliveryTime",
@@ -435,10 +449,10 @@ export function generatePricingStructuredData(locale: string = 'en') {
     // レビューを1件追加（Googleサーチコンソールのエラー回避のため）
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": Number(translation.review.rating), // 数値型に変換
+      "ratingValue": Number(translation.review.rating), // 数値型に変換（1-5の範囲）
       "reviewCount": 1, // 数値型で正の値を指定
-      "bestRating": "5",
-      "worstRating": "1"
+      "bestRating": 5, // 数値型に統一
+      "worstRating": 1 // 数値型に統一
     },
     "review": [
       {
@@ -450,7 +464,7 @@ export function generatePricingStructuredData(locale: string = 'en') {
         "reviewRating": {
           "@type": "Rating",
           "ratingValue": Number(translation.review.rating), // 数値型に変換
-          "bestRating": "5"
+          "bestRating": 5 // 数値型に統一
         },
         "reviewBody": translation.review.text,
         "datePublished": "2024-01-15"
