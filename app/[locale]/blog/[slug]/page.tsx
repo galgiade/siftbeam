@@ -52,12 +52,40 @@ export async function generateMetadata(
   // フォールバック: 静的なデフォルトOG画像
   const fallbackImageUrl = `${baseUrl}/og-default.png`;
 
+  // 同じslugの記事が存在する言語版を取得
+  const locales = ['ja', 'en', 'zh', 'ko', 'fr', 'de', 'es', 'pt', 'id'];
+  const availableLocales: Record<string, string> = {};
+  
+  locales.forEach(locale => {
+    const localePost = getPostBySlug(resolvedParams.slug, locale);
+    if (localePost) {
+      availableLocales[locale] = `${baseUrl}/${locale}/blog/${post.slug}`;
+    }
+  });
+  
+  // x-defaultは英語版が存在する場合は英語版、存在しない場合は最初に見つかった言語版
+  if (availableLocales['en']) {
+    availableLocales['x-default'] = availableLocales['en'];
+  } else if (Object.keys(availableLocales).length > 0) {
+    const firstLocale = Object.keys(availableLocales)[0];
+    availableLocales['x-default'] = availableLocales[firstLocale];
+  }
+  
+  // 現在の言語版が含まれていない場合は追加（念のため）
+  if (!availableLocales[resolvedParams.locale]) {
+    availableLocales[resolvedParams.locale] = `${baseUrl}/${resolvedParams.locale}/blog/${post.slug}`;
+  }
+
   return {
     title: `${post.title} | siftbeam Blog`,
     description: post.description,
     keywords: post.tags,
     alternates: {
       canonical: `${baseUrl}/${resolvedParams.locale}/blog/${post.slug}`,
+      languages: Object.keys(availableLocales).length > 0 ? availableLocales : {
+        'x-default': `${baseUrl}/en/blog/${post.slug}`,
+        [resolvedParams.locale]: `${baseUrl}/${resolvedParams.locale}/blog/${post.slug}`,
+      },
     },
     openGraph: {
       title: post.title,

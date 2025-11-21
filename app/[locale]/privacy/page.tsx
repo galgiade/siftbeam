@@ -65,6 +65,7 @@ export async function generateMetadata(
     alternates: {
       canonical: `${baseUrl}/${resolvedParams.locale}/privacy`,
       languages: {
+        'x-default': `${baseUrl}/en/privacy`,
         'ja': `${baseUrl}/ja/privacy`,
         'en': `${baseUrl}/en/privacy`,
         'zh': `${baseUrl}/zh/privacy`,

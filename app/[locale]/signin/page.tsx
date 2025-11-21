@@ -29,6 +29,18 @@ export async function generateMetadata(
     description: dict.label.signInSubtitle || 'Sign in to your account',
     alternates: {
       canonical: `${baseUrl}/${resolvedParams.locale}/signin`,
+      languages: {
+        'x-default': `${baseUrl}/en/signin`,
+        'ja': `${baseUrl}/ja/signin`,
+        'en': `${baseUrl}/en/signin`,
+        'zh': `${baseUrl}/zh/signin`,
+        'ko': `${baseUrl}/ko/signin`,
+        'fr': `${baseUrl}/fr/signin`,
+        'de': `${baseUrl}/de/signin`,
+        'es': `${baseUrl}/es/signin`,
+        'pt': `${baseUrl}/pt/signin`,
+        'id': `${baseUrl}/id/signin`,
+      },
     },
     openGraph: {
       title: dict.label.signInTitle || 'Sign In',

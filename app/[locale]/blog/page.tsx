@@ -110,6 +110,7 @@ export async function generateMetadata(
     alternates: {
       canonical: `${baseUrl}/${resolvedParams.locale}/blog`,
       languages: {
+        'x-default': `${baseUrl}/en/blog`,
         'ja': `${baseUrl}/ja/blog`,
         'en': `${baseUrl}/en/blog`,
         'zh': `${baseUrl}/zh/blog`,

@@ -26,6 +26,11 @@ const getLegalKeywords = (locale: string): string[] => {
     en: ['legal disclosures', 'business terms', 'company information', 'legal notice', 'business information', 'compliance', 'legal terms', 'corporate information', 'legal matters', 'business details'],
     zh: ['法律披露', '商业条款', '公司信息', '法律声明', '商业信息', '合规', '法律条款', '企业信息', '法律事项', '商业详情'],
     ko: ['법적 공시', '사업자 정보', '회사 정보', '법적 고지', '사업 정보', '규정 준수', '법적 조항', '기업 정보', '법적 사항', '사업 세부사항'],
+    fr: ['divulgations légales', 'conditions commerciales', 'informations sur l\'entreprise', 'avis légal', 'informations commerciales', 'conformité', 'termes légaux', 'informations d\'entreprise', 'questions légales', 'détails commerciaux'],
+    de: ['rechtliche Angaben', 'Geschäftsbedingungen', 'Unternehmensinformationen', 'rechtlicher Hinweis', 'Geschäftsinformationen', 'Compliance', 'rechtliche Bedingungen', 'Unternehmensinformationen', 'rechtliche Angelegenheiten', 'Geschäftsdetails'],
+    es: ['divulgaciones legales', 'términos comerciales', 'información de la empresa', 'aviso legal', 'información comercial', 'cumplimiento', 'términos legales', 'información corporativa', 'asuntos legales', 'detalles comerciales'],
+    pt: ['divulgações legais', 'termos comerciais', 'informações da empresa', 'aviso legal', 'informações comerciais', 'conformidade', 'termos legais', 'informações corporativas', 'questões legais', 'detalhes comerciais'],
+    id: ['pengungkapan hukum', 'syarat bisnis', 'informasi perusahaan', 'pemberitahuan hukum', 'informasi bisnis', 'kepatuhan', 'syarat hukum', 'informasi perusahaan', 'masalah hukum', 'detail bisnis'],
   };
   return keywords[locale] || keywords['en'];
 };
@@ -43,7 +48,10 @@ export async function generateMetadata(
     keywords: getLegalKeywords(resolvedParams.locale),
     alternates: {
       canonical: `${baseUrl}/${resolvedParams.locale}/legal-disclosures`,
-      languages: generateAlternateLanguages('/legal-disclosures', baseUrl),
+      languages: {
+        'x-default': `${baseUrl}/en/legal-disclosures`,
+        ...generateAlternateLanguages('/legal-disclosures', baseUrl),
+      },
     },
     openGraph: {
       title: dict.title || 'Legal Disclosures | siftbeam',

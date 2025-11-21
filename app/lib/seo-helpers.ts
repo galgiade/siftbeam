@@ -25,14 +25,21 @@ export const getOGLocale = (locale: string): string => {
 };
 
 // 全言語の代替URLを生成（2文字コードに統一）
-export const generateAlternateLanguages = (path: string, baseUrl?: string): Record<string, string> => {
+export const generateAlternateLanguages = (path: string, baseUrl?: string, includeXDefault: boolean = false): Record<string, string> => {
   const url = baseUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://siftbeam.com';
   const languages = ['ja', 'en', 'zh', 'ko', 'fr', 'de', 'es', 'pt', 'id'];
   
-  return languages.reduce((acc, lang) => {
+  const result = languages.reduce((acc, lang) => {
     acc[lang] = `${url}/${lang}${path}`;
     return acc;
   }, {} as Record<string, string>);
+  
+  // x-defaultを追加（英語版をデフォルトとする）
+  if (includeXDefault) {
+    result['x-default'] = `${url}/en${path}`;
+  }
+  
+  return result;
 };
 
 // OGP画像設定

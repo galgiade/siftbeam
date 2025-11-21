@@ -70,6 +70,7 @@ export async function generateMetadata(
     alternates: {
       canonical: `${baseUrl}/${resolvedParams.locale}/flow`,
       languages: {
+        'x-default': `${baseUrl}/en/flow`,
         'ja': `${baseUrl}/ja/flow`,
         'en': `${baseUrl}/en/flow`,
         'zh': `${baseUrl}/zh/flow`,

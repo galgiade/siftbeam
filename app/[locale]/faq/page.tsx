@@ -68,6 +68,7 @@ export async function generateMetadata(
     alternates: {
       canonical: `${baseUrl}/${resolvedParams.locale}/faq`,
       languages: {
+        'x-default': `${baseUrl}/en/faq`,
         'ja': `${baseUrl}/ja/faq`,
         'en': `${baseUrl}/en/faq`,
         'zh': `${baseUrl}/zh/faq`,

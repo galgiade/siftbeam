@@ -29,6 +29,18 @@ export async function generateMetadata(
     description: dict.label.emailDescription || 'Reset your password',
     alternates: {
       canonical: `${baseUrl}/${resolvedParams.locale}/forgot-password`,
+      languages: {
+        'x-default': `${baseUrl}/en/forgot-password`,
+        'ja': `${baseUrl}/ja/forgot-password`,
+        'en': `${baseUrl}/en/forgot-password`,
+        'zh': `${baseUrl}/zh/forgot-password`,
+        'ko': `${baseUrl}/ko/forgot-password`,
+        'fr': `${baseUrl}/fr/forgot-password`,
+        'de': `${baseUrl}/de/forgot-password`,
+        'es': `${baseUrl}/es/forgot-password`,
+        'pt': `${baseUrl}/pt/forgot-password`,
+        'id': `${baseUrl}/id/forgot-password`,
+      },
     },
     openGraph: {
       title: dict.label.forgotPasswordTitle || 'Forgot Password',
