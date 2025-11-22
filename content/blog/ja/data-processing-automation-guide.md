@@ -1,6 +1,6 @@
 ---
 slug: data-processing-automation-guide
-title: データ処理自動化ガイド：手動作業を90%削減 | siftbeam
+title: "データ処理自動化ガイド：手動作業を90%削減 | siftbeam"
 description: データ処理の自動化で年間500時間以上を節約する方法を解説。手動データ入力の完全排除、人為的ミスをゼロに、ワークフローの自動化を実現。実例とステップバイステップの実装方法を含む完全ガイド。
 author: siftbeam編集部
 publishedAt: 2025-01-15

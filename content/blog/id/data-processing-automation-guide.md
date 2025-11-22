@@ -1,6 +1,6 @@
 ---
 slug: data-processing-automation-guide
-title: Panduan Otomasi Pemrosesan Data: Kurangi Pekerjaan Manual 90% | siftbeam
+title: "Panduan Otomasi Pemrosesan Data: Kurangi Pekerjaan Manual 90% | siftbeam"
 description: Temukan bagaimana otomasi pemrosesan data dapat menghemat lebih dari 500 jam per tahun. Pelajari cara menghilangkan entri data manual, mencapai nol kesalahan manusia, dan mengotomatisasi alur kerja. Panduan lengkap dengan contoh nyata dan implementasi langkah demi langkah.
 author: Tim Editorial siftbeam
 publishedAt: 2025-01-15

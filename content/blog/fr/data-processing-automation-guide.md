@@ -1,6 +1,6 @@
 ---
 slug: data-processing-automation-guide
-title: Guide d'automatisation du traitement des données : Réduire le travail manuel de 90% | siftbeam
+title: "Guide d'automatisation du traitement des données : Réduire le travail manuel de 90% | siftbeam"
 description: Découvrez comment l'automatisation du traitement des données peut économiser plus de 500 heures par an. Apprenez à éliminer la saisie manuelle de données, atteindre zéro erreur humaine et automatiser les flux de travail. Guide complet avec exemples réels et mise en œuvre étape par étape.
 author: Équipe éditoriale siftbeam
 publishedAt: 2025-01-15

@@ -1,6 +1,6 @@
 ---
 slug: data-processing-automation-guide
-title: 데이터 처리 자동화 가이드: 수동 작업 90% 감소 | siftbeam
+title: "데이터 처리 자동화 가이드: 수동 작업 90% 감소 | siftbeam"
 description: 데이터 처리 자동화로 연간 500시간 이상을 절약하는 방법을 알아보세요. 수동 데이터 입력 완전 제거, 인적 오류 제로 달성, 워크플로우 자동화를 실현합니다. 실제 사례와 단계별 구현 방법을 포함한 완벽한 가이드.
 author: siftbeam 편집팀
 publishedAt: 2025-01-15

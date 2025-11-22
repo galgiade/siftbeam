@@ -1,6 +1,6 @@
 ---
 slug: data-processing-automation-guide
-title: 自动数据处理指南：减少90%手动工作 | siftbeam
+title: "自动数据处理指南：减少90%手动工作 | siftbeam"
 description: 了解自动数据处理如何每年节省500+小时。学习消除手动数据输入，实现零人为错误，并自动化工作流程。包含真实案例和分步实施的完整指南。
 author: siftbeam编辑团队
 publishedAt: 2025-01-15
