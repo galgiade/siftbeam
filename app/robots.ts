@@ -9,6 +9,15 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: [
           '/',
+          '/ja/',
+          '/en/',
+          '/zh/',
+          '/ko/',
+          '/fr/',
+          '/de/',
+          '/es/',
+          '/pt/',
+          '/id/',
           '/_next/static/', // Next.jsの静的ファイルを許可（重要！）
         ],
         disallow: [

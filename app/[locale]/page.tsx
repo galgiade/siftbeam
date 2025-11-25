@@ -4,6 +4,10 @@ import HomeContainer from '@/app/_containers/Home/HomeContainer';
 import { homeDictionaries, pickDictionary } from '@/app/dictionaries/mappings'
 import StructuredData, { generateSiftbeamStructuredData, generateOrganizationStructuredData, generateServiceStructuredData } from '@/app/_components/common/StructuredData'
 
+// 静的生成を強制（リダイレクトを防ぐため）
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+
 // 静的生成のためのgenerateStaticParams（2文字コードに統一）
 export async function generateStaticParams() {
   return [
