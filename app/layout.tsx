@@ -1,6 +1,7 @@
 import { Providers } from "@/app/providers";
 import '@/app/globals.css'
 import GoogleAnalytics from "@/app/_components/common/GoogleAnalytics";
+import GoogleAds from "@/app/_components/common/GoogleAds";
 import { WebVitals } from "@/app/_components/common/WebVitals";
 import { PageTracking } from "@/app/_components/common/PageTracking";
 import { checkRequiredEnvVars } from "@/app/lib/utils/validateEnv";
@@ -109,12 +110,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
+  const GOOGLE_ADS_CONVERSION_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID || '';
+  const GOOGLE_ADS_CONVERSION_LABEL = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL || '';
   
   // デフォルトは英語
   return (
     <html lang="en" className={inter.variable}>
       <body className={inter.className}>
         <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
+        <GoogleAds 
+          CONVERSION_ID={GOOGLE_ADS_CONVERSION_ID} 
+          CONVERSION_LABEL={GOOGLE_ADS_CONVERSION_LABEL}
+        />
         <Suspense fallback={null}>
           <WebVitals />
           <PageTracking />

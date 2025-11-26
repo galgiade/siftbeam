@@ -144,11 +144,16 @@ export default async function createPaymentSubscription(
       expand: ['latest_invoice.payment_intent']
     });
 
-    // 成功時はユーザーページにリダイレクト
-    const userLocale = currentUserAttributes.locale || 'ja';
-    
-    // Next.js 15のServer Actionでのリダイレクト
-    redirect(`/${userLocale}/account/user`);
+    // 成功時はサブスクリプションIDを返す（クライアントサイドでコンバージョン送信後にリダイレクト）
+    return {
+      success: true,
+      data: {
+        subscriptionId: subscription.id,
+        paymentMethodId: paymentMethodId,
+        customerId: customerId,
+      },
+      message: 'Subscription created successfully'
+    };
   } catch (error: any) {
     // NEXT_REDIRECTエラーの場合は再スロー（Next.jsの正常な動作）
     if (error.digest?.startsWith('NEXT_REDIRECT')) {

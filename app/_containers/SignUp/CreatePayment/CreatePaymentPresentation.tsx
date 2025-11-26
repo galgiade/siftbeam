@@ -16,6 +16,8 @@ import type { CreatePaymentLocale } from '@/app/dictionaries/createPayment/creat
 import { mapToStripeLocale } from "@/app/lib/constants/locales";
 import createPaymentSubscription from "@/app/lib/actions/create/createPaymentSubscription";
 import { createSetupIntentAction } from '@/app/lib/actions/payment-actions';
+import { trackPurchase } from "@/app/lib/utils/analytics";
+import { useRouter } from 'next/navigation';
 
 // Stripeの公開キーを設定（環境変数から取得）
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
@@ -30,6 +32,7 @@ interface CreatePaymentPresentationProps {
 function CardForm({ userAttributes, dictionary }: { userAttributes: UserAttributesDTO; dictionary: CreatePaymentLocale }) {
   const stripe = useStripe();
   const elements = useElements();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -48,14 +51,23 @@ function CardForm({ userAttributes, dictionary }: { userAttributes: UserAttribut
 
   // Next.js 15のuseEffectでServer Action実行後の処理を最適化
   useEffect(() => {
-    if (actionState.success) {
-      // 成功時は既に成功画面が表示される
+    if (actionState.success && actionState.data?.subscriptionId) {
+      // サブスクリプション作成成功時：コンバージョンを送信してからリダイレクト
       setError(null);
+      
+      // コンバージョンイベントを送信（従量課金のためvalueなし）
+      trackPurchase(actionState.data.subscriptionId);
+      
+      // コンバージョン送信後にリダイレクト（少し遅延させて確実に送信）
+      setTimeout(() => {
+        const userLocale = userAttributes.locale || 'ja';
+        router.push(`/${userLocale}/account/user`);
+      }, 100);
     } else if (actionState.message && !actionState.success) {
       // エラー時はエラーメッセージを表示
       setError(actionState.message);
     }
-  }, [actionState]);
+  }, [actionState, router, userAttributes.locale]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
