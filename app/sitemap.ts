@@ -25,8 +25,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // 各言語×各ページのURLを生成
   const urls: MetadataRoute.Sitemap = []
   
-  // 注意: ルートURL(/)は常にリダイレクトするため、サイトマップに含めない
-  // Googlebotは各言語のURLを直接クロールする
+  // ルートURL(/)を追加 - 検索エンジンボットに対してコンテンツを返すため
+  urls.push({
+    url: baseUrl,
+    lastModified: new Date(),
+    changeFrequency: 'daily',
+    priority: 1.0,
+    alternates: {
+      languages: Object.fromEntries(
+        locales.map(l => [l, `${baseUrl}/${l}`])
+      ),
+    },
+  })
   
   // 各言語のページ
   locales.forEach(locale => {

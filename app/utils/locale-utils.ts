@@ -79,4 +79,26 @@ export function isValidLocale(locale: string): locale is SupportedLocale {
 // 有効なロケールを取得する関数（無効な場合はデフォルトを返す）
 export function getValidLocale(locale: string): SupportedLocale {
   return isValidLocale(locale) ? locale : DEFAULT_LOCALE;
+}
+
+// 検索エンジンボットを検出する関数
+export function isSearchEngineBot(userAgent: string | null): boolean {
+  if (!userAgent) {
+    return false;
+  }
+
+  const botPatterns = [
+    /googlebot/i,
+    /bingbot/i,
+    /slurp/i, // Yahoo
+    /duckduckbot/i,
+    /baiduspider/i,
+    /yandexbot/i,
+    /sogou/i,
+    /exabot/i,
+    /facebot/i,
+    /ia_archiver/i, // Internet Archive
+  ];
+
+  return botPatterns.some(pattern => pattern.test(userAgent));
 } 
