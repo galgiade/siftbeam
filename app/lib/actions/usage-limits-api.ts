@@ -108,9 +108,7 @@ export async function createUsageLimit(input: CreateUsageLimitInput): Promise<Ap
     const command = new PutCommand({
       TableName: USAGE_LIMITS_TABLE_NAME,
       Item: usageLimit,
-      ExpressionAttributeNames: {
-          '#usageLimitId': 'usageLimitId'
-      }
+      ConditionExpression: 'attribute_not_exists(usageLimitId)'
     });
 
     await dynamoDocClient.send(command);
