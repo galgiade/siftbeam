@@ -108,7 +108,6 @@ export async function createUsageLimit(input: CreateUsageLimitInput): Promise<Ap
     const command = new PutCommand({
       TableName: USAGE_LIMITS_TABLE_NAME,
       Item: usageLimit,
-      ConditionExpression: 'attribute_not_exists(#usageLimitId)',
       ExpressionAttributeNames: {
           '#usageLimitId': 'usageLimitId'
       }
